@@ -1,0 +1,5 @@
+{
+  "tasks": {
+    "test:direct": "deno run ./test/index.ts"
+  }
+}
