@@ -1,5 +1,4 @@
 // deno-lint-ignore-file no-explicit-any
-import { ValidationException } from "../exceptions.ts";
 import {
   BaseValidator,
   IValidationContext,
@@ -7,9 +6,9 @@ import {
 } from "./base.ts";
 
 // deno-lint-ignore ban-types
-export type OrValidatorOptions = {};
+export type AndValidatorOptions = {};
 
-export class OrValidator<Validator, Input, Output> extends BaseValidator<
+export class AndValidator<Validator, Input, Output> extends BaseValidator<
   Validator,
   Input,
   Output
@@ -18,9 +17,9 @@ export class OrValidator<Validator, Input, Output> extends BaseValidator<
 
   protected _toJSON(_options?: JSONSchemaOptions) {
     return {
-      type: "or",
+      type: "and",
       description: this.Description,
-      anyOf: this.Validators.map((validator) => validator["_toJSON"]()),
+      allOf: this.Validators.map((validator) => validator["_toJSON"]()),
     };
   }
 
@@ -28,27 +27,20 @@ export class OrValidator<Validator, Input, Output> extends BaseValidator<
     input: any,
     ctx: IValidationContext
   ): Promise<Output> {
-    const ErrorList: ValidationException[] = [];
+    let Result: any = input;
 
-    for (const Validator of this.Validators) {
-      if (Validator instanceof BaseValidator) {
-        try {
-          return await Validator.validate(input, ctx);
-        } catch (error) {
-          ErrorList.push(error as any);
-        }
-      }
-    }
+    for (const Validator of this.Validators)
+      if (Validator instanceof BaseValidator)
+        Result = await Validator.validate(input, ctx);
 
-    throw ErrorList;
+    return Result;
   }
 
-  constructor(validators: Validator[], protected Options: OrValidatorOptions) {
+  constructor(validators: Validator[], protected Options: AndValidatorOptions) {
     super();
 
-    if (!(validators instanceof Array)) {
+    if (!(validators instanceof Array))
       throw new Error("Invalid validators list has been provided!");
-    }
 
     validators.forEach((validator) => {
       if (!(validator instanceof BaseValidator))

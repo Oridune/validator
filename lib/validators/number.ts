@@ -3,12 +3,12 @@ import { ValidationException } from "../exceptions.ts";
 import {
   BaseValidator,
   IValidationContext,
+  JSONSchemaOptions,
   TCustomValidator,
   TCustomValidatorReturn,
 } from "./base.ts";
 
 export type NumberValidatorOptions = {
-  description?: string;
   casting?: boolean;
   messages?: {
     notNumber?: string;
@@ -27,19 +27,37 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
 > {
   protected CustomValidators: TCustomValidator<any, any>[] = [];
 
+  protected MinLength?: number;
+  protected MaxLength?: number;
+  protected MinAmount?: number;
+  protected MaxAmount?: number;
+
+  protected _toJSON(_options?: JSONSchemaOptions) {
+    return {
+      type: "number",
+      description: this.Description,
+      minLength: this.MinLength,
+      maxLength: this.MaxLength,
+      minAmount: this.MinAmount,
+      maxAmount: this.MaxAmount,
+    };
+  }
+
   protected async _validate(
     input: unknown,
     ctx: IValidationContext
   ): Promise<Output> {
     if (this.Options?.shouldTerminate) ctx.shouldTerminate();
 
-    if (this.Options?.casting && !isNaN(input as any))
+    if (this.Options?.casting && !isNaN(input as any)) {
       input = parseFloat(input as any);
+    }
 
-    if (typeof input !== "number")
+    if (typeof input !== "number") {
       throw (
         this.Options?.messages?.notNumber || "Invalid number has been provided!"
       );
+    }
 
     let Result: any = input;
 
@@ -96,22 +114,27 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
     max?: number;
     shouldTerminate?: boolean;
   }) {
+    this.MinLength = options.min;
+    this.MaxLength = options.max;
+
     return this.custom((input, ctx) => {
       const Input = `${input}`;
 
       if (options.shouldTerminate) ctx.shouldTerminate();
 
-      if (Input.length < (options.min || 0))
+      if (Input.length < (options.min || 0)) {
         throw (
           this.Options?.messages?.smallerThanMinLength ??
           "Number is smaller than minimum length!"
         );
+      }
 
-      if (Input.length > (options.max || Infinity))
+      if (Input.length > (options.max || Infinity)) {
         throw (
           this.Options?.messages?.smallerThanMinLength ??
           "Number is larger than maximum length!"
         );
+      }
     });
   }
 
@@ -120,22 +143,27 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
     max?: number;
     shouldTerminate?: boolean;
   }) {
+    this.MinAmount = options.min;
+    this.MaxAmount = options.max;
+
     return this.custom((input, ctx) => {
       const Input: number = parseFloat(`${input}`);
 
       if (options.shouldTerminate) ctx.shouldTerminate();
 
-      if (Input < (options.min || 0))
+      if (Input < (options.min || 0)) {
         throw (
           this.Options?.messages?.smallerThanMinAmount ??
           "Number is smaller than minimum amount!"
         );
+      }
 
-      if (Input > (options.max || Infinity))
+      if (Input > (options.max || Infinity)) {
         throw (
           this.Options?.messages?.smallerThanMinAmount ??
           "Number is larger than maximum amount!"
         );
+      }
     });
   }
 }

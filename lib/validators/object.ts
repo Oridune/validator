@@ -2,15 +2,18 @@
 import { ValidationException } from "../exceptions.ts";
 import {
   BaseValidator,
-  IValidationContext,
   inferInput,
   inferOutput,
+  IValidationContext,
+  JSONSchemaOptions,
   TCustomValidator,
   TCustomValidatorReturn,
 } from "./base.ts";
+import { OptionalValidator } from "./optional.ts";
+import { RecordValidator } from "./record.ts";
+import e from "../../mod.ts";
 
 export type ObjectValidatorOptions = {
-  description?: string;
   casting?: boolean;
   allowUnexpectedProps?: string[];
   strict?: boolean;
@@ -34,7 +37,37 @@ export class ObjectValidator<
   Input,
   Output
 > extends BaseValidator<Shape, Input, Output> {
+  protected RestValidator?: BaseValidator<any, any, any>;
+
   protected CustomValidators: TCustomValidator<any, any>[] = [];
+
+  protected _toJSON(_options?: JSONSchemaOptions) {
+    const Properties = Object.keys(this.Shape);
+    const RequiredProps = new Set(Properties);
+
+    return {
+      type: "object",
+      description: this.Description,
+      properties: Properties.reduce((props, key) => {
+        // @ts-ignore Shape is undefined...
+        const Validator = this.Shape[key];
+
+        if (Validator instanceof BaseValidator) {
+          if (Validator instanceof OptionalValidator) RequiredProps.delete(key);
+
+          return {
+            ...props,
+            [key]: Validator["_toJSON"](),
+          };
+        }
+
+        return props;
+      }, {}),
+      additionalProperties:
+        this.RestValidator?.["_toJSON"]().additionalProperties,
+      requiredProperties: Array.from(RequiredProps),
+    };
+  }
 
   protected async _validate(
     input: Record<string, unknown>,
@@ -64,7 +97,11 @@ export class ObjectValidator<
         !this.Options.allowUnexpectedProps?.includes(key)
     );
 
-    if (ExtraProperties.length && this.Options.strict !== false) {
+    if (
+      ExtraProperties.length &&
+      this.Options.strict !== false &&
+      !this.RestValidator
+    ) {
       ctx.location = `${ctx.location}.${ExtraProperties[0]}`;
       throw (
         this.Options.messages?.unexpectedProperty ??
@@ -84,6 +121,24 @@ export class ObjectValidator<
 
       if (Validator instanceof BaseValidator)
         await Validator.validate(Result[Property], {
+          ...ctx,
+          location: `${ctx.location}.${Property}`,
+        })
+          .then((result) => {
+            Result[Property] = result ?? Result[Property];
+          })
+          .catch((err) => {
+            ErrorList.push(err);
+          });
+    }
+
+    for (const Property of ExtraProperties) {
+      if (this.ShouldTerminate && ErrorList.length) break;
+
+      this.ShouldTerminate = false;
+
+      if (this.RestValidator)
+        await this.RestValidator.validate(Result[Property], {
           ...ctx,
           location: `${ctx.location}.${Property}`,
         })
@@ -138,8 +193,9 @@ export class ObjectValidator<
   ) {
     super();
 
-    if (typeof this.Shape !== "object" || this.Shape === null)
+    if (typeof this.Shape !== "object" || this.Shape === null) {
       throw new Error("Invalid object shape has been provided!");
+    }
   }
 
   public custom<Return>(
@@ -161,12 +217,32 @@ export class ObjectValidator<
         Input & ExtendingInput,
         Output & ExtendingOutput
       >
+    : ExtendingValidator extends RecordValidator<
+        infer ExtendingShape,
+        infer ExtendingInput,
+        infer ExtendingOutput
+      >
+    ? ObjectValidator<
+        Shape & ExtendingShape,
+        Input & ExtendingInput,
+        Output & ExtendingOutput
+      >
     : never {
-    if (!(validator instanceof ObjectValidator))
-      throw new Error("An object validator was expected!");
+    if (
+      !(validator instanceof ObjectValidator) &&
+      !(validator instanceof RecordValidator)
+    )
+      throw new Error("An object or record validator was expected!");
 
-    this.Shape = { ...this.Shape, ...validator.Shape };
+    if (validator instanceof ObjectValidator)
+      this.Shape = { ...this.Shape, ...validator.Shape };
+
+    if (validator instanceof RecordValidator) this.RestValidator = validator;
 
     return this as any;
+  }
+
+  public rest<Validator>(validator: Validator) {
+    return this.extend(e.record(validator));
   }
 }

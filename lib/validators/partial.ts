@@ -1,6 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
 import e from "../../mod.ts";
-import { BaseValidator, IValidationContext } from "./base.ts";
+import {
+  BaseValidator,
+  IValidationContext,
+  JSONSchemaOptions,
+} from "./base.ts";
 import { ObjectValidator } from "./object.ts";
 import { OptionalValidatorOptions } from "./optional.ts";
 
@@ -13,6 +17,12 @@ export class PartialValidator<
   Input,
   Output
 > extends BaseValidator<Validator, Input, Output> {
+  protected Validator: BaseValidator<any, any, any>;
+
+  protected _toJSON(_options?: JSONSchemaOptions) {
+    return this.Validator["_toJSON"]();
+  }
+
   protected async _validate(
     input: any,
     ctx: IValidationContext
@@ -21,15 +31,15 @@ export class PartialValidator<
   }
 
   constructor(
-    protected Validator: Validator,
+    validator: Validator,
     protected Options: PartialValidatorOptions<unknown>
   ) {
     super();
 
-    if (!(this.Validator instanceof ObjectValidator))
+    if (!(validator instanceof ObjectValidator))
       throw new Error("Invalid object validator instance has been provided!");
     else
-      this.Validator["Shape"] = Object.entries(this.Validator["Shape"]).reduce(
+      validator["Shape"] = Object.entries(validator["Shape"]).reduce(
         (shape, [key, value]) => ({
           ...shape,
           [key]: this.Options.ignore?.includes(key)
@@ -38,5 +48,7 @@ export class PartialValidator<
         }),
         {}
       );
+
+    this.Validator = validator;
   }
 }

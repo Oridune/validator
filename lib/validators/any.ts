@@ -2,13 +2,13 @@
 import { ValidationException } from "../exceptions.ts";
 import {
   BaseValidator,
-  TCustomValidator,
   IValidationContext,
+  JSONSchemaOptions,
+  TCustomValidator,
   TCustomValidatorReturn,
 } from "./base.ts";
 
 export type AnyValidatorOptions = {
-  description?: string;
   messages?: {};
   shouldTerminate?: boolean;
 };
@@ -19,6 +19,13 @@ export class AnyValidator<Type, Input, Output> extends BaseValidator<
   Output
 > {
   protected CustomValidators: TCustomValidator<any, any>[] = [];
+
+  protected _toJSON(_options?: JSONSchemaOptions) {
+    return {
+      type: "any",
+      description: this.Description,
+    };
+  }
 
   protected async _validate(
     input: unknown,

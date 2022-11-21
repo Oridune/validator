@@ -5,12 +5,12 @@ import {
   inferInput,
   inferOutput,
   IValidationContext,
+  JSONSchemaOptions,
   TCustomValidator,
   TCustomValidatorReturn,
 } from "./base.ts";
 
 export type TupleValidatorOptions = {
-  description?: string;
   casting?: boolean;
   splitter?: string | RegExp;
   messages?: {
@@ -26,8 +26,24 @@ export class TupleValidator<
   Input,
   Output
 > extends BaseValidator<Validator, Input, Output> {
+  protected Validators: BaseValidator<any, any, any>[] = [];
   protected RestValidator?: BaseValidator<any, any, any>;
+
   protected CustomValidators: TCustomValidator<any, any>[] = [];
+
+  protected MinLength = 0;
+  protected MaxLength = 0;
+
+  protected _toJSON(_options?: JSONSchemaOptions) {
+    return {
+      type: "array",
+      description: this.Description,
+      minLength: this.MinLength,
+      maxLength: this.MaxLength,
+      tuple: this.Validators.map((validator) => validator["_toJSON"]()),
+      items: this.RestValidator?.["_toJSON"](),
+    };
+  }
 
   protected async _validate(
     input: any[],
@@ -35,31 +51,37 @@ export class TupleValidator<
   ): Promise<Output> {
     if (this.Options?.shouldTerminate) ctx.shouldTerminate();
 
-    if (this.Options?.casting && typeof input === "string")
+    if (this.Options?.casting && typeof input === "string") {
       try {
         input = JSON.parse(input);
       } catch {
-        if (this.Options.splitter)
+        if (this.Options.splitter) {
           input = input.toString().split(this.Options.splitter);
+        }
       }
+    }
 
-    if (!(input instanceof Array))
+    if (!(input instanceof Array)) {
       throw (
         this.Options?.messages?.notArray ?? "Invalid array has been provided!"
       );
+    }
 
-    if (input.length < this.Validators.length)
+    if (input.length < this.Validators.length) {
       throw (
         this.Options?.messages?.smallerThanMinLength ??
         "Array is smaller than minimum length!"
       );
+    }
 
-    if (!(this.RestValidator instanceof BaseValidator))
-      if (input.length > this.Validators.length)
+    if (!(this.RestValidator instanceof BaseValidator)) {
+      if (input.length > this.Validators.length) {
         throw (
           this.Options?.messages?.smallerThanMinLength ??
           "Array is larger than maximum length!"
         );
+      }
+    }
 
     let Result: any = [];
 
@@ -72,14 +94,14 @@ export class TupleValidator<
 
       const Validator = this.Validators[parseInt(Index)] ?? this.RestValidator;
 
-      if (Validator instanceof BaseValidator)
+      if (Validator instanceof BaseValidator) {
         await Validator.validate(Input, {
           ...ctx,
           location: `${ctx.location}.${Index}`,
         })
           .then((result) => Result.push(result))
           .catch((err) => ErrorList.push(err));
-      else Result.push(Input);
+      } else Result.push(Input);
     }
 
     if (ErrorList.length) throw ErrorList;
@@ -120,17 +142,22 @@ export class TupleValidator<
   }
 
   constructor(
-    protected Validators: Validator[],
+    validators: Validator[],
     protected Options: TupleValidatorOptions
   ) {
     super();
 
-    if (!(this.Validators instanceof Array))
+    if (!(validators instanceof Array))
       throw new Error("Invalid validators list has been provided!");
 
-    this.Validators.forEach((validator) => {
+    validators.forEach((validator) => {
       if (!(validator instanceof BaseValidator))
         throw new Error("Invalid validator instance has been provided!");
+
+      this.MinLength += 1;
+      this.MaxLength += 1;
+
+      this.Validators.push(validator);
     });
   }
 
@@ -140,11 +167,13 @@ export class TupleValidator<
   >(
     validator: RestValidator
   ): TupleValidator<T, inferInput<T>, inferOutput<T>> {
-    if (this.RestValidator instanceof BaseValidator)
+    if (this.RestValidator instanceof BaseValidator) {
       throw new Error("A rest validator cannot follow another rest validator.");
+    }
 
-    if (!(validator instanceof BaseValidator))
+    if (!(validator instanceof BaseValidator)) {
       throw new Error("Invalid validator instance has been provided!");
+    }
 
     this.RestValidator = validator;
     return this as any;
@@ -162,6 +191,29 @@ export class TupleValidator<
     max?: number;
     shouldTerminate?: boolean;
   }) {
+    if ((options.min ?? this.MinLength) < this.MinLength)
+      throw new Error(
+        `Minimum length cannot be smaller than the defined tuple schema length!`
+      );
+
+    if ((options.max ?? this.MaxLength) < this.MaxLength)
+      throw new Error(
+        `Maximum length cannot be smaller than the defined tuple schema length!`
+      );
+
+    if ((options.min ?? this.MinLength) > this.MinLength && !this.RestValidator)
+      throw new Error(
+        `If you want to set a greater min length, please set a rest validator on the tuple!`
+      );
+
+    if ((options.max ?? this.MaxLength) > this.MaxLength && !this.RestValidator)
+      throw new Error(
+        `If you want to set a greater max length, please set a rest validator on the tuple!`
+      );
+
+    this.MinLength = options.min ?? this.MinLength;
+    this.MaxLength = options.max ?? this.MaxLength;
+
     return this.custom((input, ctx) => {
       if (!(input instanceof Array))
         throw (

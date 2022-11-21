@@ -39,14 +39,45 @@ export type inferEachOutput<T extends Array<any>> = {
   [K in keyof T]: inferOutput<T[K]>;
 };
 
+export interface ValidatorJSONSchema {
+  type: string | string[];
+  description?: string;
+  minLength?: number;
+  maxLength?: number;
+  minAmount?: number;
+  maxAmount?: number;
+  pattern?: string;
+  choices?: string[];
+  properties?: Record<string, ValidatorJSONSchema>;
+  additionalProperties?: ValidatorJSONSchema;
+  requiredProperties?: string[];
+  tuple?: ValidatorJSONSchema[];
+  items?: ValidatorJSONSchema;
+  allOf?: ValidatorJSONSchema[];
+  anyOf?: ValidatorJSONSchema[];
+  expected?: any;
+}
+
+export interface JSONSchemaOptions {}
+
+export interface JSONSchema {
+  schema: ValidatorJSONSchema;
+}
+
 export class BaseValidator<_, __, Output> {
+  protected Description?: string;
+
   protected Context: IValidationContext;
   protected ShouldTerminate = false;
 
+  protected _toJSON(_options?: JSONSchemaOptions): ValidatorJSONSchema {
+    throw new Error(`_toJSON implementation is required!`);
+  }
+
   // deno-lint-ignore require-await
   protected async _validate(
-    _: unknown,
-    __: IValidationContext
+    _input: unknown,
+    _ctx: IValidationContext
   ): Promise<Output> {
     throw new Error(`Validator implementation is required!`);
   }
@@ -76,9 +107,9 @@ export class BaseValidator<_, __, Output> {
       const Exception = new ValidationException("Validation Error!");
 
       (error instanceof Array ? error : [error]).forEach((err) => {
-        if (err instanceof ValidationException)
+        if (err instanceof ValidationException) {
           Exception.pushIssues(...err.issues);
-        else if (err instanceof Error)
+        } else if (err instanceof Error) {
           Exception.pushIssues(
             ...(err instanceof ValidationException
               ? err.issues
@@ -91,16 +122,28 @@ export class BaseValidator<_, __, Output> {
                   },
                 ])
           );
-        else if (typeof err === "string")
+        } else if (typeof err === "string") {
           Exception.pushIssues({
             message: err,
             label: this.Context.label,
             location: this.Context.location,
             input,
           });
+        }
       });
 
       throw Exception;
     }
+  }
+
+  public describe(description: string) {
+    this.Description = description;
+    return this;
+  }
+
+  public toJSON(options?: JSONSchemaOptions) {
+    return {
+      schema: this._toJSON(options),
+    };
   }
 }

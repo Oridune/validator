@@ -1,3 +1,4 @@
+// deno-lint-ignore-file require-await
 // recursion
 
 import e from "../mod.ts";
@@ -146,41 +147,91 @@ import e from "../mod.ts";
     // //   ),
     // // });
 
-    // Body Validation
-    const Body = await e
+    // console.log(e.string().describe("Username").length({ max: 10 }).toJSON());
+    // console.log(
+    //   e
+    //     .number()
+    //     .describe("Phone Number")
+    //     .length({ min: 9, max: 11 })
+    //     .amount({ max: 99999999999 })
+    //     .toJSON()
+    // );
+    // console.log(e.boolean().toJSON());
+
+    const Schema = e
       .object({
-        accountId: e.value("" as string | undefined),
-        fname: e.string().length({ min: 1, max: 20 }),
-        mname: e.optional(e.string(), { nullish: true }),
-        lname: e.optional(e.string(), { nullish: true }),
-        labels: e.optional(e.array(e.string(), { casting: true })),
-        birthTime: e.optional(e.number({ casting: true })),
-        password: e.string().matches({
-          regex:
-            /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-          shouldTerminate: true,
-        }),
-        confirmPassword: e.string().custom((password, ctx) => {
-          if (ctx.input.password !== password)
-            throw "Password don't match with Confirm Password!";
-        }),
-        metadata: e.optional(
-          e.array(e.object({ key: e.string(), value: e.string() }), {
-            casting: true,
+        product: e.string(),
+        contact: e.partial(
+          e.object({
+            type: e.in(["email", "phone"]),
+            value: e.or([e.number(), e.string()]),
           })
         ),
+        note: e.optional(e.string()),
+        tags: e
+          .array(
+            e.and([
+              e.string().matches({ regex: /a/ }),
+              e.string().matches({ regex: /b/ }),
+            ])
+          )
+          .length({ min: 3, max: 15 }),
       })
-      .validate(
-        {
-          fname: "Saif Ali",
-          lname: "Khan",
-          password: "John123!",
-          confirmPassword: "John123!",
-        },
-        { label: "Users::body" }
-      );
+      .extend(
+        e.object({
+          labels: e
+            .tuple([e.string(), e.number()])
+            .rest(e.string())
+            .length({ min: 2, max: 3 }),
+          metadata: e.record(e.string()),
+        })
+      )
+      .rest(e.record(e.string()))
+      .describe("Create an order")
+      .toJSON();
 
-    console.log("Results", Body);
+    console.log(JSON.stringify(Schema, undefined, 2));
+
+    // // Body Validator
+    // const BodyValidator = e.object({
+    //   accountId: e.value("" as string | undefined),
+    //   fname: e.string().length({ min: 1, max: 20 }),
+    //   mname: e.optional(e.string(), { nullish: true }),
+    //   lname: e.optional(e.string(), { nullish: true }),
+    //   labels: e.optional(e.array(e.string(), { casting: true })),
+    //   birthTime: e.optional(e.number({ casting: true })),
+    //   password: e.string().matches({
+    //     regex:
+    //       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+    //     shouldTerminate: true,
+    //   }),
+    //   confirmPassword: e.string().custom((password, ctx) => {
+    //     if (ctx.input.password !== password) {
+    //       throw "Password don't match with Confirm Password!";
+    //     }
+    //   }),
+    //   metadata: e.optional(
+    //     e.array(e.object({ key: e.string(), value: e.string() }), {
+    //       casting: true,
+    //     })
+    //   ),
+    // });
+
+    // // Generate Json Schema
+    // const JsonSchema = BodyValidator.toJSON();
+
+    // // Body Validation
+    // const Body = await BodyValidator.validate(
+    //   {
+    //     fname: "Saif Ali",
+    //     lname: "Khan",
+    //     password: "John123!",
+    //     confirmPassword: "John123!",
+    //   },
+    //   { label: "Users::body" }
+    // );
+
+    // console.log("Results", Body);
   } catch (err) {
     console.log(err, err.issues);
   }

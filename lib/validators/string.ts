@@ -2,13 +2,13 @@
 import { ValidationException } from "../exceptions.ts";
 import {
   BaseValidator,
-  TCustomValidator,
   IValidationContext,
+  JSONSchemaOptions,
+  TCustomValidator,
   TCustomValidatorReturn,
 } from "./base.ts";
 
 export type StringValidatorOptions = {
-  description?: string;
   casting?: boolean;
   messages?: {
     notString?: string;
@@ -26,6 +26,20 @@ export class StringValidator<Type, Input, Output> extends BaseValidator<
 > {
   protected CustomValidators: TCustomValidator<any, any>[] = [];
 
+  protected MinLength?: number;
+  protected MaxLength?: number;
+  protected Pattern?: RegExp;
+
+  protected _toJSON(_options?: JSONSchemaOptions) {
+    return {
+      type: "string",
+      description: this.Description,
+      minLength: this.MinLength,
+      maxLength: this.MaxLength,
+      pattern: this.Pattern?.toString(),
+    };
+  }
+
   protected async _validate(
     input: unknown,
     ctx: IValidationContext
@@ -33,10 +47,11 @@ export class StringValidator<Type, Input, Output> extends BaseValidator<
     if (this.Options?.shouldTerminate) ctx.shouldTerminate();
 
     if (this.Options?.casting) input = `${input}`;
-    if (typeof input !== "string")
+    if (typeof input !== "string") {
       throw (
         this.Options?.messages?.notString ?? "Invalid string has been provided!"
       );
+    }
 
     let Result: any = input;
 
@@ -93,36 +108,44 @@ export class StringValidator<Type, Input, Output> extends BaseValidator<
     max?: number;
     shouldTerminate?: boolean;
   }) {
+    this.MinLength = options.min;
+    this.MaxLength = options.max;
+
     return this.custom((input, ctx) => {
       const Input = `${input}`;
 
       if (options.shouldTerminate) ctx.shouldTerminate();
 
-      if (Input.length < (options.min || 0))
+      if (Input.length < (options.min || 0)) {
         throw (
           this.Options?.messages?.smallerThanMinLength ??
           "String is smaller than minimum length!"
         );
+      }
 
-      if (Input.length > (options.max || Infinity))
+      if (Input.length > (options.max || Infinity)) {
         throw (
           this.Options?.messages?.smallerThanMinLength ??
           "String is larger than maximum length!"
         );
+      }
     });
   }
 
   public matches(options: { regex: RegExp; shouldTerminate?: boolean }) {
+    this.Pattern = options.regex;
+
     return this.custom((input, ctx) => {
       const Input = `${input}`;
 
       if (options.shouldTerminate) ctx.shouldTerminate();
 
-      if (!options.regex?.test(Input))
+      if (!options.regex?.test(Input)) {
         throw (
           this.Options?.messages?.notMatched ??
           "String didn't match the required pattern!"
         );
+      }
     });
   }
 }

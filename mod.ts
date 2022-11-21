@@ -3,7 +3,6 @@
  * Name: Epic Validator
  * Author: Saif Ali Khan
  * License: MIT
- *
  */
 
 export * from "./lib/exceptions.ts";
@@ -17,10 +16,10 @@ export * from "./lib/validators/object.ts";
 
 import { IValidationIssue, ValidationException } from "./lib/exceptions.ts";
 import {
-  inferInput,
   inferEachInput,
-  inferOutput,
   inferEachOutput,
+  inferInput,
+  inferOutput,
   IValidationContext,
 } from "./lib/validators/base.ts";
 import { AnyValidator, AnyValidatorOptions } from "./lib/validators/any.ts";
@@ -34,6 +33,7 @@ import {
 } from "./lib/validators/partial.ts";
 import { OmitValidator, OmitValidatorOptions } from "./lib/validators/omit.ts";
 import { PickValidator, PickValidatorOptions } from "./lib/validators/pick.ts";
+import { AndValidator, AndValidatorOptions } from "./lib/validators/and.ts";
 import { OrValidator, OrValidatorOptions } from "./lib/validators/or.ts";
 import {
   inferObjectInput,
@@ -134,6 +134,15 @@ const Validators = {
       PickAdvance<inferInput<Validator>, Keys>,
       PickAdvance<inferOutput<Validator>, Keys>
     >(validator, options),
+
+  and: <Validator>(
+    validators: Validator[],
+    options: AndValidatorOptions = {}
+  ) =>
+    new AndValidator<Validator, inferInput<Validator>, inferOutput<Validator>>(
+      validators,
+      options
+    ),
 
   or: <Validator>(validators: Validator[], options: OrValidatorOptions = {}) =>
     new OrValidator<Validator, inferInput<Validator>, inferOutput<Validator>>(

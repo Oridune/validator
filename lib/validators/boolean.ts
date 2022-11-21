@@ -3,12 +3,12 @@ import { ValidationException } from "../exceptions.ts";
 import {
   BaseValidator,
   IValidationContext,
+  JSONSchemaOptions,
   TCustomValidator,
   TCustomValidatorReturn,
 } from "./base.ts";
 
 export type BooleanValidatorOptions = {
-  description?: string;
   expected?: boolean;
   casting?: boolean;
   messages?: {
@@ -26,30 +26,41 @@ export class BooleanValidator<Type, Input, Output> extends BaseValidator<
 > {
   protected CustomValidators: TCustomValidator<any, any>[] = [];
 
+  protected _toJSON(_options?: JSONSchemaOptions) {
+    return {
+      type: "boolean",
+      description: this.Description,
+      expected: this.Options?.expected,
+    };
+  }
+
   protected async _validate(
     input: unknown,
     ctx: IValidationContext
   ): Promise<Output> {
     if (this.Options?.shouldTerminate) ctx.shouldTerminate();
 
-    if (this.Options?.casting && typeof input === "string")
+    if (this.Options?.casting && typeof input === "string") {
       input = ["true", "1"].includes(input.toLowerCase());
+    }
 
-    if (typeof input !== "boolean")
+    if (typeof input !== "boolean") {
       throw (
         this.Options?.messages?.notBoolean ??
         "Invalid boolean has been provided!"
       );
+    }
 
     let Result: any = input;
 
     if (
       typeof this.Options?.expected === "boolean" &&
       this.Options?.expected !== Result
-    )
+    ) {
       throw this.Options?.expected
         ? this.Options?.messages?.notTrue ?? "Value should be true!"
         : this.Options?.messages?.notFalse ?? "Value should be false!";
+    }
 
     const ErrorList: ValidationException[] = [];
 

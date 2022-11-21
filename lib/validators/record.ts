@@ -3,12 +3,12 @@ import { ValidationException } from "../exceptions.ts";
 import {
   BaseValidator,
   IValidationContext,
+  JSONSchemaOptions,
   TCustomValidator,
   TCustomValidatorReturn,
 } from "./base.ts";
 
 export type RecordValidatorOptions = {
-  description?: string;
   casting?: boolean;
   messages?: {
     notObject?: string;
@@ -21,7 +21,16 @@ export class RecordValidator<Validator, Input, Output> extends BaseValidator<
   Input,
   Output
 > {
+  protected Validator?: BaseValidator<any, any, any>;
   protected CustomValidators: TCustomValidator<any, any>[] = [];
+
+  protected _toJSON(_options?: JSONSchemaOptions) {
+    return {
+      type: "object",
+      description: this.Description,
+      additionalProperties: this.Validator?.["_toJSON"](),
+    };
+  }
 
   protected async _validate(
     input: Record<string, any>,
@@ -29,23 +38,25 @@ export class RecordValidator<Validator, Input, Output> extends BaseValidator<
   ): Promise<Output> {
     if (this.Options?.shouldTerminate) ctx.shouldTerminate();
 
-    if (this.Options?.casting && typeof input === "string")
+    if (this.Options?.casting && typeof input === "string") {
       try {
         input = JSON.parse(input);
       } catch {
         // Do nothing...
       }
+    }
 
-    if (typeof input !== "object")
+    if (typeof input !== "object") {
       throw (
         this.Options?.messages?.notObject ?? "Invalid object has been provided!"
       );
+    }
 
     let Result: Record<string, any> = {};
 
     const ErrorList: ValidationException[] = [];
 
-    if (this.Validator instanceof BaseValidator)
+    if (this.Validator) {
       for (const [Index, Input] of Object.entries(input)) {
         if (this.ShouldTerminate && ErrorList.length) break;
 
@@ -58,7 +69,7 @@ export class RecordValidator<Validator, Input, Output> extends BaseValidator<
           .then((result) => (Result[Index] = result))
           .catch((err) => ErrorList.push(err));
       }
-    else Result = input;
+    } else Result = input;
 
     if (ErrorList.length) throw ErrorList;
 
@@ -98,13 +109,15 @@ export class RecordValidator<Validator, Input, Output> extends BaseValidator<
   }
 
   constructor(
-    protected Validator?: Validator,
+    validator?: Validator,
     protected Options?: RecordValidatorOptions
   ) {
     super();
 
-    if (this.Validator && !(this.Validator instanceof BaseValidator))
-      throw new Error("Invalid validator instance has been provided!");
+    if (validator)
+      if (!(validator instanceof BaseValidator))
+        throw new Error("Invalid validator instance has been provided!");
+      else this.Validator = validator;
   }
 
   public custom<Return>(

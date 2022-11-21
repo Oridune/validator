@@ -3,12 +3,12 @@ import { ValidationException } from "../exceptions.ts";
 import {
   BaseValidator,
   IValidationContext,
+  JSONSchemaOptions,
   TCustomValidator,
   TCustomValidatorReturn,
 } from "./base.ts";
 
 export type ArrayValidatorOptions = {
-  description?: string;
   casting?: boolean;
   splitter?: string | RegExp;
   messages?: {
@@ -24,7 +24,21 @@ export class ArrayValidator<Validator, Input, Output> extends BaseValidator<
   Input,
   Output
 > {
+  protected Validator?: BaseValidator<any, any, any>;
   protected CustomValidators: TCustomValidator<any, any>[] = [];
+
+  protected MinLength?: number;
+  protected MaxLength?: number;
+
+  protected _toJSON(_options?: JSONSchemaOptions) {
+    return {
+      type: "array",
+      description: this.Description,
+      minLength: this.MinLength,
+      maxLength: this.MaxLength,
+      items: this.Validator?.["_toJSON"](),
+    };
+  }
 
   protected async _validate(
     input: any[],
@@ -49,7 +63,7 @@ export class ArrayValidator<Validator, Input, Output> extends BaseValidator<
 
     const ErrorList: ValidationException[] = [];
 
-    if (this.Validator instanceof BaseValidator)
+    if (this.Validator)
       for (const [Index, Input] of Object.entries(input)) {
         if (this.ShouldTerminate && ErrorList.length) break;
 
@@ -102,13 +116,15 @@ export class ArrayValidator<Validator, Input, Output> extends BaseValidator<
   }
 
   constructor(
-    protected Validator?: Validator,
+    validator?: Validator,
     protected Options?: ArrayValidatorOptions
   ) {
     super();
 
-    if (this.Validator && !(this.Validator instanceof BaseValidator))
-      throw new Error("Invalid validator instance has been provided!");
+    if (validator)
+      if (!(validator instanceof BaseValidator))
+        throw new Error("Invalid validator instance has been provided!");
+      else this.Validator = validator;
   }
 
   public custom<Return>(
@@ -123,6 +139,9 @@ export class ArrayValidator<Validator, Input, Output> extends BaseValidator<
     max?: number;
     shouldTerminate?: boolean;
   }) {
+    this.MinLength = options.min;
+    this.MaxLength = options.max;
+
     return this.custom((input, ctx) => {
       if (!(input instanceof Array))
         throw (

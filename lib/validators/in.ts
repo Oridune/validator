@@ -3,12 +3,12 @@ import { ValidationException } from "../exceptions.ts";
 import {
   BaseValidator,
   IValidationContext,
+  JSONSchemaOptions,
   TCustomValidator,
   TCustomValidatorReturn,
 } from "./base.ts";
 
 export type InValidatorOptions = {
-  description?: string;
   messages?: {
     notString?: string;
     notInList?: string;
@@ -22,6 +22,31 @@ export class InValidator<Type, Input, Output> extends BaseValidator<
   Output
 > {
   protected CustomValidators: TCustomValidator<any, any>[] = [];
+
+  protected _toJSON(_options?: JSONSchemaOptions) {
+    if (!(this.List instanceof Array))
+      return {
+        type: "enum",
+        description: this.Description,
+      };
+
+    const ChoiceTypes = Array.from(
+      new Set(this.List.map((item) => typeof item))
+    );
+
+    return {
+      type: ChoiceTypes.length
+        ? ChoiceTypes.length === 1
+          ? ChoiceTypes[0]
+          : ChoiceTypes
+        : "enum",
+      description: this.Description,
+      choices:
+        this.List instanceof Array
+          ? Array.from(new Set(this.List.map((item) => `${item}`)))
+          : undefined,
+    };
+  }
 
   protected async _validate(
     input: unknown,

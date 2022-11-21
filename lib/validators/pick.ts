@@ -1,5 +1,9 @@
 // deno-lint-ignore-file no-explicit-any
-import { BaseValidator, IValidationContext } from "./base.ts";
+import {
+  BaseValidator,
+  IValidationContext,
+  JSONSchemaOptions,
+} from "./base.ts";
 import { ObjectValidator } from "./object.ts";
 
 export type PickValidatorOptions<Keys> = {
@@ -11,6 +15,12 @@ export class PickValidator<
   Input,
   Output
 > extends BaseValidator<Validator, Input, Output> {
+  protected Validator: BaseValidator<any, any, any>;
+
+  protected _toJSON(_options?: JSONSchemaOptions) {
+    return this.Validator["_toJSON"]();
+  }
+
   protected async _validate(
     input: any,
     ctx: IValidationContext
@@ -19,18 +29,20 @@ export class PickValidator<
   }
 
   constructor(
-    protected Validator: Validator,
+    validator: Validator,
     protected Options: PickValidatorOptions<unknown>
   ) {
     super();
 
-    if (!(this.Validator instanceof ObjectValidator))
+    if (!(validator instanceof ObjectValidator))
       throw new Error("Invalid object validator instance has been provided!");
     else
-      this.Validator["Shape"] = Object.entries(this.Validator["Shape"]).reduce(
+      validator["Shape"] = Object.entries(validator["Shape"]).reduce(
         (shape, [key, value]) =>
           this.Options.keys?.includes(key) ? { ...shape, [key]: value } : shape,
         {}
       );
+
+    this.Validator = validator;
   }
 }
