@@ -9,6 +9,14 @@ export type OptionalValidatorOptions = {
   nullish?: boolean;
 };
 
+export type DefaultValueType<DefaultInput> = DefaultInput extends () => Promise<
+  infer T
+>
+  ? T
+  : DefaultInput extends () => infer T
+  ? T
+  : DefaultInput;
+
 export class OptionalValidator<Validator, Input, Output> extends BaseValidator<
   Validator,
   Input,
@@ -31,7 +39,9 @@ export class OptionalValidator<Validator, Input, Output> extends BaseValidator<
     )
       return await this.Validator.validate(input, ctx);
 
-    return this.DefaultValue;
+    return typeof this.DefaultValue === "function"
+      ? this.DefaultValue()
+      : this.DefaultValue;
   }
 
   constructor(
@@ -51,7 +61,10 @@ export class OptionalValidator<Validator, Input, Output> extends BaseValidator<
   ): OptionalValidator<
     Validator,
     Input,
-    Exclude<DefaultInput | Output, undefined>
+    | (DefaultValueType<DefaultInput> extends Promise<infer T>
+        ? T
+        : DefaultValueType<DefaultInput>)
+    | Exclude<Output, undefined>
   > {
     this.DefaultValue = value;
     return this as any;

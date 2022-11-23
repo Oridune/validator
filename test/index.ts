@@ -160,7 +160,7 @@ import e from "../mod.ts";
 
     const Schema = e
       .object({
-        product: e.string(),
+        product: e.optional(e.string()).default(1),
         contact: e.partial(
           e.object({
             type: e.in(["email", "phone"]),
