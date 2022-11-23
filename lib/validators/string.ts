@@ -132,15 +132,18 @@ export class StringValidator<Type, Input, Output> extends BaseValidator<
     });
   }
 
-  public matches(options: { regex: RegExp; shouldTerminate?: boolean }) {
-    this.Pattern = options.regex;
+  public matches(
+    options: { regex: RegExp; shouldTerminate?: boolean } | RegExp
+  ) {
+    const Options = options instanceof RegExp ? { regex: options } : options;
+    this.Pattern = Options.regex;
 
     return this.custom((input, ctx) => {
       const Input = `${input}`;
 
-      if (options.shouldTerminate) ctx.shouldTerminate();
+      if (Options.shouldTerminate) ctx.shouldTerminate();
 
-      if (!options.regex?.test(Input)) {
+      if (!Options.regex?.test(Input)) {
         throw (
           this.Options?.messages?.notMatched ??
           "String didn't match the required pattern!"

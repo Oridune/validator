@@ -33,11 +33,24 @@ Deno.test("Validator Tests", async (t) => {
     assertEquals(await e.boolean().validate(true), true);
     assertEquals(
       await e.array().validate(RawUser.followers),
-      RawUser.followers,
+      RawUser.followers
     );
     assertEquals(
-      await e.object({}, { strict: false }).validate(RawUser),
-      RawUser,
+      await e
+        .object(
+          {},
+          {
+            allowUnexpectedProps: [
+              "name",
+              "age",
+              "active",
+              "metadata",
+              "followers",
+            ],
+          }
+        )
+        .validate(RawUser),
+      RawUser
     );
   });
 

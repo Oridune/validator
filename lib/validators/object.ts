@@ -15,8 +15,7 @@ import e from "../../mod.ts";
 
 export type ObjectValidatorOptions = {
   casting?: boolean;
-  allowUnexpectedProps?: string[];
-  strict?: boolean;
+  allowUnexpectedProps?: string[] | boolean;
   messages?: {
     notObject?: string;
     unexpectedProperty?: string;
@@ -89,20 +88,22 @@ export class ObjectValidator<
 
     let Result: any = { ...input };
 
-    // Strict Properties Check
+    // Unexpected Properties Check
     const Properties = Object.keys(this.Shape);
-    const ExtraProperties = Object.keys(Result).filter(
+    const UnexpectedProperties = Object.keys(Result).filter(
       (key) =>
         !Properties.includes(key) &&
-        !this.Options.allowUnexpectedProps?.includes(key)
+        (this.Options.allowUnexpectedProps instanceof Array
+          ? !this.Options.allowUnexpectedProps.includes(key)
+          : !this.Options.allowUnexpectedProps)
     );
 
     if (
-      ExtraProperties.length &&
-      this.Options.strict !== false &&
+      UnexpectedProperties.length &&
+      this.Options.allowUnexpectedProps !== true &&
       !this.RestValidator
     ) {
-      ctx.location = `${ctx.location}.${ExtraProperties[0]}`;
+      ctx.location = `${ctx.location}.${UnexpectedProperties[0]}`;
       throw (
         this.Options.messages?.unexpectedProperty ??
         "Unexpected property has been encountered!"
@@ -132,7 +133,7 @@ export class ObjectValidator<
           });
     }
 
-    for (const Property of ExtraProperties) {
+    for (const Property of UnexpectedProperties) {
       if (this.ShouldTerminate && ErrorList.length) break;
 
       this.ShouldTerminate = false;
