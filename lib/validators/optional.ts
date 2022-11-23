@@ -9,13 +9,13 @@ export type OptionalValidatorOptions = {
   nullish?: boolean;
 };
 
-export type DefaultValueType<DefaultInput> = DefaultInput extends () => Promise<
-  infer T
->
+export type DefaultValueType<D> = D extends (
+  ctx: IValidationContext
+) => Promise<infer T>
   ? T
-  : DefaultInput extends () => infer T
+  : D extends (ctx: IValidationContext) => infer T
   ? T
-  : DefaultInput;
+  : D;
 
 export class OptionalValidator<Validator, Input, Output> extends BaseValidator<
   Validator,
@@ -42,9 +42,10 @@ export class OptionalValidator<Validator, Input, Output> extends BaseValidator<
     )
       return await this.Validator.validate(input, ctx);
 
-    const DefaultValue = await (typeof this.Default?.value === "function"
-      ? this.Default?.value()
-      : this.Default?.value);
+    const DefaultValue =
+      typeof this.Default?.value === "function"
+        ? await this.Default?.value(ctx)
+        : this.Default?.value;
 
     if (this.Default?.validate)
       return await this.Validator.validate(DefaultValue, ctx);
@@ -64,6 +65,21 @@ export class OptionalValidator<Validator, Input, Output> extends BaseValidator<
     this.Validator = validator;
   }
 
+  public default<
+    DefaultInput extends (ctx: IValidationContext) => any,
+    Validate extends boolean = false
+  >(
+    value: DefaultInput,
+    options?: {
+      validate?: Validate;
+    }
+  ): OptionalValidator<
+    Validator,
+    Input,
+    Validate extends true
+      ? Exclude<Output, undefined>
+      : DefaultValueType<DefaultInput> | Exclude<Output, undefined>
+  >;
   public default<DefaultInput, Validate extends boolean = false>(
     value: DefaultInput,
     options?: {
@@ -74,11 +90,19 @@ export class OptionalValidator<Validator, Input, Output> extends BaseValidator<
     Input,
     Validate extends true
       ? Exclude<Output, undefined>
-      :
-          | (DefaultValueType<DefaultInput> extends Promise<infer T>
-              ? T
-              : DefaultValueType<DefaultInput>)
-          | Exclude<Output, undefined>
+      : DefaultInput | Exclude<Output, undefined>
+  >;
+  public default<DefaultInput, Validate extends boolean = false>(
+    value: DefaultInput,
+    options?: {
+      validate?: Validate;
+    }
+  ): OptionalValidator<
+    Validator,
+    Input,
+    Validate extends true
+      ? Exclude<Output, undefined>
+      : DefaultInput | Exclude<Output, undefined>
   > {
     if (typeof this.Default === "object")
       throw new Error(`Cannot call a default method multiple times!`);
