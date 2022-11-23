@@ -93,7 +93,7 @@ export class BaseValidator<_, __, Output> {
   }
 
   public async validate(
-    input: unknown,
+    input?: unknown,
     ctx?: Omit<Partial<IValidationContext>, "shouldTerminate">
   ): Promise<Output> {
     try {

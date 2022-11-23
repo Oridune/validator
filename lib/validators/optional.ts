@@ -36,20 +36,18 @@ export class OptionalValidator<Validator, Input, Output> extends BaseValidator<
     input: any,
     ctx: IValidationContext
   ): Promise<Output> {
+    if (
+      input !== undefined &&
+      (this.Options.nullish !== true || (this.Options.nullish && !!input))
+    )
+      return await this.Validator.validate(input, ctx);
+
     const DefaultValue = await (typeof this.Default?.value === "function"
       ? this.Default?.value()
       : this.Default?.value);
 
-    console.log("Default Value:", DefaultValue, this.Default);
-
-    if (this.Default?.validate && input === undefined) input = DefaultValue;
-
-    if (
-      this.Default?.validate ||
-      (input !== undefined &&
-        (this.Options.nullish !== true || (this.Options.nullish && !!input)))
-    )
-      return await this.Validator.validate(input, ctx);
+    if (this.Default?.validate)
+      return await this.Validator.validate(DefaultValue, ctx);
 
     return DefaultValue;
   }
