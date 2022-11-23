@@ -23,8 +23,10 @@ export class OptionalValidator<Validator, Input, Output> extends BaseValidator<
   Output
 > {
   protected Validator: BaseValidator<any, any, any>;
-  protected ValidateDefaultValue = false;
-  protected DefaultValue?: any;
+  protected Default?: {
+    value: any;
+    validate: boolean;
+  };
 
   protected _toJSON(_options?: JSONSchemaOptions) {
     return this.Validator["_toJSON"]();
@@ -34,15 +36,16 @@ export class OptionalValidator<Validator, Input, Output> extends BaseValidator<
     input: any,
     ctx: IValidationContext
   ): Promise<Output> {
-    const DefaultValue = await (typeof this.DefaultValue === "function"
-      ? this.DefaultValue()
-      : this.DefaultValue);
+    const DefaultValue = await (typeof this.Default?.value === "function"
+      ? this.Default?.value()
+      : this.Default?.value);
 
-    if (this.ValidateDefaultValue && input === undefined) input = DefaultValue;
+    if (this.Default?.validate && input === undefined) input = DefaultValue;
 
     if (
-      input !== undefined &&
-      (this.Options.nullish !== true || (this.Options.nullish && !!input))
+      this.Default?.validate ||
+      (input !== undefined &&
+        (this.Options.nullish !== true || (this.Options.nullish && !!input)))
     )
       return await this.Validator.validate(input, ctx);
 
@@ -70,15 +73,21 @@ export class OptionalValidator<Validator, Input, Output> extends BaseValidator<
     Validator,
     Input,
     Validate extends true
-      ? Output
+      ? Exclude<Output, undefined>
       :
           | (DefaultValueType<DefaultInput> extends Promise<infer T>
               ? T
               : DefaultValueType<DefaultInput>)
           | Exclude<Output, undefined>
   > {
-    this.ValidateDefaultValue = options?.validate ?? false;
-    this.DefaultValue = value;
+    if (typeof this.Default === "object")
+      throw new Error(`Cannot call a default method multiple times!`);
+
+    this.Default = {
+      value,
+      validate: options?.validate ?? false,
+    };
+
     return this as any;
   }
 }
