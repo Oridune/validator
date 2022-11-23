@@ -40,6 +40,8 @@ export class OptionalValidator<Validator, Input, Output> extends BaseValidator<
       ? this.Default?.value()
       : this.Default?.value);
 
+    console.log("Default Value:", DefaultValue, this.Default);
+
     if (this.Default?.validate && input === undefined) input = DefaultValue;
 
     if (
