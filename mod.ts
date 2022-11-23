@@ -194,12 +194,12 @@ const Validators = {
     new StringValidator<StringConstructor, T, T>(options),
 
   in: <T>(
-    list: T[] | ((ctx: IValidationContext) => T[]),
+    list: T[] | ((ctx: IValidationContext) => T[] | Promise<T[]>),
     options: InValidatorOptions = {}
   ) => new InValidator<any, T, T>(list, options),
 
   enum: <T extends string>(
-    list: T[] | ((ctx: IValidationContext) => T[]),
+    list: T[] | ((ctx: IValidationContext) => T[] | Promise<T[]>),
     options: InValidatorOptions = {}
   ) => new InValidator<any, T, T>(list, options),
 

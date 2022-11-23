@@ -198,6 +198,7 @@ try {
     lname: e.optional(e.string(), { nullish: true }),
     labels: e.optional(e.array(e.string(), { casting: true })),
     birthTime: e.optional(e.number({ casting: true })),
+    in: e.in(async () => [""]),
     password: e.string().matches({
       regex:
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,

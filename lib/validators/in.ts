@@ -57,9 +57,9 @@ export class InValidator<Type, Input, Output> extends BaseValidator<
     let Result: any = input;
 
     if (
-      !(typeof this.List === "function" ? this.List(ctx) : this.List).includes(
-        Result
-      )
+      !(
+        typeof this.List === "function" ? await this.List(ctx) : this.List
+      ).includes(Result)
     )
       throw this.Options?.messages?.notInList ?? "Value not in the list!";
 
@@ -101,7 +101,9 @@ export class InValidator<Type, Input, Output> extends BaseValidator<
   }
 
   constructor(
-    protected List: Input[] | ((ctx: IValidationContext) => Input[]),
+    protected List:
+      | Input[]
+      | ((ctx: IValidationContext) => Input[] | Promise<Input[]>),
     protected Options?: InValidatorOptions
   ) {
     super();
