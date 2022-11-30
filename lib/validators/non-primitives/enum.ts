@@ -53,7 +53,7 @@ export class EnumValidator<Type, Input, Output> extends BaseValidator<
   ) {
     super(options);
 
-    if (!(choices instanceof Array))
+    if (!(choices instanceof Array) && typeof choices !== "function")
       throw new Error("Invalid choice list has been provided!");
 
     this.Options = options;

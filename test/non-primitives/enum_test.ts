@@ -17,10 +17,23 @@ enum Status {
 }
 
 Deno.test("Enum Validator Tests", async (ctx) => {
-  await ctx.step("Truthy Validation (In)", async () => {
+  await ctx.step("Truthy Validation (In) Case 1", async () => {
     try {
       const Target = "pending";
       const Result = await e.in(Object.values(StatusMixed)).validate(Target);
+      assertEquals(Result, Target);
+    } catch (e) {
+      if (e instanceof ValidationException) console.log(e.issues);
+      throw e;
+    }
+  });
+
+  await ctx.step("Truthy Validation (In) Case 2", async () => {
+    try {
+      const Target = "pending";
+      const Result = await e
+        .in(() => Object.values(StatusMixed))
+        .validate(Target);
       assertEquals(Result, Target);
     } catch (e) {
       if (e instanceof ValidationException) console.log(e.issues);
