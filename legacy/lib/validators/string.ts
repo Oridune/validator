@@ -8,19 +8,18 @@ import {
   TCustomValidatorReturn,
 } from "./base.ts";
 
-export type NumberValidatorOptions = {
+export type StringValidatorOptions = {
   casting?: boolean;
   messages?: {
-    notNumber?: string;
+    notString?: string;
+    notMatched?: string;
     smallerThanMinLength?: string;
     largerThanMaxLength?: string;
-    smallerThanMinAmount?: string;
-    largerThanMaxAmount?: string;
   };
   shouldTerminate?: boolean;
 };
 
-export class NumberValidator<Type, Input, Output> extends BaseValidator<
+export class StringValidator<Type, Input, Output> extends BaseValidator<
   Type,
   Input,
   Output
@@ -29,17 +28,15 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
 
   protected MinLength?: number;
   protected MaxLength?: number;
-  protected MinAmount?: number;
-  protected MaxAmount?: number;
+  protected Pattern?: RegExp;
 
   protected _toJSON(_options?: JSONSchemaOptions) {
     return {
-      type: "number",
+      type: "string",
       description: this.Description,
       minLength: this.MinLength,
       maxLength: this.MaxLength,
-      minAmount: this.MinAmount,
-      maxAmount: this.MaxAmount,
+      pattern: this.Pattern?.toString(),
     };
   }
 
@@ -49,13 +46,10 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
   ): Promise<Output> {
     if (this.Options?.shouldTerminate) ctx.shouldTerminate();
 
-    if (this.Options?.casting && !isNaN(input as any)) {
-      input = parseFloat(input as any);
-    }
-
-    if (typeof input !== "number") {
+    if (this.Options?.casting) input = `${input}`;
+    if (typeof input !== "string") {
       throw (
-        this.Options?.messages?.notNumber || "Invalid number has been provided!"
+        this.Options?.messages?.notString ?? "Invalid string has been provided!"
       );
     }
 
@@ -86,7 +80,7 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
         }
       })
         .then((res: any) => {
-          Result = res ?? Result;
+          Result = ctx.output = res ?? Result;
         })
         .catch((err: any) => {
           ErrorList.push(err);
@@ -98,13 +92,13 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
     return Result as Output;
   }
 
-  constructor(protected Options?: NumberValidatorOptions) {
+  constructor(protected Options?: StringValidatorOptions) {
     super();
   }
 
   public custom<Return>(
     validator: TCustomValidator<Output, Return>
-  ): NumberValidator<Type, Input, TCustomValidatorReturn<Return, Output>> {
+  ): StringValidator<Type, Input, TCustomValidatorReturn<Return, Output>> {
     this.CustomValidators.push(validator);
     return this as any;
   }
@@ -125,43 +119,34 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
       if (Input.length < (options.min || 0)) {
         throw (
           this.Options?.messages?.smallerThanMinLength ??
-          "Number is smaller than minimum length!"
+          "String is smaller than minimum length!"
         );
       }
 
       if (Input.length > (options.max || Infinity)) {
         throw (
           this.Options?.messages?.smallerThanMinLength ??
-          "Number is larger than maximum length!"
+          "String is larger than maximum length!"
         );
       }
     });
   }
 
-  public amount(options: {
-    min?: number;
-    max?: number;
-    shouldTerminate?: boolean;
-  }) {
-    this.MinAmount = options.min;
-    this.MaxAmount = options.max;
+  public matches(
+    options: { regex: RegExp; shouldTerminate?: boolean } | RegExp
+  ) {
+    const Options = options instanceof RegExp ? { regex: options } : options;
+    this.Pattern = Options.regex;
 
     return this.custom((input, ctx) => {
-      const Input: number = parseFloat(`${input}`);
+      const Input = `${input}`;
 
-      if (options.shouldTerminate) ctx.shouldTerminate();
+      if (Options.shouldTerminate) ctx.shouldTerminate();
 
-      if (Input < (options.min || 0)) {
+      if (!Options.regex?.test(Input)) {
         throw (
-          this.Options?.messages?.smallerThanMinAmount ??
-          "Number is smaller than minimum amount!"
-        );
-      }
-
-      if (Input > (options.max || Infinity)) {
-        throw (
-          this.Options?.messages?.smallerThanMinAmount ??
-          "Number is larger than maximum amount!"
+          this.Options?.messages?.notMatched ??
+          "String didn't match the required pattern!"
         );
       }
     });

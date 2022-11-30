@@ -99,9 +99,17 @@ export class TupleValidator<
           ...ctx,
           location: `${ctx.location}.${Index}`,
         })
-          .then((result) => Result.push(result))
+          .then((result) => {
+            if (ctx.output === undefined) ctx.output = [];
+            ctx.output.push(result);
+            Result.push(result);
+          })
           .catch((err) => ErrorList.push(err));
-      } else Result.push(Input);
+      } else {
+        if (ctx.output === undefined) ctx.output = [];
+        ctx.output.push(Input);
+        Result.push(Input);
+      }
     }
 
     if (ErrorList.length) throw ErrorList;
@@ -129,7 +137,7 @@ export class TupleValidator<
         }
       })
         .then((res: any) => {
-          Result = res ?? Result;
+          Result = ctx.output = res ?? Result;
         })
         .catch((err: any) => {
           ErrorList.push(err);

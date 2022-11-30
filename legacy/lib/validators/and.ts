@@ -31,7 +31,7 @@ export class AndValidator<Validator, Input, Output> extends BaseValidator<
 
     for (const Validator of this.Validators)
       if (Validator instanceof BaseValidator)
-        Result = await Validator.validate(input, ctx);
+        Result = ctx.output = await Validator.validate(input, ctx);
 
     return Result;
   }

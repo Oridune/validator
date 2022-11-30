@@ -60,7 +60,7 @@ export class AnyValidator<Type, Input, Output> extends BaseValidator<
         }
       })
         .then((res: any) => {
-          Result = res ?? Result;
+          Result = ctx.output = res ?? Result;
         })
         .catch((err: any) => {
           ErrorList.push(err);

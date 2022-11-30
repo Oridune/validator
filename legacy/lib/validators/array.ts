@@ -8,54 +8,81 @@ import {
   TCustomValidatorReturn,
 } from "./base.ts";
 
-export type StringValidatorOptions = {
+export type ArrayValidatorOptions = {
   casting?: boolean;
+  splitter?: string | RegExp;
   messages?: {
-    notString?: string;
-    notMatched?: string;
+    notArray?: string;
     smallerThanMinLength?: string;
     largerThanMaxLength?: string;
   };
   shouldTerminate?: boolean;
 };
 
-export class StringValidator<Type, Input, Output> extends BaseValidator<
-  Type,
+export class ArrayValidator<Validator, Input, Output> extends BaseValidator<
+  Validator,
   Input,
   Output
 > {
+  protected Validator?: BaseValidator<any, any, any>;
   protected CustomValidators: TCustomValidator<any, any>[] = [];
 
   protected MinLength?: number;
   protected MaxLength?: number;
-  protected Pattern?: RegExp;
 
   protected _toJSON(_options?: JSONSchemaOptions) {
     return {
-      type: "string",
+      type: "array",
       description: this.Description,
       minLength: this.MinLength,
       maxLength: this.MaxLength,
-      pattern: this.Pattern?.toString(),
+      items: this.Validator?.["_toJSON"](),
     };
   }
 
   protected async _validate(
-    input: unknown,
+    input: any[],
     ctx: IValidationContext
   ): Promise<Output> {
     if (this.Options?.shouldTerminate) ctx.shouldTerminate();
 
-    if (this.Options?.casting) input = `${input}`;
-    if (typeof input !== "string") {
-      throw (
-        this.Options?.messages?.notString ?? "Invalid string has been provided!"
-      );
-    }
+    if (this.Options?.casting && typeof input === "string")
+      try {
+        input = JSON.parse(input);
+      } catch {
+        if (this.Options.splitter)
+          input = input.toString().split(this.Options.splitter);
+      }
 
-    let Result: any = input;
+    if (!(input instanceof Array))
+      throw (
+        this.Options?.messages?.notArray ?? "Invalid array has been provided!"
+      );
+
+    let Result: any = [];
 
     const ErrorList: ValidationException[] = [];
+
+    if (this.Validator)
+      for (const [Index, Input] of Object.entries(input)) {
+        if (this.ShouldTerminate && ErrorList.length) break;
+
+        this.ShouldTerminate = false;
+
+        await this.Validator.validate(Input, {
+          ...ctx,
+          location: `${ctx.location}.${Index}`,
+        })
+          .then((result) => {
+            if (ctx.output === undefined) ctx.output = [];
+            ctx.output.push(result);
+            Result.push(result);
+          })
+          .catch((err) => ErrorList.push(err));
+      }
+    else Result = input;
+
+    if (ErrorList.length) throw ErrorList;
 
     for (const Validator of this.CustomValidators) {
       if (this.ShouldTerminate && ErrorList.length) break;
@@ -80,7 +107,7 @@ export class StringValidator<Type, Input, Output> extends BaseValidator<
         }
       })
         .then((res: any) => {
-          Result = res ?? Result;
+          Result = ctx.output = res ?? Result;
         })
         .catch((err: any) => {
           ErrorList.push(err);
@@ -92,13 +119,21 @@ export class StringValidator<Type, Input, Output> extends BaseValidator<
     return Result as Output;
   }
 
-  constructor(protected Options?: StringValidatorOptions) {
+  constructor(
+    validator?: Validator,
+    protected Options?: ArrayValidatorOptions
+  ) {
     super();
+
+    if (validator)
+      if (!(validator instanceof BaseValidator))
+        throw new Error("Invalid validator instance has been provided!");
+      else this.Validator = validator;
   }
 
   public custom<Return>(
     validator: TCustomValidator<Output, Return>
-  ): StringValidator<Type, Input, TCustomValidatorReturn<Return, Output>> {
+  ): ArrayValidator<Validator, Input, TCustomValidatorReturn<Return, Output>> {
     this.CustomValidators.push(validator);
     return this as any;
   }
@@ -112,43 +147,26 @@ export class StringValidator<Type, Input, Output> extends BaseValidator<
     this.MaxLength = options.max;
 
     return this.custom((input, ctx) => {
-      const Input = `${input}`;
+      if (!(input instanceof Array))
+        throw (
+          this.Options?.messages?.notArray ?? "Invalid array has been provided!"
+        );
+
+      const Input: Array<any> = input;
 
       if (options.shouldTerminate) ctx.shouldTerminate();
 
-      if (Input.length < (options.min || 0)) {
+      if (Input.length < (options.min || 0))
         throw (
           this.Options?.messages?.smallerThanMinLength ??
-          "String is smaller than minimum length!"
+          "Array is smaller than minimum length!"
         );
-      }
 
-      if (Input.length > (options.max || Infinity)) {
+      if (Input.length > (options.max || Infinity))
         throw (
           this.Options?.messages?.smallerThanMinLength ??
-          "String is larger than maximum length!"
+          "Array is larger than maximum length!"
         );
-      }
-    });
-  }
-
-  public matches(
-    options: { regex: RegExp; shouldTerminate?: boolean } | RegExp
-  ) {
-    const Options = options instanceof RegExp ? { regex: options } : options;
-    this.Pattern = Options.regex;
-
-    return this.custom((input, ctx) => {
-      const Input = `${input}`;
-
-      if (Options.shouldTerminate) ctx.shouldTerminate();
-
-      if (!Options.regex?.test(Input)) {
-        throw (
-          this.Options?.messages?.notMatched ??
-          "String didn't match the required pattern!"
-        );
-      }
     });
   }
 }

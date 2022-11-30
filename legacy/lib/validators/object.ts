@@ -126,7 +126,9 @@ export class ObjectValidator<
           location: `${ctx.location}.${Property}`,
         })
           .then((result) => {
-            Result[Property] = result ?? Result[Property];
+            if (ctx.output === undefined) ctx.output = {};
+            Result[Property] = ctx.output[Property] =
+              result ?? Result[Property];
           })
           .catch((err) => {
             ErrorList.push(err);
@@ -144,7 +146,9 @@ export class ObjectValidator<
           location: `${ctx.location}.${Property}`,
         })
           .then((result) => {
-            Result[Property] = result ?? Result[Property];
+            if (ctx.output === undefined) ctx.output = {};
+            Result[Property] = ctx.output[Property] =
+              result ?? Result[Property];
           })
           .catch((err) => {
             ErrorList.push(err);
@@ -176,7 +180,7 @@ export class ObjectValidator<
         }
       })
         .then((res: any) => {
-          Result = res ?? Result;
+          Result = ctx.output = res ?? Result;
         })
         .catch((err: any) => {
           ErrorList.push(err);
@@ -194,9 +198,8 @@ export class ObjectValidator<
   ) {
     super();
 
-    if (typeof this.Shape !== "object" || this.Shape === null) {
+    if (typeof this.Shape !== "object" || this.Shape === null)
       throw new Error("Invalid object shape has been provided!");
-    }
   }
 
   public custom<Return>(

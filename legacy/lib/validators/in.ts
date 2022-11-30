@@ -1,4 +1,4 @@
-// deno-lint-ignore-file no-explicit-any no-async-promise-executor
+// deno-lint-ignore-file no-async-promise-executor no-explicit-any
 import { ValidationException } from "../exceptions.ts";
 import {
   BaseValidator,
@@ -8,18 +8,15 @@ import {
   TCustomValidatorReturn,
 } from "./base.ts";
 
-export type BooleanValidatorOptions = {
-  expected?: boolean;
-  casting?: boolean;
+export type InValidatorOptions = {
   messages?: {
-    notBoolean?: string;
-    notTrue?: string;
-    notFalse?: string;
+    notString?: string;
+    notInList?: string;
   };
   shouldTerminate?: boolean;
 };
 
-export class BooleanValidator<Type, Input, Output> extends BaseValidator<
+export class InValidator<Type, Input, Output> extends BaseValidator<
   Type,
   Input,
   Output
@@ -27,10 +24,27 @@ export class BooleanValidator<Type, Input, Output> extends BaseValidator<
   protected CustomValidators: TCustomValidator<any, any>[] = [];
 
   protected _toJSON(_options?: JSONSchemaOptions) {
+    if (!(this.List instanceof Array))
+      return {
+        type: "enum",
+        description: this.Description,
+      };
+
+    const ChoiceTypes = Array.from(
+      new Set(this.List.map((item) => typeof item))
+    );
+
     return {
-      type: "boolean",
+      type: ChoiceTypes.length
+        ? ChoiceTypes.length === 1
+          ? ChoiceTypes[0]
+          : ChoiceTypes
+        : "enum",
       description: this.Description,
-      expected: this.Options?.expected,
+      choices:
+        this.List instanceof Array
+          ? Array.from(new Set(this.List.map((item) => `${item}`)))
+          : undefined,
     };
   }
 
@@ -40,27 +54,14 @@ export class BooleanValidator<Type, Input, Output> extends BaseValidator<
   ): Promise<Output> {
     if (this.Options?.shouldTerminate) ctx.shouldTerminate();
 
-    if (this.Options?.casting && typeof input === "string") {
-      input = ["true", "1"].includes(input.toLowerCase());
-    }
-
-    if (typeof input !== "boolean") {
-      throw (
-        this.Options?.messages?.notBoolean ??
-        "Invalid boolean has been provided!"
-      );
-    }
-
     let Result: any = input;
 
     if (
-      typeof this.Options?.expected === "boolean" &&
-      this.Options?.expected !== Result
-    ) {
-      throw this.Options?.expected
-        ? this.Options?.messages?.notTrue ?? "Value should be true!"
-        : this.Options?.messages?.notFalse ?? "Value should be false!";
-    }
+      !(
+        typeof this.List === "function" ? await this.List(ctx) : this.List
+      ).includes(Result)
+    )
+      throw this.Options?.messages?.notInList ?? "Value not in the list!";
 
     const ErrorList: ValidationException[] = [];
 
@@ -87,7 +88,7 @@ export class BooleanValidator<Type, Input, Output> extends BaseValidator<
         }
       })
         .then((res: any) => {
-          Result = res ?? Result;
+          Result = ctx.output = res ?? Result;
         })
         .catch((err: any) => {
           ErrorList.push(err);
@@ -99,13 +100,18 @@ export class BooleanValidator<Type, Input, Output> extends BaseValidator<
     return Result as Output;
   }
 
-  constructor(protected Options?: BooleanValidatorOptions) {
+  constructor(
+    protected List:
+      | Input[]
+      | ((ctx: IValidationContext) => Input[] | Promise<Input[]>),
+    protected Options?: InValidatorOptions
+  ) {
     super();
   }
 
   public custom<Return>(
     validator: TCustomValidator<Output, Return>
-  ): BooleanValidator<Type, Input, TCustomValidatorReturn<Return, Output>> {
+  ): InValidator<Type, Input, TCustomValidatorReturn<Return, Output>> {
     this.CustomValidators.push(validator);
     return this as any;
   }

@@ -8,70 +8,61 @@ import {
   TCustomValidatorReturn,
 } from "./base.ts";
 
-export type RecordValidatorOptions = {
+export type BooleanValidatorOptions = {
+  expected?: boolean;
   casting?: boolean;
   messages?: {
-    notObject?: string;
+    notBoolean?: string;
+    notTrue?: string;
+    notFalse?: string;
   };
   shouldTerminate?: boolean;
 };
 
-export class RecordValidator<Validator, Input, Output> extends BaseValidator<
-  Validator,
+export class BooleanValidator<Type, Input, Output> extends BaseValidator<
+  Type,
   Input,
   Output
 > {
-  protected Validator?: BaseValidator<any, any, any>;
   protected CustomValidators: TCustomValidator<any, any>[] = [];
 
   protected _toJSON(_options?: JSONSchemaOptions) {
     return {
-      type: "object",
+      type: "boolean",
       description: this.Description,
-      additionalProperties: this.Validator?.["_toJSON"](),
+      expected: this.Options?.expected,
     };
   }
 
   protected async _validate(
-    input: Record<string, any>,
+    input: unknown,
     ctx: IValidationContext
   ): Promise<Output> {
     if (this.Options?.shouldTerminate) ctx.shouldTerminate();
 
     if (this.Options?.casting && typeof input === "string") {
-      try {
-        input = JSON.parse(input);
-      } catch {
-        // Do nothing...
-      }
+      input = ["true", "1"].includes(input.toLowerCase());
     }
 
-    if (typeof input !== "object") {
+    if (typeof input !== "boolean") {
       throw (
-        this.Options?.messages?.notObject ?? "Invalid object has been provided!"
+        this.Options?.messages?.notBoolean ??
+        "Invalid boolean has been provided!"
       );
     }
 
-    let Result: Record<string, any> = {};
+    let Result: any = input;
+
+    if (
+      typeof this.Options?.expected === "boolean" &&
+      this.Options?.expected !== Result
+    ) {
+      throw this.Options?.expected
+        ? this.Options?.messages?.notTrue ?? "Value should be true!"
+        : this.Options?.messages?.notFalse ?? "Value should be false!";
+    }
 
     const ErrorList: ValidationException[] = [];
-
-    if (this.Validator) {
-      for (const [Index, Input] of Object.entries(input)) {
-        if (this.ShouldTerminate && ErrorList.length) break;
-
-        this.ShouldTerminate = false;
-
-        await this.Validator.validate(Input, {
-          ...ctx,
-          location: `${ctx.location}.${Index}`,
-        })
-          .then((result) => (Result[Index] = result))
-          .catch((err) => ErrorList.push(err));
-      }
-    } else Result = input;
-
-    if (ErrorList.length) throw ErrorList;
 
     for (const Validator of this.CustomValidators) {
       if (this.ShouldTerminate && ErrorList.length) break;
@@ -96,7 +87,7 @@ export class RecordValidator<Validator, Input, Output> extends BaseValidator<
         }
       })
         .then((res: any) => {
-          Result = res ?? Result;
+          Result = ctx.output = res ?? Result;
         })
         .catch((err: any) => {
           ErrorList.push(err);
@@ -108,21 +99,13 @@ export class RecordValidator<Validator, Input, Output> extends BaseValidator<
     return Result as Output;
   }
 
-  constructor(
-    validator?: Validator,
-    protected Options?: RecordValidatorOptions
-  ) {
+  constructor(protected Options?: BooleanValidatorOptions) {
     super();
-
-    if (validator)
-      if (!(validator instanceof BaseValidator))
-        throw new Error("Invalid validator instance has been provided!");
-      else this.Validator = validator;
   }
 
   public custom<Return>(
     validator: TCustomValidator<Output, Return>
-  ): RecordValidator<Validator, Input, TCustomValidatorReturn<Return, Output>> {
+  ): BooleanValidator<Type, Input, TCustomValidatorReturn<Return, Output>> {
     this.CustomValidators.push(validator);
     return this as any;
   }

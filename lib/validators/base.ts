@@ -1,16 +1,25 @@
-// deno-lint-ignore-file no-explicit-any
+// deno-lint-ignore-file no-explicit-any no-empty-interface
 import { ValidationException } from "../exceptions.ts";
 
-export interface IValidationContext {
-  label?: string;
-  input: any;
-  location: string;
-  shouldTerminate: () => void;
+export interface IBaseValidatorOptions {
+  throwsFatal?: boolean;
 }
 
-export type TCustomValidator<Input, Return> = (
-  input: Input,
-  ctx: IValidationContext
+export interface IValidatorContext extends IValidationOptions {
+  readonly input: any;
+  output?: any;
+  throwsFatal: () => void;
+}
+
+export interface IValidationOptions {
+  name?: string;
+  location?: string;
+  index?: string | number | symbol;
+  parent?: IValidatorContext;
+}
+
+export type TCustomValidator<_Input, Return> = (
+  ctx: IValidatorContext
 ) => Return;
 
 export type TCustomValidatorReturn<Return, Default> = Return extends void
@@ -19,7 +28,7 @@ export type TCustomValidatorReturn<Return, Default> = Return extends void
   ? TCustomValidatorReturn<R, Default>
   : Return;
 
-export type inferInput<T> = T extends BaseValidator<any, infer Input, any>
+export type inferInput<T> = T extends BaseValidator<infer Input, any, any>
   ? Input extends BaseValidator<any, any, any>
     ? inferInput<Input>
     : Input
@@ -39,7 +48,7 @@ export type inferEachOutput<T extends Array<any>> = {
   [K in keyof T]: inferOutput<T[K]>;
 };
 
-export interface ValidatorJSONSchema {
+export interface IValidatorJSONSchema {
   type: string | string[];
   description?: string;
   minLength?: number;
@@ -48,92 +57,92 @@ export interface ValidatorJSONSchema {
   maxAmount?: number;
   pattern?: string;
   choices?: string[];
-  properties?: Record<string, ValidatorJSONSchema>;
-  additionalProperties?: ValidatorJSONSchema;
+  properties?: Record<string, IValidatorJSONSchema>;
+  additionalProperties?: IValidatorJSONSchema;
   requiredProperties?: string[];
-  tuple?: ValidatorJSONSchema[];
-  items?: ValidatorJSONSchema;
-  allOf?: ValidatorJSONSchema[];
-  anyOf?: ValidatorJSONSchema[];
+  tuple?: IValidatorJSONSchema[];
+  items?: IValidatorJSONSchema;
+  allOf?: IValidatorJSONSchema[];
+  anyOf?: IValidatorJSONSchema[];
   expected?: any;
 }
 
-export interface JSONSchemaOptions {}
+export interface IJSONSchemaOptions {}
 
-export interface JSONSchema {
-  schema: ValidatorJSONSchema;
+export interface IJSONSchema {
+  schema: IValidatorJSONSchema;
 }
 
-export class BaseValidator<_, __, Output> {
+export class BaseValidator<Type, Input, Output> {
   protected Description?: string;
+  protected Exception: ValidationException;
+  protected CustomValidators: TCustomValidator<any, any>[] = [];
 
-  protected Context: IValidationContext;
-  protected ShouldTerminate = false;
-
-  protected _toJSON(_options?: JSONSchemaOptions): ValidatorJSONSchema {
+  protected _toJSON(_options?: IJSONSchemaOptions): IValidatorJSONSchema {
     throw new Error(`_toJSON implementation is required!`);
   }
 
-  // deno-lint-ignore require-await
   protected async _validate(
-    _input: unknown,
-    _ctx: IValidationContext
-  ): Promise<Output> {
-    throw new Error(`Validator implementation is required!`);
+    ctx: IValidatorContext
+  ): Promise<IValidatorContext> {
+    for (const Validator of this.CustomValidators)
+      try {
+        ctx.output = (await Validator(ctx)) ?? ctx.output;
+      } catch (error) {
+        const ResolvedError =
+          error instanceof ValidationException
+            ? error
+            : {
+                message: error.message ?? error,
+                name: ctx.name,
+                location: ctx.location,
+                input: ctx.input,
+                output: ctx.output,
+              };
+
+        this.Exception.pushIssues(ResolvedError);
+      }
+
+    if (this.Exception.issues.length) throw this.Exception;
+    return ctx;
   }
 
-  constructor() {
-    this.Context = {
-      input: undefined,
-      location: "input",
-      shouldTerminate: () => {
-        this.ShouldTerminate = true;
-      },
-    };
+  constructor(options: IBaseValidatorOptions) {
+    this.Exception = new ValidationException();
+    if (options.throwsFatal) this.throwsFatal();
+  }
+
+  public throwsFatal() {
+    this.Exception.throwsFatal();
+    return this;
+  }
+
+  public custom<Return>(
+    validator: TCustomValidator<Output, Return>
+  ): BaseValidator<Type, Input, TCustomValidatorReturn<Return, Output>> {
+    if (typeof validator !== "function")
+      throw new Error(`Invalid validator function has been provided!`);
+
+    this.CustomValidators.push(validator);
+    return this as any;
   }
 
   public async validate(
-    input?: unknown,
-    ctx?: Omit<Partial<IValidationContext>, "shouldTerminate">
+    input?: any,
+    options?: IValidationOptions
   ): Promise<Output> {
-    try {
-      // Resolve Context
-      this.Context = { ...this.Context, ...ctx };
-      this.Context.input = this.Context.input ?? input;
+    const Context: IValidatorContext = {
+      input,
+      name: options?.name,
+      location: options?.location ?? options?.name ?? "input",
+      index: options?.index,
+      parent: options?.parent,
+      throwsFatal: this.throwsFatal.bind(this),
+    };
 
-      // Execute Validator
-      return await this._validate(input, this.Context); // Await here to catch the error
-    } catch (error) {
-      const Exception = new ValidationException("Validation Error!");
-
-      (error instanceof Array ? error : [error]).forEach((err) => {
-        if (err instanceof ValidationException) {
-          Exception.pushIssues(...err.issues);
-        } else if (err instanceof Error) {
-          Exception.pushIssues(
-            ...(err instanceof ValidationException
-              ? err.issues
-              : [
-                  {
-                    message: err.message,
-                    label: this.Context.label,
-                    location: this.Context.location,
-                    input,
-                  },
-                ])
-          );
-        } else if (typeof err === "string") {
-          Exception.pushIssues({
-            message: err,
-            label: this.Context.label,
-            location: this.Context.location,
-            input,
-          });
-        }
-      });
-
-      throw Exception;
-    }
+    this.Exception = this.Exception.clone().reset();
+    await this._validate(Context);
+    return Context.output;
   }
 
   public describe(description: string) {
@@ -141,7 +150,7 @@ export class BaseValidator<_, __, Output> {
     return this;
   }
 
-  public toJSON(options?: JSONSchemaOptions) {
+  public toJSON(options?: IJSONSchemaOptions) {
     return {
       schema: this._toJSON(options),
     };
