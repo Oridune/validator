@@ -90,7 +90,7 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
     this.MinLength = Options.min;
     this.MaxLength = Options.max;
 
-    return this.custom((ctx) => {
+    const Validator = this.custom((ctx) => {
       if (ctx.output?.length < (Options.min || 0))
         throw (
           this.Options?.messages?.smallerLength ??
@@ -103,5 +103,11 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
           "Array is greater than maximum length!"
         );
     });
+
+    return Validator as ArrayValidator<
+      Type,
+      typeof Validator extends BaseValidator<any, infer I, any> ? I : Input,
+      typeof Validator extends BaseValidator<any, any, infer O> ? O : Output
+    >;
   }
 }

@@ -62,7 +62,7 @@ export class StringValidator<Type, Input, Output> extends BaseValidator<
     this.MinLength = Options.min;
     this.MaxLength = Options.max;
 
-    return this.custom((ctx) => {
+    const Validator = this.custom((ctx) => {
       if (ctx.output?.length < (Options.min || 0))
         throw (
           this.Options?.messages?.smallerLength ??
@@ -75,19 +75,31 @@ export class StringValidator<Type, Input, Output> extends BaseValidator<
           "String is greater than maximum length!"
         );
     });
+
+    return Validator as StringValidator<
+      Type,
+      typeof Validator extends BaseValidator<any, infer I, any> ? I : Input,
+      typeof Validator extends BaseValidator<any, any, infer O> ? O : Output
+    >;
   }
 
   public matches(options: { regex: RegExp } | RegExp) {
     const Options = options instanceof RegExp ? { regex: options } : options;
     this.Pattern = Options.regex;
 
-    return this.custom((ctx) => {
+    const Validator = this.custom((ctx) => {
       if (!Options.regex?.test(ctx.output))
         throw (
           this.Options?.messages?.matchFailed ??
           "String didn't match the required pattern!"
         );
     });
+
+    return Validator as StringValidator<
+      Type,
+      typeof Validator extends BaseValidator<any, infer I, any> ? I : Input,
+      typeof Validator extends BaseValidator<any, any, infer O> ? O : Output
+    >;
   }
 
   public in<C extends string>(choices: C[]): StringValidator<Type, Input, C> {
@@ -98,12 +110,18 @@ export class StringValidator<Type, Input, Output> extends BaseValidator<
   }
 
   public isNaN() {
-    return this.custom((ctx) => {
+    const Validator = this.custom((ctx) => {
       if (!isNaN(ctx.output))
         throw (
           this.Options?.messages?.numberLike ??
           "String should not be number like!"
         );
     });
+
+    return Validator as StringValidator<
+      Type,
+      typeof Validator extends BaseValidator<any, infer I, any> ? I : Input,
+      typeof Validator extends BaseValidator<any, any, infer O> ? O : Output
+    >;
   }
 }

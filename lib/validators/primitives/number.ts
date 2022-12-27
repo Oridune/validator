@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import {
   BaseValidator,
   IBaseValidatorOptions,
@@ -68,7 +69,7 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
     this.MinLength = Options.min;
     this.MaxLength = Options.max;
 
-    return this.custom((ctx) => {
+    const Validator = this.custom((ctx) => {
       const Input = `${ctx.output}`;
 
       if (Input.length < (Options.min || 0))
@@ -83,6 +84,12 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
           "Number is greater than maximum length!"
         );
     });
+
+    return Validator as NumberValidator<
+      Type,
+      typeof Validator extends BaseValidator<any, infer I, any> ? I : Input,
+      typeof Validator extends BaseValidator<any, any, infer O> ? O : Output
+    >;
   }
 
   public amount(options: { min?: number; max?: number } | number) {
@@ -90,7 +97,7 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
     this.MinAmount = Options.min;
     this.MaxAmount = Options.max;
 
-    return this.custom((ctx) => {
+    const Validator = this.custom((ctx) => {
       if (ctx.output < (Options.min || 0))
         throw (
           this.Options?.messages?.smallerAmount ??
@@ -103,23 +110,41 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
           "Number is greater than maximum amount!"
         );
     });
+
+    return Validator as NumberValidator<
+      Type,
+      typeof Validator extends BaseValidator<any, infer I, any> ? I : Input,
+      typeof Validator extends BaseValidator<any, any, infer O> ? O : Output
+    >;
   }
 
   public int() {
     this.IsInt = true;
 
-    return this.custom((ctx) => {
+    const Validator = this.custom((ctx) => {
       if (isNaN(ctx.output) || ctx.output % 1 !== 0)
         throw this.Options?.messages?.notInt ?? "Number should be an integer!";
     });
+
+    return Validator as NumberValidator<
+      Type,
+      typeof Validator extends BaseValidator<any, infer I, any> ? I : Input,
+      typeof Validator extends BaseValidator<any, any, infer O> ? O : Output
+    >;
   }
 
   public float() {
     this.IsFloat = true;
 
-    return this.custom((ctx) => {
+    const Validator = this.custom((ctx) => {
       if (isNaN(ctx.output) || ctx.output % 1 === 0)
         throw this.Options?.messages?.notFloat ?? "Number should be a float!";
     });
+
+    return Validator as NumberValidator<
+      Type,
+      typeof Validator extends BaseValidator<any, infer I, any> ? I : Input,
+      typeof Validator extends BaseValidator<any, any, infer O> ? O : Output
+    >;
   }
 }

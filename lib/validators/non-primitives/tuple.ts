@@ -152,7 +152,7 @@ export class TupleValidator<
     this.MinLength = Options.min ?? this.MinLength;
     this.MaxLength = Options.max ?? this.MaxLength;
 
-    return this.custom((ctx) => {
+    const Validator = this.custom((ctx) => {
       if (ctx.output?.length < (Options.min || 0))
         throw (
           this.Options?.messages?.smallerLength ??
@@ -165,5 +165,11 @@ export class TupleValidator<
           "Array is greater than maximum length!"
         );
     });
+
+    return Validator as TupleValidator<
+      Type,
+      typeof Validator extends BaseValidator<any, infer I, any> ? I : Input,
+      typeof Validator extends BaseValidator<any, any, infer O> ? O : Output
+    >;
   }
 }
