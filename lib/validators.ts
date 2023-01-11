@@ -358,9 +358,14 @@ const Validators = {
    * @param location Path to a specific field where the error occured.
    * @param input Input value that is causing the error.
    */
-  error: (message: string, location?: string, input?: any) => {
+  error: (
+    message: string | Error | ValidationException,
+    location?: string,
+    input?: any
+  ) => {
+    if (message instanceof ValidationException) throw message;
     throw new ValidationException("Validation Error!").pushIssues({
-      message,
+      message: message instanceof Error ? message.message : message,
       location,
       input,
     });
@@ -372,6 +377,15 @@ const Validators = {
    */
   errors: (issues: IValidationIssue[]) => {
     throw new ValidationException("Validation Error!").pushIssues(...issues);
+  },
+
+  try: async <T>(callback: () => T) => {
+    try {
+      const Results = await callback();
+      return Results;
+    } catch (error) {
+      throw Validators.error(error);
+    }
   },
 };
 
