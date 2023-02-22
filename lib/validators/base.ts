@@ -145,6 +145,15 @@ export class BaseValidator<Type, Input, Output> {
     return Context.output;
   }
 
+  public async test(input?: any, options?: IValidationOptions) {
+    try {
+      await this.validate(input, options);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   public describe(description: string) {
     this.Description = description;
     return this;

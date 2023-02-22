@@ -379,9 +379,26 @@ const Validators = {
     throw new ValidationException("Validation Error!").pushIssues(...issues);
   },
 
+  /**
+   * Try to execute a callback and convert possible error to a validation error.
+   * @param callback Callback function to be executed.
+   */
   try: async <T>(callback: () => T) => {
     try {
       const Results = await callback();
+      return Results;
+    } catch (error) {
+      throw Validators.error(error);
+    }
+  },
+
+  /**
+   * Try to execute a synchronous callback and convert possible error to a validation error.
+   * @param callback Callback function to be executed.
+   */
+  trySync: <T>(callback: () => T) => {
+    try {
+      const Results = callback();
       return Results;
     } catch (error) {
       throw Validators.error(error);

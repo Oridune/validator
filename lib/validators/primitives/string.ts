@@ -26,7 +26,7 @@ export class StringValidator<Type, Input, Output> extends BaseValidator<
 
   protected MinLength?: number;
   protected MaxLength?: number;
-  protected Pattern?: RegExp;
+  protected Patterns?: RegExp[];
 
   protected _toJSON(_options?: IJSONSchemaOptions) {
     return {
@@ -34,7 +34,7 @@ export class StringValidator<Type, Input, Output> extends BaseValidator<
       description: this.Description,
       minLength: this.MinLength,
       maxLength: this.MaxLength,
-      pattern: this.Pattern?.toString(),
+      patterns: this.Patterns?.map((pattern) => pattern.toString()),
     };
   }
 
@@ -83,16 +83,37 @@ export class StringValidator<Type, Input, Output> extends BaseValidator<
     >;
   }
 
-  public matches(options: { regex: RegExp } | RegExp) {
-    const Options = options instanceof RegExp ? { regex: options } : options;
-    this.Pattern = Options.regex;
+  public min(length: number) {
+    return this.length({ min: length });
+  }
+
+  public max(length: number) {
+    return this.length({ max: length });
+  }
+
+  public matches(options: { regex: RegExp | RegExp[] } | RegExp | RegExp[]) {
+    const Options =
+      options instanceof RegExp || options instanceof Array
+        ? { regex: options }
+        : options;
+    const Patterns =
+      Options.regex instanceof Array ? Options.regex : [Options.regex];
+
+    for (const Pattern of Patterns)
+      if (!(Pattern instanceof RegExp))
+        throw new Error(
+          `Invalid regular expression '${Pattern}' has been provided!`
+        );
+
+    this.Patterns = Patterns;
 
     const Validator = this.custom((ctx) => {
-      if (!Options.regex?.test(ctx.output))
-        throw (
-          this.Options?.messages?.matchFailed ??
-          "String didn't match the required pattern!"
-        );
+      for (const Pattern of Patterns)
+        if (!Pattern.test(ctx.output))
+          throw (
+            this.Options?.messages?.matchFailed ??
+            "String didn't match the expected pattern!"
+          );
     });
 
     return Validator as StringValidator<
