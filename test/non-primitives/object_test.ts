@@ -155,6 +155,74 @@ Deno.test("Object Validator Tests", async (ctx) => {
     }
   });
 
+  await ctx.step("Check expected context", async () => {
+    try {
+      const Target = {
+        foo: "bar",
+        bar: "baz",
+        hello: "world",
+      };
+
+      const Target2 = {
+        ...Target,
+        bar: "buzz",
+      };
+
+      const Context = {
+        password: "test123",
+      };
+
+      const Result = await e
+        .object({
+          foo: e.string(),
+          bar: e
+            .string()
+            .custom((ctx) => {
+              assertObjectMatch(ctx.context, Context);
+              assertEquals(ctx.input, Target.bar);
+              assertEquals(ctx.output, Target.bar);
+              ctx.output = "buzz";
+              ctx.context.password = "xyz123";
+              ctx.context.secret = Context.password;
+            })
+            .custom((ctx) => {
+              assertObjectMatch(ctx.context, {
+                password: "xyz123",
+                secret: Context.password,
+              });
+              assertEquals(ctx.input, Target.bar);
+              assertEquals(ctx.output, "buzz");
+            }),
+          hello: e.string().custom((ctx) => {
+            assertObjectMatch(ctx.context, {
+              password: "xyz123",
+              secret: Context.password,
+            });
+            assertEquals(ctx.input, Target.hello);
+            assertEquals(ctx.output, Target.hello);
+            assertObjectMatch(ctx.parent?.input, Target);
+            assertObjectMatch(ctx.parent?.output, Target2);
+          }),
+        })
+        .custom((ctx) => {
+          assertObjectMatch(ctx.context, {
+            password: "xyz123",
+            secret: Context.password,
+          });
+          assertEquals(ctx.input, Target);
+          assertEquals(ctx.output, Target2);
+        })
+        .validate(Target, {
+          context: Context,
+        });
+
+      assertObjectMatch(Result, Target2);
+    } catch (e) {
+      if (e instanceof ValidationException) console.log(e.issues);
+      throw e;
+    }
+  });
+
   await ctx.step("Termination Check Case 1", async () => {
     try {
       await e

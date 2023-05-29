@@ -67,6 +67,7 @@ export class RecordValidator<Type, Input, Output> extends BaseValidator<
               ...ctx,
               location: `${ctx.location}.${Index}`,
               index: Index,
+              property: Index,
               parent: ctx,
             });
           } catch (error) {

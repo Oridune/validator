@@ -102,6 +102,7 @@ export class TupleValidator<
               ...ctx,
               location: `${ctx.location}.${Index}`,
               index: parseInt(Index),
+              property: Index,
               parent: ctx,
             });
           } catch (error) {

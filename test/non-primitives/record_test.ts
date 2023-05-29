@@ -47,6 +47,7 @@ Deno.test("Record Validator Tests", async (ctx) => {
             .string()
             .custom((ctx) => {
               if (ctx.index === "bar") {
+                assertEquals(ctx.property, "bar");
                 assertEquals(ctx.input, Target.bar);
                 assertEquals(ctx.output, Target.bar);
                 ctx.output = "buzz";
@@ -54,6 +55,7 @@ Deno.test("Record Validator Tests", async (ctx) => {
             })
             .custom((ctx) => {
               if (ctx.index === "bar") {
+                assertEquals(ctx.property, "bar");
                 assertEquals(ctx.input, Target.bar);
                 assertEquals(ctx.output, "buzz");
               }

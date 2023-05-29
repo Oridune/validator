@@ -14,8 +14,10 @@ export interface IValidatorContext extends IValidationOptions {
 export interface IValidationOptions {
   name?: string;
   location?: string;
-  index?: string | number | symbol;
+  index?: string | number | symbol; //! Both index and property are the same!
+  property?: string | number | symbol;
   parent?: IValidatorContext;
+  context?: any;
 }
 
 export type TCustomValidator<_Input, Return> = (
@@ -112,11 +114,20 @@ export class BaseValidator<Type, Input, Output> {
     if (options.throwsFatal) this.throwsFatal();
   }
 
+  /**
+   * Adds a stop point to the validation if there was an error occured on the previous validator.
+   *
+   */
   public throwsFatal() {
     this.Exception.throwsFatal();
     return this;
   }
 
+  /**
+   * Provide a custom method for validation.
+   * @param validator A validation function.
+   * @returns
+   */
   public custom<Return>(
     validator: TCustomValidator<Output, Return>
   ): BaseValidator<Type, Input, TCustomValidatorReturn<Return, Output>> {
@@ -127,6 +138,14 @@ export class BaseValidator<Type, Input, Output> {
     return this as any;
   }
 
+  /**
+   * Executes the validation chain.
+   * @param input An input value to be validated.
+   * @param options
+   * @returns
+   *
+   * @throws {ValidationException}
+   */
   public async validate(
     input?: any,
     options?: IValidationOptions
@@ -136,7 +155,9 @@ export class BaseValidator<Type, Input, Output> {
       name: options?.name,
       location: options?.location ?? options?.name ?? "input",
       index: options?.index,
+      property: options?.property,
       parent: options?.parent,
+      context: options?.context,
       throwsFatal: this.throwsFatal.bind(this),
     };
 
@@ -145,23 +166,49 @@ export class BaseValidator<Type, Input, Output> {
     return Context.output;
   }
 
-  public async test(input?: any, options?: IValidationOptions) {
+  /**
+   * Tries to execute the validation chain and if there is an error, it will not be thrown but instead will be returned.
+   * @param input An input value to be validated.
+   * @param options
+   * @returns
+   */
+  public async try(input?: any, options?: IValidationOptions) {
     try {
-      await this.validate(input, options);
-      return true;
-    } catch {
-      return false;
+      return { output: await this.validate(input, options), error: null };
+    } catch (error) {
+      return { output: null, error };
     }
   }
 
-  public describe(description: string) {
-    this.Description = description;
-    return this;
+  /**
+   * Tries to execute the validation chain and returns a boolean value based on the result.
+   * @param input An input value to be validated.
+   * @param options
+   * @returns
+   */
+  public async test(input?: any, options?: IValidationOptions) {
+    const { error } = await this.try(input, options);
+    return !!error;
   }
 
+  /**
+   * Generates a JSON schema based on your validation schema.
+   * @param options
+   * @returns
+   */
   public toJSON(options?: IJSONSchemaOptions) {
     return {
       schema: this._toJSON(options),
     };
+  }
+
+  /**
+   * Add a description for the JSON schema.
+   * @param description
+   * @returns
+   */
+  public describe(description: string) {
+    this.Description = description;
+    return this;
   }
 }

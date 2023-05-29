@@ -1,4 +1,4 @@
-import { build, emptyDir } from "https://deno.land/x/dnt@0.32.1/mod.ts";
+import { build, emptyDir } from "https://deno.land/x/dnt@0.36.0/mod.ts";
 
 await emptyDir("./npm");
 
@@ -6,6 +6,7 @@ await build({
   entryPoints: ["./mod.ts"],
   outDir: "./npm",
   shims: {
+    // see JS docs for overview and more options
     deno: true,
   },
   package: {
@@ -25,8 +26,9 @@ await build({
     },
     homepage: "https://github.com/Oridune/validator#readme",
   },
+  postBuild() {
+    // steps to run after building and before running the tests
+    Deno.copyFileSync("LICENSE", "npm/LICENSE");
+    Deno.copyFileSync("README.md", "npm/README.md");
+  },
 });
-
-// post build steps
-Deno.copyFileSync("LICENSE", "npm/LICENSE");
-Deno.copyFileSync("README.md", "npm/README.md");

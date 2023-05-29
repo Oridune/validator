@@ -75,6 +75,7 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
               ...ctx,
               location: `${ctx.location}.${Index}`,
               index: parseInt(Index),
+              property: Index,
               parent: ctx,
             });
           } catch (error) {

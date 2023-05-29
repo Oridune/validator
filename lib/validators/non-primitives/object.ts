@@ -126,6 +126,7 @@ export class ObjectValidator<
                 ...ctx,
                 location: `${ctx.location}.${Property}`,
                 index: Property,
+                property: Property,
                 parent: ctx,
               }
             );
@@ -142,6 +143,7 @@ export class ObjectValidator<
                 ...ctx,
                 location: `${ctx.location}.${Property}`,
                 index: Property,
+                property: Property,
                 parent: ctx,
               })) ?? ctx.output[Property];
           } catch (error) {
