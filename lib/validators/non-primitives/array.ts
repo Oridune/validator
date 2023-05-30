@@ -111,4 +111,12 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
       typeof Validator extends BaseValidator<any, any, infer O> ? O : Output
     >;
   }
+
+  public min(length: number) {
+    return this.length({ min: length });
+  }
+
+  public max(length: number) {
+    return this.length({ max: length });
+  }
 }
