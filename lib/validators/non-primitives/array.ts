@@ -4,6 +4,7 @@ import {
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
+  ISampleDataOptions,
 } from "../base.ts";
 
 export interface IArrayValidatorOptions extends IBaseValidatorOptions {
@@ -35,6 +36,16 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
       maxLength: this.MaxLength,
       items: this.Validator?.["_toJSON"](),
     };
+  }
+
+  protected _toSample(options?: ISampleDataOptions) {
+    const Output = [] as Input & Array<any>;
+
+    if (this.Validator instanceof BaseValidator)
+      for (let i = 0; i < (this.MinLength ?? 1); i++)
+        Output.push(this.Validator["_toSample"](options));
+
+    return this.Sample ?? Output;
   }
 
   constructor(validator?: Type, options: IArrayValidatorOptions = {}) {

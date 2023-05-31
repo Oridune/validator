@@ -2,6 +2,7 @@ import {
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
+  ISampleDataOptions,
 } from "../base.ts";
 
 export interface IBooleanValidatorOptions extends IBaseValidatorOptions {
@@ -27,6 +28,13 @@ export class BooleanValidator<Type, Input, Output> extends BaseValidator<
       description: this.Description,
       expected: this.Options?.expected,
     };
+  }
+
+  protected _toSample(_options?: ISampleDataOptions) {
+    return (
+      this.Sample ??
+      ([true, false][Math.floor(Math.random() * (1 - 0 + 1) + 0)] as Input)
+    );
   }
 
   constructor(options: IBooleanValidatorOptions = {}) {

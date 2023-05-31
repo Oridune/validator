@@ -4,6 +4,7 @@ import {
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
+  ISampleDataOptions,
 } from "../base.ts";
 
 export interface IOrValidatorOptions extends IBaseValidatorOptions {}
@@ -22,6 +23,15 @@ export class OrValidator<Type, Input, Output> extends BaseValidator<
       description: this.Description,
       anyOf: this.Validators.map((validator) => validator["_toJSON"]()),
     };
+  }
+
+  protected _toSample(options?: ISampleDataOptions) {
+    return (
+      this.Sample ??
+      this.Validators[Math.floor(Math.random() * this.Validators.length)][
+        "_toSample"
+      ](options)
+    );
   }
 
   constructor(validators: Type[], options: IOrValidatorOptions = {}) {

@@ -3,6 +3,7 @@ import {
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
+  ISampleDataOptions,
 } from "../base.ts";
 
 export interface IAnyValidatorOptions extends IBaseValidatorOptions {}
@@ -19,6 +20,10 @@ export class AnyValidator<Type, Input, Output> extends BaseValidator<
       type: "any",
       description: this.Description,
     };
+  }
+
+  protected _toSample(_options?: ISampleDataOptions) {
+    return this.Sample ?? (undefined as Input);
   }
 
   constructor(options: IAnyValidatorOptions = {}) {

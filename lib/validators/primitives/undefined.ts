@@ -2,6 +2,7 @@ import {
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
+  ISampleDataOptions,
 } from "../base.ts";
 
 export interface IUndefinedValidatorOptions extends IBaseValidatorOptions {
@@ -22,6 +23,10 @@ export class UndefinedValidator<Type, Input, Output> extends BaseValidator<
       type: "undefined",
       description: this.Description,
     };
+  }
+
+  protected _toSample(_options?: ISampleDataOptions) {
+    return this.Sample ?? (undefined as Input);
   }
 
   constructor(options: IUndefinedValidatorOptions = {}) {

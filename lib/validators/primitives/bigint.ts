@@ -2,6 +2,7 @@ import {
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
+  ISampleDataOptions,
 } from "../base.ts";
 
 export interface IBigIntValidatorOptions extends IBaseValidatorOptions {
@@ -22,6 +23,10 @@ export class BigIntValidator<Type, Input, Output> extends BaseValidator<
       type: "bigint",
       description: this.Description,
     };
+  }
+
+  protected _toSample(_options?: ISampleDataOptions) {
+    return this.Sample ?? (1n as Input);
   }
 
   constructor(options: IBigIntValidatorOptions = {}) {

@@ -4,6 +4,7 @@ import {
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
+  ISampleDataOptions,
 } from "../base.ts";
 import { ObjectValidator } from "../non-primitives/object.ts";
 import { IOptionalValidatorOptions } from "./optional.ts";
@@ -28,6 +29,10 @@ export class PartialValidator<
 
   protected _toJSON(_options?: IJSONSchemaOptions) {
     return this.Validator["_toJSON"]();
+  }
+
+  protected _toSample(options?: ISampleDataOptions) {
+    return this.Sample ?? this.Validator["_toSample"](options);
   }
 
   constructor(

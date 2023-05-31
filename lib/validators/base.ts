@@ -30,21 +30,21 @@ export type TCustomValidatorReturn<Return, Default> = Return extends void
   ? TCustomValidatorReturn<R, Default>
   : Return;
 
-export type inferInput<T> = T extends BaseValidator<infer Input, any, any>
+export type inferInput<T> = T extends BaseValidator<any, infer Input, any>
   ? Input extends BaseValidator<any, any, any>
     ? inferInput<Input>
     : Input
   : never;
-
-export type inferEachInput<T extends Array<any>> = {
-  [K in keyof T]: inferInput<T[K]>;
-};
 
 export type inferOutput<T> = T extends BaseValidator<any, any, infer Output>
   ? Output extends BaseValidator<any, any, any>
     ? inferOutput<Output>
     : Output
   : never;
+
+export type inferEachInput<T extends Array<any>> = {
+  [K in keyof T]: inferInput<T[K]>;
+};
 
 export type inferEachOutput<T extends Array<any>> = {
   [K in keyof T]: inferOutput<T[K]>;
@@ -71,17 +71,24 @@ export interface IValidatorJSONSchema {
 
 export interface IJSONSchemaOptions {}
 
+export interface ISampleDataOptions {}
+
 export interface IJSONSchema {
   schema: IValidatorJSONSchema;
 }
 
 export class BaseValidator<Type, Input, Output> {
   protected Description?: string;
+  protected Sample?: any;
   protected Exception: ValidationException;
   protected CustomValidators: TCustomValidator<any, any>[] = [];
 
   protected _toJSON(_options?: IJSONSchemaOptions): IValidatorJSONSchema {
     throw new Error(`_toJSON implementation is required!`);
+  }
+
+  protected _toSample(_options?: ISampleDataOptions): Input {
+    throw new Error(`_toSample implementation is required!`);
   }
 
   protected async _validate(
@@ -203,12 +210,33 @@ export class BaseValidator<Type, Input, Output> {
   }
 
   /**
+   * Generates a Sample data based on your validation schema.
+   * @param options
+   * @returns
+   */
+  public toSample(options?: ISampleDataOptions) {
+    return {
+      data: this._toSample(options),
+    };
+  }
+
+  /**
    * Add a description for the JSON schema.
    * @param description
    * @returns
    */
   public describe(description: string) {
     this.Description = description;
+    return this;
+  }
+
+  /**
+   * Add a sample for the Sample data.
+   * @param sample
+   * @returns
+   */
+  public sample(sample: any) {
+    this.Sample = sample;
     return this;
   }
 }

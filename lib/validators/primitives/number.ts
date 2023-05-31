@@ -3,6 +3,7 @@ import {
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
+  ISampleDataOptions,
 } from "../base.ts";
 
 export interface INumberValidatorOptions extends IBaseValidatorOptions {
@@ -43,6 +44,26 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
       minAmount: this.MinAmount,
       maxAmount: this.MaxAmount,
     };
+  }
+
+  protected _toSample(_options?: ISampleDataOptions) {
+    return (
+      this.Sample ??
+      (() => {
+        const Min = this.MinAmount ?? 1;
+        const Max = this.MaxAmount ?? 2;
+        const Num = Math.floor(Math.random() * (Max - Min + 1) + Min);
+        const Nums: number[] = new Array(this.MinLength ?? 1).fill(0);
+
+        Nums[0] = Num;
+
+        return parseInt(
+          typeof this.MaxLength === "number"
+            ? Nums.join("").slice(0, this.MaxLength)
+            : Nums.join("")
+        ) as Input;
+      })()
+    );
   }
 
   constructor(options: INumberValidatorOptions = {}) {

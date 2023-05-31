@@ -2,6 +2,7 @@ import {
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
+  ISampleDataOptions,
   IValidatorContext,
 } from "../base.ts";
 
@@ -45,6 +46,15 @@ export class EnumValidator<Type, Input, Output> extends BaseValidator<
           ? Array.from(new Set(this.Choices.map((item) => `${item}`)))
           : undefined,
     };
+  }
+
+  protected _toSample(_options?: ISampleDataOptions) {
+    return (
+      this.Sample ??
+      ((!(this.Choices instanceof Array)
+        ? ""
+        : this.Choices.join("|")) as Input)
+    );
   }
 
   constructor(

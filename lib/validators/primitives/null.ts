@@ -2,6 +2,7 @@ import {
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
+  ISampleDataOptions,
 } from "../base.ts";
 
 export interface INullValidatorOptions extends IBaseValidatorOptions {
@@ -22,6 +23,10 @@ export class NullValidator<Type, Input, Output> extends BaseValidator<
       type: "null",
       description: this.Description,
     };
+  }
+
+  protected _toSample(_options?: ISampleDataOptions) {
+    return this.Sample ?? (null as Input);
   }
 
   constructor(options: INullValidatorOptions = {}) {

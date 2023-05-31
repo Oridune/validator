@@ -4,6 +4,7 @@ import {
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
+  ISampleDataOptions,
   inferInput,
   inferOutput,
 } from "../base.ts";
@@ -61,6 +62,21 @@ export class ObjectValidator<
         this.RestValidator?.["_toJSON"]().additionalProperties,
       requiredProperties: Array.from(RequiredProps),
     };
+  }
+
+  protected _toSample(_options?: ISampleDataOptions) {
+    return (
+      this.Sample ??
+      (Object.keys(this.Shape).reduce((obj, key) => {
+        // @ts-ignore Shape is undefined...
+        const Validator = this.Shape[key];
+
+        if (Validator instanceof BaseValidator)
+          return { ...obj, [key]: Validator["_toSample"]() };
+
+        return obj;
+      }, {}) as Input)
+    );
   }
 
   constructor(shape: Type, options: IObjectValidatorOptions = {}) {

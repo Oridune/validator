@@ -4,6 +4,7 @@ import {
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
+  ISampleDataOptions,
   inferInput,
   inferOutput,
 } from "../base.ts";
@@ -39,6 +40,18 @@ export class TupleValidator<
       tuple: this.Validators.map((validator) => validator["_toJSON"]()),
       items: this.Validator?.["_toJSON"](),
     };
+  }
+
+  protected _toSample(options?: ISampleDataOptions) {
+    const Output = [] as Input & Array<any>;
+
+    if (this.Validator instanceof BaseValidator)
+      for (let i = 0; i < (this.MinLength ?? 1); i++)
+        Output.push(
+          (this.Validators[i] ?? this.Validator)["_toSample"](options)
+        );
+
+    return this.Sample ?? Output;
   }
 
   constructor(validators: Type[], options: ITupleValidatorOptions = {}) {

@@ -3,6 +3,7 @@ import {
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
+  ISampleDataOptions,
 } from "../base.ts";
 
 export interface IStringValidatorOptions extends IBaseValidatorOptions {
@@ -36,6 +37,10 @@ export class StringValidator<Type, Input, Output> extends BaseValidator<
       maxLength: this.MaxLength,
       patterns: this.Patterns?.map((pattern) => pattern.toString()),
     };
+  }
+
+  protected _toSample(_options?: ISampleDataOptions) {
+    return this.Sample ?? ("" as Input);
   }
 
   constructor(options: IStringValidatorOptions = {}) {

@@ -2,6 +2,7 @@
 import {
   BaseValidator,
   IJSONSchemaOptions,
+  ISampleDataOptions,
   IValidatorContext,
 } from "../base.ts";
 
@@ -31,6 +32,10 @@ export class OptionalValidator<Type, Input, Output> extends BaseValidator<
 
   protected _toJSON(_options?: IJSONSchemaOptions) {
     return this.Validator["_toJSON"]();
+  }
+
+  protected _toSample(options?: ISampleDataOptions) {
+    return this.Sample ?? this.Validator["_toSample"](options);
   }
 
   constructor(validator: Type, options: IOptionalValidatorOptions = {}) {

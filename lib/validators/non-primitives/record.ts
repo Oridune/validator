@@ -4,6 +4,7 @@ import {
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
+  ISampleDataOptions,
 } from "../base.ts";
 
 export interface IRecordValidatorOptions extends IBaseValidatorOptions {
@@ -28,6 +29,10 @@ export class RecordValidator<Type, Input, Output> extends BaseValidator<
       description: this.Description,
       additionalProperties: this.Validator?.["_toJSON"](),
     };
+  }
+
+  protected _toSample(_options?: ISampleDataOptions | undefined) {
+    return this.Sample ?? ({} as Input);
   }
 
   constructor(validator?: Type, options: IRecordValidatorOptions = {}) {
