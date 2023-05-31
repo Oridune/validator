@@ -1,6 +1,7 @@
 // deno-lint-ignore-file no-explicit-any ban-types
 import { ValidationException } from "../../exceptions.ts";
 import {
+  TErrorMessage,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
@@ -13,10 +14,7 @@ import { OptionalValidator } from "../utility/optional.ts";
 export interface IObjectValidatorOptions extends IBaseValidatorOptions {
   cast?: boolean;
   allowUnexpectedProps?: string[] | boolean;
-  messages?: {
-    typeError?: string;
-    unexpectedProperty?: string;
-  };
+  messages?: Partial<Record<"typeError" | "unexpectedProperty", TErrorMessage>>;
 }
 
 export type inferObjectInput<T> = {
@@ -99,8 +97,8 @@ export class ObjectValidator<
         }
 
       if (typeof ctx.output !== "object" || ctx.output === null)
-        throw (
-          this.Options.messages?.typeError ??
+        throw await this._resolveErrorMessage(
+          this.Options.messages?.typeError,
           "Invalid object has been provided!"
         );
 
@@ -122,8 +120,8 @@ export class ObjectValidator<
         !this.RestValidator
       ) {
         ctx.location = `${ctx.location}.${UnexpectedProperties[0]}`;
-        throw (
-          this.Options.messages?.unexpectedProperty ??
+        throw await this._resolveErrorMessage(
+          this.Options.messages?.unexpectedProperty,
           "Unexpected property has been encountered!"
         );
       }

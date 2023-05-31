@@ -1,6 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { ValidationException } from "../../exceptions.ts";
 import {
+  TErrorMessage,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
@@ -10,11 +11,9 @@ import {
 export interface IArrayValidatorOptions extends IBaseValidatorOptions {
   cast?: boolean;
   splitter?: string | RegExp;
-  messages?: {
-    typeError?: string;
-    smallerLength?: string;
-    greaterLength?: string;
-  };
+  messages?: Partial<
+    Record<"typeError" | "smallerLength" | "greaterLength", TErrorMessage>
+  >;
 }
 
 export class ArrayValidator<Type, Input, Output> extends BaseValidator<
@@ -70,8 +69,8 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
         }
 
       if (!(ctx.output instanceof Array))
-        throw (
-          this.Options?.messages?.typeError ??
+        throw await this._resolveErrorMessage(
+          this.Options?.messages?.typeError,
           "Invalid array has been provided!"
         );
 
@@ -102,16 +101,16 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
     this.MinLength = Options.min;
     this.MaxLength = Options.max;
 
-    const Validator = this.custom((ctx) => {
+    const Validator = this.custom(async (ctx) => {
       if (ctx.output?.length < (Options.min || 0))
-        throw (
-          this.Options?.messages?.smallerLength ??
+        throw await this._resolveErrorMessage(
+          this.Options.messages?.smallerLength,
           "Array is smaller than minimum length!"
         );
 
       if (ctx.output?.length > (Options.max || Infinity))
-        throw (
-          this.Options?.messages?.greaterLength ??
+        throw await this._resolveErrorMessage(
+          this.Options.messages?.greaterLength,
           "Array is greater than maximum length!"
         );
     });

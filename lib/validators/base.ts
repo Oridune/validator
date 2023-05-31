@@ -1,6 +1,8 @@
 // deno-lint-ignore-file no-explicit-any no-empty-interface
 import { ValidationException } from "../exceptions.ts";
 
+export type TErrorMessage = string | (() => string | Promise<string>);
+
 export interface IBaseValidatorOptions {
   throwsFatal?: boolean;
 }
@@ -82,6 +84,17 @@ export class BaseValidator<Type, Input, Output> {
   protected Sample?: any;
   protected Exception: ValidationException;
   protected CustomValidators: TCustomValidator<any, any>[] = [];
+
+  protected async _resolveErrorMessage(
+    message: TErrorMessage | undefined,
+    defaultMessage: string
+  ) {
+    return typeof message === "function"
+      ? await message()
+      : typeof message === "string"
+      ? message
+      : defaultMessage;
+  }
 
   protected _toJSON(_options?: IJSONSchemaOptions): IValidatorJSONSchema {
     throw new Error(`_toJSON implementation is required!`);

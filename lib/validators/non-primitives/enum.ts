@@ -1,4 +1,5 @@
 import {
+  TErrorMessage,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
@@ -7,10 +8,7 @@ import {
 } from "../base.ts";
 
 export interface IEnumValidatorOptions extends IBaseValidatorOptions {
-  messages?: {
-    typeError?: string;
-    invalidChoice?: string;
-  };
+  messages?: Partial<Record<"typeError" | "invalidChoice", TErrorMessage>>;
 }
 
 export class EnumValidator<Type, Input, Output> extends BaseValidator<
@@ -79,7 +77,10 @@ export class EnumValidator<Type, Input, Output> extends BaseValidator<
             : this.Choices
         ).includes(ctx.output)
       )
-        throw this.Options?.messages?.invalidChoice ?? "Invalid choice!";
+        throw await this._resolveErrorMessage(
+          this.Options?.messages?.invalidChoice,
+          "Invalid choice!"
+        );
     });
   }
 }

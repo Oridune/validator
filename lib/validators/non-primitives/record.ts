@@ -1,6 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { ValidationException } from "../../exceptions.ts";
 import {
+  TErrorMessage,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
@@ -10,9 +11,7 @@ import {
 export interface IRecordValidatorOptions extends IBaseValidatorOptions {
   cast?: boolean;
   splitter?: string | RegExp;
-  messages?: {
-    typeError?: string;
-  };
+  messages?: Partial<Record<"typeError", TErrorMessage>>;
 }
 
 export class RecordValidator<Type, Input, Output> extends BaseValidator<
@@ -56,8 +55,8 @@ export class RecordValidator<Type, Input, Output> extends BaseValidator<
         }
 
       if (typeof ctx.output !== "object" || ctx.output === null)
-        throw (
-          this.Options.messages?.typeError ??
+        throw await this._resolveErrorMessage(
+          this.Options.messages?.typeError,
           "Invalid object has been provided!"
         );
 

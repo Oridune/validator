@@ -1,4 +1,5 @@
 import {
+  TErrorMessage,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
@@ -8,11 +9,9 @@ import {
 export interface IBooleanValidatorOptions extends IBaseValidatorOptions {
   expected?: boolean;
   cast?: boolean;
-  messages?: {
-    typeError?: string;
-    notTrue?: string;
-    notFalse?: string;
-  };
+  messages?: Partial<
+    Record<"typeError" | "notTrue" | "notFalse", TErrorMessage>
+  >;
 }
 
 export class BooleanValidator<Type, Input, Output> extends BaseValidator<
@@ -42,15 +41,15 @@ export class BooleanValidator<Type, Input, Output> extends BaseValidator<
 
     this.Options = options;
 
-    this.custom((ctx) => {
+    this.custom(async (ctx) => {
       ctx.output = ctx.input;
 
       if (this.Options.cast && typeof ctx.output !== "boolean")
         ctx.output = ["true", "1"].includes(`${ctx.output}`.toLowerCase());
 
       if (typeof ctx.output !== "boolean")
-        throw (
-          this.Options?.messages?.typeError ??
+        throw await this._resolveErrorMessage(
+          this.Options?.messages?.typeError,
           "Invalid boolean has been provided!"
         );
 
@@ -59,8 +58,14 @@ export class BooleanValidator<Type, Input, Output> extends BaseValidator<
         this.Options.expected !== ctx.output
       )
         throw this.Options.expected
-          ? this.Options.messages?.notTrue ?? "Value should be true!"
-          : this.Options.messages?.notFalse ?? "Value should be false!";
+          ? await this._resolveErrorMessage(
+              this.Options.messages?.notTrue,
+              "Value should be true!"
+            )
+          : await this._resolveErrorMessage(
+              this.Options.messages?.notFalse,
+              "Value should be false!"
+            );
     });
   }
 }

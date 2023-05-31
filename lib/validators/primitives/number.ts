@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import {
+  TErrorMessage,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
@@ -8,15 +9,18 @@ import {
 
 export interface INumberValidatorOptions extends IBaseValidatorOptions {
   cast?: boolean;
-  messages?: {
-    typeError?: string;
-    smallerLength?: string;
-    greaterLength?: string;
-    smallerAmount?: string;
-    greaterAmount?: string;
-    notInt?: string;
-    notFloat?: string;
-  };
+  messages?: Partial<
+    Record<
+      | "typeError"
+      | "smallerLength"
+      | "greaterLength"
+      | "smallerAmount"
+      | "greaterAmount"
+      | "notInt"
+      | "notFloat",
+      TErrorMessage
+    >
+  >;
 }
 
 export class NumberValidator<Type, Input, Output> extends BaseValidator<
@@ -71,15 +75,15 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
 
     this.Options = options;
 
-    this.custom((ctx) => {
+    this.custom(async (ctx) => {
       ctx.output = ctx.input;
 
       if (this.Options.cast && typeof ctx.output !== "number")
         ctx.output = parseFloat(ctx.output);
 
       if (typeof ctx.output !== "number" || isNaN(ctx.output))
-        throw (
-          this.Options?.messages?.typeError ??
+        throw await this._resolveErrorMessage(
+          this.Options?.messages?.typeError,
           "Invalid number has been provided!"
         );
     });
@@ -90,18 +94,18 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
     this.MinLength = Options.min;
     this.MaxLength = Options.max;
 
-    const Validator = this.custom((ctx) => {
+    const Validator = this.custom(async (ctx) => {
       const Input = `${ctx.output}`;
 
       if (Input.length < (Options.min || 0))
-        throw (
-          this.Options?.messages?.smallerLength ??
+        throw await this._resolveErrorMessage(
+          this.Options?.messages?.smallerLength,
           "Number is smaller than minimum length!"
         );
 
       if (Input.length > (Options.max || Infinity))
-        throw (
-          this.Options?.messages?.greaterLength ??
+        throw await this._resolveErrorMessage(
+          this.Options?.messages?.greaterLength,
           "Number is greater than maximum length!"
         );
     });
@@ -118,16 +122,16 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
     this.MinAmount = Options.min;
     this.MaxAmount = Options.max;
 
-    const Validator = this.custom((ctx) => {
+    const Validator = this.custom(async (ctx) => {
       if (ctx.output < (Options.min || 0))
-        throw (
-          this.Options?.messages?.smallerAmount ??
+        throw await this._resolveErrorMessage(
+          this.Options?.messages?.smallerAmount,
           "Number is smaller than minimum amount!"
         );
 
       if (ctx.output > (Options.max || Infinity))
-        throw (
-          this.Options?.messages?.greaterAmount ??
+        throw await this._resolveErrorMessage(
+          this.Options?.messages?.greaterAmount,
           "Number is greater than maximum amount!"
         );
     });
@@ -142,9 +146,12 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
   public int() {
     this.IsInt = true;
 
-    const Validator = this.custom((ctx) => {
+    const Validator = this.custom(async (ctx) => {
       if (isNaN(ctx.output) || ctx.output % 1 !== 0)
-        throw this.Options?.messages?.notInt ?? "Number should be an integer!";
+        throw await this._resolveErrorMessage(
+          this.Options?.messages?.notInt,
+          "Number should be an integer!"
+        );
     });
 
     return Validator as NumberValidator<
@@ -157,9 +164,12 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
   public float() {
     this.IsFloat = true;
 
-    const Validator = this.custom((ctx) => {
+    const Validator = this.custom(async (ctx) => {
       if (isNaN(ctx.output) || ctx.output % 1 === 0)
-        throw this.Options?.messages?.notFloat ?? "Number should be a float!";
+        throw await this._resolveErrorMessage(
+          this.Options?.messages?.notFloat,
+          "Number should be a float!"
+        );
     });
 
     return Validator as NumberValidator<

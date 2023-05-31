@@ -1,4 +1,5 @@
 import {
+  TErrorMessage,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
@@ -6,9 +7,7 @@ import {
 } from "../base.ts";
 
 export interface IBigIntValidatorOptions extends IBaseValidatorOptions {
-  messages?: {
-    typeError?: string;
-  };
+  messages?: Partial<Record<"typeError", TErrorMessage>>;
 }
 
 export class BigIntValidator<Type, Input, Output> extends BaseValidator<
@@ -34,12 +33,12 @@ export class BigIntValidator<Type, Input, Output> extends BaseValidator<
 
     this.Options = options;
 
-    this.custom((ctx) => {
+    this.custom(async (ctx) => {
       ctx.output = ctx.input;
 
       if (typeof ctx.output !== "bigint")
-        throw (
-          this.Options?.messages?.typeError ??
+        throw await this._resolveErrorMessage(
+          this.Options?.messages?.typeError,
           "Invalid bigint has been provided!"
         );
     });

@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import {
+  TErrorMessage,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
@@ -8,14 +9,17 @@ import {
 
 export interface IStringValidatorOptions extends IBaseValidatorOptions {
   cast?: boolean;
-  messages?: {
-    typeError?: string;
-    smallerLength?: string;
-    greaterLength?: string;
-    matchFailed?: string;
-    invalidChoice?: string;
-    numberLike?: string;
-  };
+  messages?: Partial<
+    Record<
+      | "typeError"
+      | "smallerLength"
+      | "greaterLength"
+      | "matchFailed"
+      | "invalidChoice"
+      | "numberLike",
+      TErrorMessage
+    >
+  >;
 }
 
 export class StringValidator<Type, Input, Output> extends BaseValidator<
@@ -48,15 +52,15 @@ export class StringValidator<Type, Input, Output> extends BaseValidator<
 
     this.Options = options;
 
-    this.custom((ctx) => {
+    this.custom(async (ctx) => {
       ctx.output = ctx.input;
 
       if (this.Options.cast && typeof ctx.output !== "string")
         ctx.output = `${ctx.output}`;
 
       if (typeof ctx.output !== "string")
-        throw (
-          this.Options?.messages?.typeError ??
+        throw await this._resolveErrorMessage(
+          this.Options?.messages?.typeError,
           "Invalid string has been provided!"
         );
     });
@@ -67,16 +71,16 @@ export class StringValidator<Type, Input, Output> extends BaseValidator<
     this.MinLength = Options.min;
     this.MaxLength = Options.max;
 
-    const Validator = this.custom((ctx) => {
+    const Validator = this.custom(async (ctx) => {
       if (ctx.output?.length < (Options.min || 0))
-        throw (
-          this.Options?.messages?.smallerLength ??
+        throw await this._resolveErrorMessage(
+          this.Options?.messages?.smallerLength,
           "String is smaller than minimum length!"
         );
 
       if (ctx.output?.length > (Options.max || Infinity))
-        throw (
-          this.Options?.messages?.greaterLength ??
+        throw await this._resolveErrorMessage(
+          this.Options?.messages?.greaterLength,
           "String is greater than maximum length!"
         );
     });
@@ -112,11 +116,11 @@ export class StringValidator<Type, Input, Output> extends BaseValidator<
 
     this.Patterns = Patterns;
 
-    const Validator = this.custom((ctx) => {
+    const Validator = this.custom(async (ctx) => {
       for (const Pattern of Patterns)
         if (!Pattern.test(ctx.output))
-          throw (
-            this.Options?.messages?.matchFailed ??
+          throw await this._resolveErrorMessage(
+            this.Options?.messages?.matchFailed,
             "String didn't match the expected pattern!"
           );
     });
@@ -129,17 +133,20 @@ export class StringValidator<Type, Input, Output> extends BaseValidator<
   }
 
   public in<C extends string>(choices: C[]): StringValidator<Type, Input, C> {
-    return this.custom((ctx) => {
+    return this.custom(async (ctx) => {
       if (!choices.includes(ctx.output))
-        throw this.Options?.messages?.matchFailed ?? "Invalid choice!";
+        throw await this._resolveErrorMessage(
+          this.Options?.messages?.invalidChoice,
+          "Invalid choice!"
+        );
     }) as any;
   }
 
   public isNaN() {
-    const Validator = this.custom((ctx) => {
+    const Validator = this.custom(async (ctx) => {
       if (!isNaN(ctx.output))
-        throw (
-          this.Options?.messages?.numberLike ??
+        throw await this._resolveErrorMessage(
+          this.Options?.messages?.numberLike,
           "String should not be number like!"
         );
     });
