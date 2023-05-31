@@ -26,4 +26,24 @@ Deno.test("BigInt Validator Tests", async (ctx) => {
       assertEquals(e.issues.length, 1);
     }
   });
+
+  await ctx.step("Falsy Message Validation", async () => {
+    const ErrorMessage = "Oops!";
+
+    try {
+      await e
+        .bigint({
+          messages: {
+            typeError: () => ErrorMessage,
+          },
+        })
+        .validate("hi");
+      throw new Error(`Validation Invalid!`);
+    } catch (e) {
+      if (e instanceof ValidationException) console.log(e.issues);
+      assertInstanceOf(e, ValidationException);
+      assertEquals(e.issues.length, 1);
+      assertEquals(e.issues[0].message, ErrorMessage);
+    }
+  });
 });
