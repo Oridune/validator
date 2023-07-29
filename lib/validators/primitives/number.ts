@@ -90,7 +90,8 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
   }
 
   public length(options: { min?: number; max?: number } | number) {
-    const Options = typeof options === "object" ? options : { max: options };
+    const Options =
+      typeof options === "object" ? options : { min: options, max: options };
     this.MinLength = Options.min;
     this.MaxLength = Options.max;
 
@@ -115,6 +116,14 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
       typeof Validator extends BaseValidator<any, infer I, any> ? I : Input,
       typeof Validator extends BaseValidator<any, any, infer O> ? O : Output
     >;
+  }
+
+  public min(length: number) {
+    return this.length({ min: length });
+  }
+
+  public max(length: number) {
+    return this.length({ max: length });
   }
 
   public amount(options: { min?: number; max?: number } | number) {

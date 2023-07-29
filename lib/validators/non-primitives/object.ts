@@ -1,4 +1,4 @@
-// deno-lint-ignore-file no-explicit-any ban-types
+// deno-lint-ignore-file no-explicit-any
 import { ValidationException } from "../../exceptions.ts";
 import {
   TErrorMessage,

@@ -140,7 +140,8 @@ export class TupleValidator<
   }
 
   public length(options: { min?: number; max?: number } | number) {
-    const Options = typeof options === "object" ? options : { max: options };
+    const Options =
+      typeof options === "object" ? options : { min: options, max: options };
 
     if ((Options.min ?? this.MinLength) < this.MinLength)
       throw new Error(
@@ -184,5 +185,13 @@ export class TupleValidator<
       typeof Validator extends BaseValidator<any, infer I, any> ? I : Input,
       typeof Validator extends BaseValidator<any, any, infer O> ? O : Output
     >;
+  }
+
+  public min(length: number) {
+    return this.length({ min: length });
+  }
+
+  public max(length: number) {
+    return this.length({ max: length });
   }
 }

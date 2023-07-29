@@ -67,7 +67,8 @@ export class StringValidator<Type, Input, Output> extends BaseValidator<
   }
 
   public length(options: { min?: number; max?: number } | number) {
-    const Options = typeof options === "object" ? options : { max: options };
+    const Options =
+      typeof options === "object" ? options : { min: options, max: options };
     this.MinLength = Options.min;
     this.MaxLength = Options.max;
 
