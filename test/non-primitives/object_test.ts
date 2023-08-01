@@ -7,14 +7,9 @@ import {
 
 Deno.test("Object Validator Tests", async (ctx) => {
   await ctx.step("Truthy Validation", async () => {
-    try {
-      const Target = {};
-      const Result = await e.object().validate(Target);
-      assertEquals(Result, Target);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    const Target = {};
+    const Result = await e.object().validate(Target);
+    assertEquals(Result, Target);
   });
 
   await ctx.step("Falsy Validation", async () => {
@@ -22,7 +17,6 @@ Deno.test("Object Validator Tests", async (ctx) => {
       await e.object().validate("hi");
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 1);
     }
@@ -37,7 +31,6 @@ Deno.test("Object Validator Tests", async (ctx) => {
 
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 1);
       assertEquals(e.issues[0].location, "input.foo");
@@ -57,7 +50,6 @@ Deno.test("Object Validator Tests", async (ctx) => {
 
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(
         e.issues[0].message,
@@ -68,22 +60,17 @@ Deno.test("Object Validator Tests", async (ctx) => {
   });
 
   await ctx.step("Allow Unexpected Fields", async () => {
-    try {
-      const Target = {
-        foo: "bar",
-        bar: "baz",
-        hello: "world",
-      };
+    const Target = {
+      foo: "bar",
+      bar: "baz",
+      hello: "world",
+    };
 
-      const Result = await e
-        .object({ foo: e.string() }, { allowUnexpectedProps: true })
-        .validate(Target);
+    const Result = await e
+      .object({ foo: e.string() }, { allowUnexpectedProps: true })
+      .validate(Target);
 
-      assertObjectMatch(Result, Target);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    assertObjectMatch(Result, Target);
   });
 
   await ctx.step("Allow Specific Unexpected Fields", async () => {
@@ -98,7 +85,6 @@ Deno.test("Object Validator Tests", async (ctx) => {
 
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(
         e.issues[0].message,
@@ -109,118 +95,108 @@ Deno.test("Object Validator Tests", async (ctx) => {
   });
 
   await ctx.step("Output chain check", async () => {
-    try {
-      const Target = {
-        foo: "bar",
-        bar: "baz",
-        hello: "world",
-      };
+    const Target = {
+      foo: "bar",
+      bar: "baz",
+      hello: "world",
+    };
 
-      const Target2 = {
-        ...Target,
-        bar: "buzz",
-      };
+    const Target2 = {
+      ...Target,
+      bar: "buzz",
+    };
 
-      const Result = await e
-        .object({
-          foo: e.string(),
-          bar: e
-            .string()
-            .custom((ctx) => {
-              assertEquals(ctx.input, Target.bar);
-              assertEquals(ctx.output, Target.bar);
-              ctx.output = "buzz";
-            })
-            .custom((ctx) => {
-              assertEquals(ctx.input, Target.bar);
-              assertEquals(ctx.output, "buzz");
-            }),
-          hello: e.string().custom((ctx) => {
-            assertEquals(ctx.input, Target.hello);
-            assertEquals(ctx.output, Target.hello);
-            assertObjectMatch(ctx.parent?.input, Target);
-            assertObjectMatch(ctx.parent?.output, Target2);
+    const Result = await e
+      .object({
+        foo: e.string(),
+        bar: e
+          .string()
+          .custom((ctx) => {
+            assertEquals(ctx.input, Target.bar);
+            assertEquals(ctx.output, Target.bar);
+            ctx.output = "buzz";
+          })
+          .custom((ctx) => {
+            assertEquals(ctx.input, Target.bar);
+            assertEquals(ctx.output, "buzz");
           }),
-        })
-        .custom((ctx) => {
-          assertEquals(ctx.input, Target);
-          assertEquals(ctx.output, Target2);
-        })
-        .validate(Target);
+        hello: e.string().custom((ctx) => {
+          assertEquals(ctx.input, Target.hello);
+          assertEquals(ctx.output, Target.hello);
+          assertObjectMatch(ctx.parent?.input, Target);
+          assertObjectMatch(ctx.parent?.output, Target2);
+        }),
+      })
+      .custom((ctx) => {
+        assertEquals(ctx.input, Target);
+        assertEquals(ctx.output, Target2);
+      })
+      .validate(Target);
 
-      assertObjectMatch(Result, Target2);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    assertObjectMatch(Result, Target2);
   });
 
   await ctx.step("Check expected context", async () => {
-    try {
-      const Target = {
-        foo: "bar",
-        bar: "baz",
-        hello: "world",
-      };
+    const Target = {
+      foo: "bar",
+      bar: "baz",
+      hello: "world",
+    };
 
-      const Target2 = {
-        ...Target,
-        bar: "buzz",
-      };
+    const Target2 = {
+      ...Target,
+      bar: "buzz",
+    };
 
-      const Context = {
-        password: "test123",
-      };
+    const Context = {
+      password: "test123",
+    };
 
-      const Result = await e
-        .object({
-          foo: e.string(),
-          bar: e
-            .string()
-            .custom((ctx) => {
-              assertObjectMatch(ctx.context, Context);
-              assertEquals(ctx.input, Target.bar);
-              assertEquals(ctx.output, Target.bar);
-              ctx.output = "buzz";
-              ctx.context.password = "xyz123";
-              ctx.context.secret = Context.password;
-            })
-            .custom((ctx) => {
-              assertObjectMatch(ctx.context, {
-                password: "xyz123",
-                secret: Context.password,
-              });
-              assertEquals(ctx.input, Target.bar);
-              assertEquals(ctx.output, "buzz");
-            }),
-          hello: e.string().custom((ctx) => {
+    const Result = await e
+      .object({
+        foo: e.string(),
+        bar: e
+          .string()
+          .custom((ctx) => {
+            assertObjectMatch(ctx.context, Context);
+            assertEquals(ctx.input, Target.bar);
+            assertEquals(ctx.output, Target.bar);
+            ctx.output = "buzz";
+            ctx.context.password = "xyz123";
+            ctx.context.secret = Context.password;
+          })
+          .custom((ctx) => {
             assertObjectMatch(ctx.context, {
               password: "xyz123",
               secret: Context.password,
             });
-            assertEquals(ctx.input, Target.hello);
-            assertEquals(ctx.output, Target.hello);
-            assertObjectMatch(ctx.parent?.input, Target);
-            assertObjectMatch(ctx.parent?.output, Target2);
+            assertEquals(ctx.input, Target.bar);
+            assertEquals(ctx.output, "buzz");
           }),
-        })
-        .custom((ctx) => {
+        hello: e.string().custom((ctx) => {
           assertObjectMatch(ctx.context, {
             password: "xyz123",
             secret: Context.password,
           });
-          assertEquals(ctx.input, Target);
-          assertEquals(ctx.output, Target2);
-        })
-        .validate(Target, {
-          context: Context,
+          assertEquals(ctx.input, Target.hello);
+          assertEquals(ctx.output, Target.hello);
+          assertObjectMatch(ctx.parent?.input, Target);
+          assertObjectMatch(ctx.parent?.output, Target2);
+        }),
+      })
+      .custom((ctx) => {
+        assertObjectMatch(ctx.context, {
+          password: "xyz123",
+          secret: Context.password,
         });
+        assertEquals(ctx.input, Target);
+        assertEquals(ctx.output, Target2);
+      })
+      .validate(Target, {
+        context: Context,
+      });
 
-      assertObjectMatch(Result, Target2);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    assertObjectMatch(Result, Target2);
   });
 
   await ctx.step("Termination Check Case 1", async () => {
@@ -249,7 +225,6 @@ Deno.test("Object Validator Tests", async (ctx) => {
 
       // throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 3);
     }
@@ -284,7 +259,6 @@ Deno.test("Object Validator Tests", async (ctx) => {
 
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.isFatal, true);
       assertEquals(e.issues.length, 4);
@@ -315,7 +289,6 @@ Deno.test("Object Validator Tests", async (ctx) => {
 
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 2);
     }
@@ -345,7 +318,6 @@ Deno.test("Object Validator Tests", async (ctx) => {
 
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 1);
     }
@@ -381,7 +353,6 @@ Deno.test("Object Validator Tests", async (ctx) => {
 
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.isFatal, true);
       assertEquals(e.issues.length, 1);
@@ -418,7 +389,6 @@ Deno.test("Object Validator Tests", async (ctx) => {
 
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.isFatal, true);
       assertEquals(e.issues.length, 2);

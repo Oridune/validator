@@ -125,7 +125,11 @@ export class BaseValidator<Type, Input, Output> {
         this.Exception.pushIssues(ResolvedError);
       }
 
-    if (this.Exception.issues.length) throw this.Exception;
+    if (this.Exception.issues.length) {
+      console.error("Validation Issues:", this.Exception.issues);
+      throw this.Exception;
+    }
+
     return ctx;
   }
 
@@ -135,12 +139,20 @@ export class BaseValidator<Type, Input, Output> {
   }
 
   /**
-   * Adds a stop point to the validation if there was an error occured on the previous validator.
+   * Adds a stop point to the validation if there was an error occured on the current validator.
    *
    */
   public throwsFatal() {
     this.Exception.throwsFatal();
     return this;
+  }
+
+  /**
+   * Adds a stop point to the validation if there was an error occured on the current validator.
+   *
+   */
+  public checkpoint() {
+    return this.throwsFatal();
   }
 
   /**

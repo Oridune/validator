@@ -6,14 +6,9 @@ import {
 
 Deno.test("String Validator Tests", async (ctx) => {
   await ctx.step("Truthy Validation", async () => {
-    try {
-      const Target = "";
-      const Result = await e.string().validate(Target);
-      assertEquals(Result, Target);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    const Target = "";
+    const Result = await e.string().validate(Target);
+    assertEquals(Result, Target);
   });
 
   await ctx.step("Falsy Validation", async () => {
@@ -21,35 +16,24 @@ Deno.test("String Validator Tests", async (ctx) => {
       await e.string().validate(1);
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 1);
     }
   });
 
   await ctx.step("Casted Validation", async () => {
-    try {
-      const Result = await e.string({ cast: true }).validate(1);
-      assertEquals(Result, "1");
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    const Result = await e.string({ cast: true }).validate(1);
+    assertEquals(Result, "1");
   });
 
   await ctx.step("Truty Pattern Validation", async () => {
-    try {
-      const Target = "test@gmail.com";
-      const Result = await e
-        .string()
-        .matches(/^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,63})$/)
-        .validate(Target);
+    const Target = "test@gmail.com";
+    const Result = await e
+      .string()
+      .matches(/^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,63})$/)
+      .validate(Target);
 
-      assertEquals(Result, Target);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    assertEquals(Result, Target);
   });
 
   await ctx.step("Falsy Pattern Validation", async () => {
@@ -60,30 +44,24 @@ Deno.test("String Validator Tests", async (ctx) => {
         .validate("testatgmail.com");
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
     }
   });
 
   await ctx.step("Truthy Choice Validation", async () => {
-    try {
-      enum OrderType {
-        PENDING = "pending",
-        COMPLETED = "completed",
-        CANCELLED = "cancelled",
-      }
-
-      const Target = "pending";
-      const Result = await e
-        .string()
-        .in(Object.values(OrderType))
-        .validate(Target);
-
-      assertEquals(Result, Target);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
+    enum OrderType {
+      PENDING = "pending",
+      COMPLETED = "completed",
+      CANCELLED = "cancelled",
     }
+
+    const Target = "pending";
+    const Result = await e
+      .string()
+      .in(Object.values(OrderType))
+      .validate(Target);
+
+    assertEquals(Result, Target);
   });
 
   await ctx.step("Falsy Choice Validation", async () => {
@@ -96,7 +74,6 @@ Deno.test("String Validator Tests", async (ctx) => {
 
       assertEquals(Result, Target);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
     }
   });
@@ -110,7 +87,6 @@ Deno.test("String Validator Tests", async (ctx) => {
         .validate(Target, { name: "length_check" });
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 1);
       assertEquals(e.issues[0].input, "");
@@ -125,21 +101,16 @@ Deno.test("String Validator Tests", async (ctx) => {
   });
 
   await ctx.step("Validator Chain", async () => {
-    try {
-      const NewValue = "Hello";
+    const NewValue = "Hello";
 
-      const Result = await e
-        .string()
-        .length({ max: 0 })
-        .custom((ctx) => (ctx.output = NewValue))
-        .custom((ctx) => assertEquals(ctx.output, NewValue))
-        .validate("");
+    const Result = await e
+      .string()
+      .length({ max: 0 })
+      .custom((ctx) => (ctx.output = NewValue))
+      .custom((ctx) => assertEquals(ctx.output, NewValue))
+      .validate("");
 
-      assertEquals(Result, NewValue);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    assertEquals(Result, NewValue);
   });
 
   await ctx.step("Termination Case 1", async () => {
@@ -156,7 +127,6 @@ Deno.test("String Validator Tests", async (ctx) => {
         .validate("");
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 2);
     }
@@ -177,7 +147,6 @@ Deno.test("String Validator Tests", async (ctx) => {
         .validate("");
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 1);
     }
@@ -188,7 +157,6 @@ Deno.test("String Validator Tests", async (ctx) => {
       await e.string().isNaN().validate("123");
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 1);
       assertEquals(e.issues[0].message, "String should not be number like!");

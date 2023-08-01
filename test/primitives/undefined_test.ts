@@ -6,13 +6,8 @@ import {
 
 Deno.test("Undefined Validator Tests", async (ctx) => {
   await ctx.step("Truthy Validation", async () => {
-    try {
-      const Result = await e.undefined().validate();
-      assertEquals(Result, undefined);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    const Result = await e.undefined().validate();
+    assertEquals(Result, undefined);
   });
 
   await ctx.step("Falsy Validation", async () => {
@@ -20,7 +15,6 @@ Deno.test("Undefined Validator Tests", async (ctx) => {
       await e.undefined().validate("hi");
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 1);
     }

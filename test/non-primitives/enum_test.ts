@@ -18,38 +18,23 @@ enum Status {
 
 Deno.test("Enum Validator Tests", async (ctx) => {
   await ctx.step("Truthy Validation (In) Case 1", async () => {
-    try {
-      const Target = "pending";
-      const Result = await e.in(Object.values(StatusMixed)).validate(Target);
-      assertEquals(Result, Target);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    const Target = "pending";
+    const Result = await e.in(Object.values(StatusMixed)).validate(Target);
+    assertEquals(Result, Target);
   });
 
   await ctx.step("Truthy Validation (In) Case 2", async () => {
-    try {
-      const Target = "pending";
-      const Result = await e
-        .in(() => Object.values(StatusMixed))
-        .validate(Target);
-      assertEquals(Result, Target);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    const Target = "pending";
+    const Result = await e
+      .in(() => Object.values(StatusMixed))
+      .validate(Target);
+    assertEquals(Result, Target);
   });
 
   await ctx.step("Truthy Validation (Enum)", async () => {
-    try {
-      const Target = "pending";
-      const Result = await e.enum(Object.values(Status)).validate(Target);
-      assertEquals(Result, Target);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    const Target = "pending";
+    const Result = await e.enum(Object.values(Status)).validate(Target);
+    assertEquals(Result, Target);
   });
 
   await ctx.step("Falsy Validation (In)", async () => {
@@ -57,7 +42,6 @@ Deno.test("Enum Validator Tests", async (ctx) => {
       await e.in(Object.values(StatusMixed)).validate("hi");
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 1);
     }
@@ -68,7 +52,6 @@ Deno.test("Enum Validator Tests", async (ctx) => {
       await e.enum(Object.values(Status)).validate("hi");
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 1);
     }

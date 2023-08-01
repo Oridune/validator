@@ -7,35 +7,20 @@ import {
 
 Deno.test("Optional Validator Tests", async (ctx) => {
   await ctx.step("Truthy Validation Case 1", async () => {
-    try {
-      const Result = await e.optional(e.string()).validate();
-      assertEquals(Result, undefined);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    const Result = await e.optional(e.string()).validate();
+    assertEquals(Result, undefined);
   });
 
   await ctx.step("Truthy Validation Case 2", async () => {
-    try {
-      const Target = "hi";
-      const Result = await e.optional(e.string()).validate(Target);
-      assertEquals(Result, Target);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    const Target = "hi";
+    const Result = await e.optional(e.string()).validate(Target);
+    assertEquals(Result, Target);
   });
 
   await ctx.step("Truthy Validation Case 3", async () => {
-    try {
-      const Target = 10n;
-      const Result = await e.optional(e.string()).default(Target).validate();
-      assertEquals(Result, Target);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    const Target = 10n;
+    const Result = await e.optional(e.string()).default(Target).validate();
+    assertEquals(Result, Target);
   });
 
   await ctx.step("Falsy Validation", async () => {
@@ -43,50 +28,39 @@ Deno.test("Optional Validator Tests", async (ctx) => {
       await e.optional(e.string()).validate(1);
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 1);
     }
   });
 
   await ctx.step("Optional in object Case 1", async () => {
-    try {
-      const Target = {
-        foo: "bar",
-        baz: undefined,
-      };
-      const Result = await e
-        .object({
-          foo: e.string(),
-          baz: e.optional(e.string()),
-        })
-        .validate(Target);
+    const Target = {
+      foo: "bar",
+      baz: undefined,
+    };
+    const Result = await e
+      .object({
+        foo: e.string(),
+        baz: e.optional(e.string()),
+      })
+      .validate(Target);
 
-      assertObjectMatch(Result, Target);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    assertObjectMatch(Result, Target);
   });
 
   await ctx.step("Optional in object Case 2", async () => {
-    try {
-      const Target = {
-        foo: "bar",
-        baz: "foo",
-      };
-      const Result = await e
-        .object({
-          foo: e.string(),
-          baz: e.optional(e.string()),
-        })
-        .validate(Target);
+    const Target = {
+      foo: "bar",
+      baz: "foo",
+    };
+    const Result = await e
+      .object({
+        foo: e.string(),
+        baz: e.optional(e.string()),
+      })
+      .validate(Target);
 
-      assertObjectMatch(Result, Target);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    assertObjectMatch(Result, Target);
   });
 
   await ctx.step("Optional in object Case 3", async () => {
@@ -103,7 +77,6 @@ Deno.test("Optional Validator Tests", async (ctx) => {
 
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 1);
     }
@@ -134,7 +107,6 @@ Deno.test("Optional Validator Tests", async (ctx) => {
 
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 4);
     }
@@ -164,7 +136,6 @@ Deno.test("Optional Validator Tests", async (ctx) => {
 
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 1);
     }
@@ -194,7 +165,6 @@ Deno.test("Optional Validator Tests", async (ctx) => {
 
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 1);
     }
@@ -228,7 +198,6 @@ Deno.test("Optional Validator Tests", async (ctx) => {
 
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 1);
     }

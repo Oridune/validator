@@ -6,14 +6,9 @@ import {
 
 Deno.test("BigInt Validator Tests", async (ctx) => {
   await ctx.step("Truthy Validation", async () => {
-    try {
-      const Target = 1n;
-      const Result = await e.bigint().validate(Target);
-      assertEquals(Result, Target);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    const Target = 1n;
+    const Result = await e.bigint().validate(Target);
+    assertEquals(Result, Target);
   });
 
   await ctx.step("Falsy Validation", async () => {
@@ -21,7 +16,6 @@ Deno.test("BigInt Validator Tests", async (ctx) => {
       await e.bigint().validate("hi");
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 1);
     }
@@ -40,7 +34,6 @@ Deno.test("BigInt Validator Tests", async (ctx) => {
         .validate("hi");
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 1);
       assertEquals(e.issues[0].message, ErrorMessage);

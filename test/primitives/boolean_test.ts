@@ -6,14 +6,9 @@ import {
 
 Deno.test("Boolean Validator Tests", async (ctx) => {
   await ctx.step("Truthy Validation", async () => {
-    try {
-      const Target = true;
-      const Result = await e.boolean().validate(Target);
-      assertEquals(Result, Target);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    const Target = true;
+    const Result = await e.boolean().validate(Target);
+    assertEquals(Result, Target);
   });
 
   await ctx.step("Falsy Validation", async () => {
@@ -21,20 +16,14 @@ Deno.test("Boolean Validator Tests", async (ctx) => {
       await e.boolean().validate("hi");
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 1);
     }
   });
 
   await ctx.step("Casted Validation", async () => {
-    try {
-      const Result = await e.boolean({ cast: true }).validate("1");
-      assertEquals(Result, true);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    const Result = await e.boolean({ cast: true }).validate("1");
+    assertEquals(Result, true);
   });
 
   await ctx.step("Expectation", async () => {

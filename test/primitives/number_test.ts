@@ -6,14 +6,9 @@ import {
 
 Deno.test("Number Validator Tests", async (ctx) => {
   await ctx.step("Truthy Validation", async () => {
-    try {
-      const Target = 1;
-      const Result = await e.number().validate(Target);
-      assertEquals(Result, Target);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    const Target = 1;
+    const Result = await e.number().validate(Target);
+    assertEquals(Result, Target);
   });
 
   await ctx.step("Falsy Validation", async () => {
@@ -21,20 +16,14 @@ Deno.test("Number Validator Tests", async (ctx) => {
       await e.number().validate("hi");
       throw new Error(`Validation Invalid!`);
     } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 1);
     }
   });
 
   await ctx.step("Casted Validation", async () => {
-    try {
-      const Result = await e.number({ cast: true }).validate("1");
-      assertEquals(Result, 1);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    const Result = await e.number({ cast: true }).validate("1");
+    assertEquals(Result, 1);
   });
 
   await ctx.step("Min Length Check", async () => {
@@ -71,15 +60,10 @@ Deno.test("Number Validator Tests", async (ctx) => {
   });
 
   await ctx.step("Truthy Integer Check", async () => {
-    try {
-      const Target = 100;
-      const Results = await e.number().int().validate(Target);
+    const Target = 100;
+    const Results = await e.number().int().validate(Target);
 
-      assertEquals(Results, Target);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    assertEquals(Results, Target);
   });
 
   await ctx.step("Falsy Integer Check", async () => {
@@ -94,15 +78,10 @@ Deno.test("Number Validator Tests", async (ctx) => {
   });
 
   await ctx.step("Truthy Float Check", async () => {
-    try {
-      const Target = 1.1;
-      const Results = await e.number().float().validate(Target);
+    const Target = 1.1;
+    const Results = await e.number().float().validate(Target);
 
-      assertEquals(Results, Target);
-    } catch (e) {
-      if (e instanceof ValidationException) console.log(e.issues);
-      throw e;
-    }
+    assertEquals(Results, Target);
   });
 
   await ctx.step("Falsy Float Check", async () => {
