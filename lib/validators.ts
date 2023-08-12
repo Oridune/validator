@@ -1,4 +1,4 @@
-// deno-lint-ignore-file no-explicit-any ban-types
+// deno-lint-ignore-file no-explicit-any ban-types ban-unused-ignore
 import {
   inferEachInput,
   inferEachOutput,
@@ -179,7 +179,7 @@ const Validators = {
    * @param options
    * @returns
    */
-  null: <T extends bigint>(options?: INullValidatorOptions) =>
+  null: <T extends null>(options?: INullValidatorOptions) =>
     new NullValidator<null, T, T>(options),
 
   /**
