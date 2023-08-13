@@ -73,7 +73,10 @@ export interface IValidatorJSONSchema {
 
 export interface IJSONSchemaOptions {}
 
-export interface ISampleDataOptions {}
+export interface ISampleDataOptions {
+  schema?: boolean;
+  schemaOptions?: IJSONSchemaOptions;
+}
 
 export interface IJSONSchema {
   schema: IValidatorJSONSchema;
@@ -242,6 +245,10 @@ export class BaseValidator<Type, Input, Output> {
   public toSample(options?: ISampleDataOptions) {
     return {
       data: this._toSample(options),
+      schema:
+        options?.schema !== false
+          ? this._toJSON(options?.schemaOptions)
+          : undefined,
     };
   }
 
