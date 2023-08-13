@@ -37,6 +37,10 @@ import {
   NullValidator,
 } from "./validators/primitives/null.ts";
 import {
+  IDateValidatorOptions,
+  DateValidator,
+} from "./validators/non-primitives/date.ts";
+import {
   IStringValidatorOptions,
   StringValidator,
 } from "./validators/primitives/string.ts";
@@ -181,6 +185,14 @@ const Validators = {
    */
   null: <T extends null>(options?: INullValidatorOptions) =>
     new NullValidator<null, T, T>(options),
+
+  /**
+   * Make sure the input value is a date.
+   * @param options
+   * @returns
+   */
+  date: <T extends Date>(options?: IDateValidatorOptions) =>
+    new DateValidator<null, T, T>(options),
 
   /**
    * Validate a string value
