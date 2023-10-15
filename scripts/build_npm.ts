@@ -1,6 +1,13 @@
 import { build, emptyDir } from "https://deno.land/x/dnt@0.36.0/mod.ts";
+import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 
 await emptyDir("./npm");
+
+const Version =
+  Deno.args[0] ??
+  (await Input.prompt({
+    message: "Enter the version:",
+  }));
 
 await build({
   entryPoints: ["./mod.ts"],
@@ -11,7 +18,7 @@ await build({
   },
   package: {
     name: "@oridune/validator",
-    version: Deno.args[0],
+    version: Version,
     description:
       "A powerful typescript compatible/zod alternative schema validator.",
     repository: {

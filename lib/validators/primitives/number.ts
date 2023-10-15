@@ -124,7 +124,7 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
     this.MaxAmount = Options.max;
 
     const Validator = this.custom(async (ctx) => {
-      if (ctx.output < (Options.min || 0))
+      if (ctx.output < (Options.min || -Infinity))
         throw await this._resolveErrorMessage(
           this.Options?.messages?.smallerAmount,
           "Number is smaller than minimum amount!"

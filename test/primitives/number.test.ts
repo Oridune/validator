@@ -59,6 +59,20 @@ Deno.test("Number Validator Tests", async (ctx) => {
     }
   });
 
+  await ctx.step("Truthy Amount Check", async () => {
+    const Target = -1;
+    const Results = await e.number().min(-1).max(1).validate(Target);
+
+    assertEquals(Results, Target);
+  });
+
+  await ctx.step("Falsy Amount Check", async () => {
+    const Target = -1;
+    const Results = await e.number().min(0).max(1).validate(Target);
+
+    assertEquals(Results, Target);
+  });
+
   await ctx.step("Truthy Integer Check", async () => {
     const Target = 100;
     const Results = await e.number().int().validate(Target);
