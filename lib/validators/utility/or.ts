@@ -37,6 +37,8 @@ export class OrValidator<Type, Input, Output> extends BaseValidator<
   constructor(validators: Type[], options: IOrValidatorOptions = {}) {
     super(options);
 
+    this.Options = options;
+
     if (!(validators instanceof Array))
       throw new Error("Invalid validators list has been provided!");
 
@@ -46,8 +48,6 @@ export class OrValidator<Type, Input, Output> extends BaseValidator<
 
       this.Validators.push(validator);
     });
-
-    this.Options = options;
 
     this.custom(async (ctx) => {
       ctx.output = ctx.input;

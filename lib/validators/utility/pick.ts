@@ -35,17 +35,17 @@ export class PickValidator<
   constructor(validator: Type, options: IPickValidatorOptions<unknown> = {}) {
     super(options);
 
-    if (!(validator instanceof ObjectValidator))
+    this.Options = options;
+    this.Validator = validator;
+
+    if (!(this.Validator instanceof ObjectValidator))
       throw new Error("Invalid object validator instance has been provided!");
     else
-      validator["Shape"] = Object.entries(validator["Shape"]).reduce(
+      this.Validator["Shape"] = Object.entries(this.Validator["Shape"]).reduce(
         (shape, [key, value]) =>
           this.Options.keys?.includes(key) ? { ...shape, [key]: value } : shape,
         {}
       );
-
-    this.Options = options;
-    this.Validator = validator;
 
     this.custom(async (ctx) => {
       ctx.output = ctx.input;
