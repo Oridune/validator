@@ -5,86 +5,51 @@ import {
   inferInput,
   inferOutput,
   IValidatorContext,
-} from "./validators/base.ts";
-import {
   inferObjectInput,
   inferObjectOutput,
   IObjectValidatorOptions,
   ObjectValidator,
-} from "./validators/non-primitives/object.ts";
-import {
   IRecordValidatorOptions,
   RecordValidator,
-} from "./validators/non-primitives/record.ts";
-import {
   ArrayValidator,
   IArrayValidatorOptions,
-} from "./validators/non-primitives/array.ts";
-import {
   ITupleValidatorOptions,
   TupleValidator,
-} from "./validators/non-primitives/tuple.ts";
-import {
   EnumValidator,
   IEnumValidatorOptions,
-} from "./validators/non-primitives/enum.ts";
-import {
   IUndefinedValidatorOptions,
   UndefinedValidator,
-} from "./validators/primitives/undefined.ts";
-import {
   INullValidatorOptions,
   NullValidator,
-} from "./validators/primitives/null.ts";
-import {
   IDateValidatorOptions,
   DateValidator,
-} from "./validators/non-primitives/date.ts";
-import {
   IStringValidatorOptions,
   StringValidator,
-} from "./validators/primitives/string.ts";
-import {
   INumberValidatorOptions,
   NumberValidator,
-} from "./validators/primitives/number.ts";
-import {
   BooleanValidator,
   IBooleanValidatorOptions,
-} from "./validators/primitives/boolean.ts";
-import {
   BigIntValidator,
   IBigIntValidatorOptions,
-} from "./validators/primitives/bigint.ts";
-import {
   AnyValidator,
   IAnyValidatorOptions,
-} from "./validators/utility/any.ts";
-import {
   IOptionalValidatorOptions,
   OptionalValidator,
-} from "./validators/utility/optional.ts";
-import {
   AndValidator,
   IAndValidatorOptions,
-} from "./validators/utility/and.ts";
-import { IOrValidatorOptions, OrValidator } from "./validators/utility/or.ts";
-import { IValidationIssue, ValidationException } from "./exceptions.ts";
-import {
+  IOrValidatorOptions,
+  OrValidator,
   IOmitValidatorOptions,
   OmitAdvance,
   OmitValidator,
-} from "./validators/utility/omit.ts";
-import {
   IPartialValidatorOptions,
   PartialAdvance,
   PartialValidator,
-} from "./validators/utility/partial.ts";
-import {
   IPickValidatorOptions,
   PickAdvance,
   PickValidator,
-} from "./validators/utility/pick.ts";
+} from "./validators/mod.ts";
+import { IValidationIssue, ValidationException } from "./exceptions.ts";
 
 const Validators = {
   /**
