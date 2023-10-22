@@ -7,6 +7,7 @@ import {
   IJSONSchemaOptions,
   ISampleDataOptions,
 } from "../base.ts";
+import { OptionalValidator } from "../utility/optional.ts";
 
 export interface IRecordValidatorOptions extends IBaseValidatorOptions {
   cast?: boolean;
@@ -74,6 +75,16 @@ export class RecordValidator<Type, Input, Output> extends BaseValidator<
               property: Index,
               parent: ctx,
             });
+
+            if (
+              ctx.output[Index] === undefined &&
+              this.Validator instanceof OptionalValidator &&
+              (this.Validator["Options"].deletePropertyIfUndefined === true ||
+                (this.Validator["Options"].deletePropertyIfUndefined !==
+                  false &&
+                  !(Index in ctx.input)))
+            )
+              delete ctx.output[Index];
           } catch (error) {
             Exception.pushIssues(error);
           }

@@ -81,10 +81,11 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
       if (this.Validator)
         for (const [Index, Input] of Object.entries(ctx.output))
           try {
-            ctx.output[parseInt(Index)] = await this.Validator.validate(Input, {
+            const Key = parseInt(Index);
+            ctx.output[Key] = await this.Validator.validate(Input, {
               ...ctx,
               location: `${ctx.location}.${Index}`,
-              index: parseInt(Index),
+              index: Key,
               property: Index,
               parent: ctx,
             });

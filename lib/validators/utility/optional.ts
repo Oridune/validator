@@ -8,6 +8,7 @@ import {
 
 export interface IOptionalValidatorOptions {
   nullish?: boolean;
+  deletePropertyIfUndefined?: boolean;
 }
 
 export type IDefaultValueType<D> = D extends (

@@ -16,3 +16,32 @@ const Shape = e.object({
 type T = inferOutput<typeof Shape>;
 
 console.log(Shape.toSample().data);
+
+const UserSchema = e.object({
+  username: e.string().custom((ctx) => {
+    ctx.output = undefined;
+  }),
+  password: e.optional(e.string()),
+  profile: e.object({
+    name: e.string(),
+    dob: e.date(),
+  }),
+});
+
+console.log(
+  await UserSchema.validate({
+    username: "saffellikhan",
+    password: undefined,
+    profile: {
+      name: "Saif Ali Khan",
+      dob: new Date(),
+    },
+  }),
+  await UserSchema.validate({
+    username: "saffellikhan",
+    profile: {
+      name: "Saif Ali Khan",
+      dob: new Date(),
+    },
+  })
+);
