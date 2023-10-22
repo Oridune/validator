@@ -128,10 +128,7 @@ export class BaseValidator<Type, Input, Output> {
         this.Exception.pushIssues(ResolvedError);
       }
 
-    if (this.Exception.issues.length) {
-      console.error("Validation Issues:", this.Exception.issues);
-      throw this.Exception;
-    }
+    if (this.Exception.issues.length) throw this.Exception;
 
     return ctx;
   }

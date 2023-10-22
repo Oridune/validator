@@ -1,13 +1,13 @@
 import { build, emptyDir } from "https://deno.land/x/dnt@0.36.0/mod.ts";
 import { Input } from "https://deno.land/x/cliffy@v0.25.4/prompt/mod.ts";
 
-await emptyDir("./npm");
-
 const Version =
   Deno.args[0] ??
   (await Input.prompt({
-    message: "Enter the version:",
+    message: "Enter the new version:",
   }));
+
+await emptyDir("./npm");
 
 await build({
   entryPoints: ["./mod.ts"],
