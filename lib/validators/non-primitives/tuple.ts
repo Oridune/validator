@@ -1,13 +1,11 @@
 // deno-lint-ignore-file no-explicit-any
 import { ValidationException } from "../../exceptions.ts";
+import { TErrorMessage, inferInput, inferOutput } from "../../types.ts";
 import {
-  TErrorMessage,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
   ISampleDataOptions,
-  inferInput,
-  inferOutput,
 } from "../base.ts";
 
 export interface ITupleValidatorOptions extends IBaseValidatorOptions {

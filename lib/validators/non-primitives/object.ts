@@ -1,12 +1,10 @@
 import { ValidationException } from "../../exceptions.ts";
+import { TErrorMessage } from "../../types.ts";
 import {
-  TErrorMessage,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
   ISampleDataOptions,
-  inferInput,
-  inferOutput,
 } from "../base.ts";
 import { OptionalValidator } from "../utility/optional.ts";
 
@@ -15,14 +13,6 @@ export interface IObjectValidatorOptions extends IBaseValidatorOptions {
   allowUnexpectedProps?: string[] | boolean;
   messages?: Partial<Record<"typeError" | "unexpectedProperty", TErrorMessage>>;
 }
-
-export type inferObjectInput<T> = {
-  [key in keyof T]: inferInput<T[key]>;
-};
-
-export type inferObjectOutput<T> = {
-  [key in keyof T]: inferOutput<T[key]>;
-};
 
 export class ObjectValidator<
   Type extends object,

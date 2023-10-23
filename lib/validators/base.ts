@@ -1,11 +1,6 @@
 // deno-lint-ignore-file no-explicit-any no-empty-interface
 import { ValidationException } from "../exceptions.ts";
-
-export type TErrorMessage = string | (() => string | Promise<string>);
-
-export interface IBaseValidatorOptions {
-  throwsFatal?: boolean;
-}
+import { TErrorMessage } from "../types.ts";
 
 export interface IValidatorContext extends IValidationOptions {
   readonly input: any;
@@ -31,26 +26,6 @@ export type TCustomValidatorReturn<Return, Default> = Return extends void
   : Return extends Promise<infer R>
   ? TCustomValidatorReturn<R, Default>
   : Return;
-
-export type inferInput<T> = T extends BaseValidator<any, infer Input, any>
-  ? Input extends BaseValidator<any, any, any>
-    ? inferInput<Input>
-    : Input
-  : never;
-
-export type inferOutput<T> = T extends BaseValidator<any, any, infer Output>
-  ? Output extends BaseValidator<any, any, any>
-    ? inferOutput<Output>
-    : Output
-  : never;
-
-export type inferEachInput<T extends Array<any>> = {
-  [K in keyof T]: inferInput<T[K]>;
-};
-
-export type inferEachOutput<T extends Array<any>> = {
-  [K in keyof T]: inferOutput<T[K]>;
-};
 
 export interface IValidatorJSONSchema {
   type: string | string[];
@@ -80,6 +55,10 @@ export interface ISampleDataOptions {
 
 export interface IJSONSchema {
   schema: IValidatorJSONSchema;
+}
+
+export interface IBaseValidatorOptions {
+  throwsFatal?: boolean;
 }
 
 export class BaseValidator<Type, Input, Output> {

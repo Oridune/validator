@@ -1,12 +1,6 @@
 // deno-lint-ignore-file no-explicit-any ban-types ban-unused-ignore
 import {
-  inferEachInput,
-  inferEachOutput,
-  inferInput,
-  inferOutput,
   IValidatorContext,
-  inferObjectInput,
-  inferObjectOutput,
   IObjectValidatorOptions,
   ObjectValidator,
   IRecordValidatorOptions,
@@ -50,6 +44,14 @@ import {
   PickValidator,
 } from "./validators/mod.ts";
 import { IValidationIssue, ValidationException } from "./exceptions.ts";
+import {
+  inferInput,
+  inferOutput,
+  inferObjectInput,
+  inferObjectOutput,
+  inferEachInput,
+  inferEachOutput,
+} from "./types.ts";
 
 const Validators = {
   /**

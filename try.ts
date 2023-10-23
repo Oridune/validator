@@ -1,8 +1,8 @@
-import e, { inferOutput } from "./mod.ts";
+import e from "./mod.ts";
 
-const S = e.string().sample("Saif Ali Khan");
+const S = e.optional(e.string().sample("Saif Ali Khan")).default("something");
 
-const Shape = e.object({
+const Shape = {
   name: S,
   contact: e.number().length({ min: 11 }),
   role: e.enum(["admin", "user"]),
@@ -11,11 +11,11 @@ const Shape = e.object({
   tags: e.record(e.string()),
   metadata: e.any().sample({}),
   note: e.optional(e.string()),
-});
+};
 
-type T = inferOutput<typeof Shape>;
+const Schema = e.object(Shape);
 
-console.log(Shape.toSample().data);
+console.log(Schema.toSample().data);
 
 const UserSchema = e.object({
   username: e.string().custom((ctx) => {

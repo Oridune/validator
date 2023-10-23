@@ -1,5 +1,5 @@
+import { TErrorMessage } from "../../types.ts";
 import {
-  TErrorMessage,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,

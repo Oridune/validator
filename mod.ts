@@ -1,4 +1,5 @@
 export * from "./lib/validators/mod.ts";
+export * from "./lib/types.ts";
 export * from "./lib/exceptions.ts";
 
 import _ from "./lib/validators.ts";

@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
+import { TErrorMessage } from "../../types.ts";
 import {
-  TErrorMessage,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
