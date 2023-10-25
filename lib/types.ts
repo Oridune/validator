@@ -20,6 +20,8 @@ import {
   OmitValidator,
   PartialValidator,
   PickValidator,
+  IfValidator,
+  InstanceOfValidator,
 } from "./validators/mod.ts";
 
 export type TErrorMessage = string | (() => string | Promise<string>);
@@ -62,6 +64,10 @@ export type inferInput<T> = T extends ObjectValidator<any, infer R, any>
   ? R
   : T extends PickValidator<any, infer R, any>
   ? R
+  : T extends IfValidator<any, infer R, any>
+  ? R
+  : T extends InstanceOfValidator<any, infer R, any>
+  ? R
   : T extends BaseValidator<any, infer R, any>
   ? R
   : never;
@@ -103,6 +109,10 @@ export type inferOutput<T> = T extends ObjectValidator<any, any, infer R>
   : T extends PartialValidator<any, any, infer R>
   ? R
   : T extends PickValidator<any, any, infer R>
+  ? R
+  : T extends IfValidator<any, any, infer R>
+  ? R
+  : T extends InstanceOfValidator<any, any, infer R>
   ? R
   : T extends BaseValidator<any, any, infer R>
   ? R

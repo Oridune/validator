@@ -19,5 +19,7 @@ export * from "./utility/optional.ts";
 export * from "./utility/or.ts";
 export * from "./utility/partial.ts";
 export * from "./utility/pick.ts";
+export * from "./utility/if.ts";
+export * from "./utility/instanceOf.ts";
 
 export * from "./base.ts";

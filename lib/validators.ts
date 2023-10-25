@@ -1,4 +1,4 @@
-// deno-lint-ignore-file no-explicit-any ban-types ban-unused-ignore
+// deno-lint-ignore-file no-explicit-any ban-types ban-unused-ignore ban-ts-comment
 import {
   IValidatorContext,
   IObjectValidatorOptions,
@@ -42,6 +42,10 @@ import {
   IPickValidatorOptions,
   PickAdvance,
   PickValidator,
+  IfValidator,
+  IIfValidatorOptions,
+  InstanceOfValidator,
+  IInstanceOfValidatorOptions,
 } from "./validators/mod.ts";
 import { IValidationIssue, ValidationException } from "./exceptions.ts";
 import {
@@ -330,6 +334,33 @@ const Validators = {
       PickAdvance<inferInput<Validator>, Keys>,
       PickAdvance<inferOutput<Validator>, Keys>
     >(validator, options),
+
+  /**
+   * Validate if the value matches the predicate
+   * @param predicate `boolean` or a function that accepts the value and context in the first two arguments and returns a `boolean`
+   * @param options
+   * @returns
+   */
+  if: <T = any>(
+    predicate: boolean | ((value: T, ...arg: any[]) => boolean),
+    options?: IIfValidatorOptions
+  ) => new IfValidator<unknown, T, T>(predicate, options),
+
+  /**
+   * Validate if value is an instanceof a specific constructor
+   * @param constructor
+   * @param options
+   * @returns
+   */
+  instanceOf: <T extends new (...args: any[]) => any>(
+    constructor: T,
+    options?: IInstanceOfValidatorOptions
+  ) =>
+    // @ts-ignore
+    new InstanceOfValidator<T, T["prototype"], T["prototype"]>(
+      constructor,
+      options
+    ),
 
   /**
    * Add an error to the validator.
