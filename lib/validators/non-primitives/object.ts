@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { ValidationException } from "../../exceptions.ts";
 import { TErrorMessage } from "../../types.ts";
 import {
@@ -21,7 +22,7 @@ export class ObjectValidator<
 > extends BaseValidator<Type, Input, Output> {
   protected Options: IObjectValidatorOptions;
   protected Shape: Type;
-  // protected RestValidator?: BaseValidator<any, any, any>;
+  protected RestValidator?: BaseValidator<any, any, any>;
 
   protected _toJSON(_options?: IJSONSchemaOptions) {
     const Properties = Object.keys(this.Shape);
@@ -105,9 +106,8 @@ export class ObjectValidator<
 
       if (
         UnexpectedProperties.length &&
-        this.Options.allowUnexpectedProps !== true
-        // &&
-        // !this.RestValidator
+        this.Options.allowUnexpectedProps !== true &&
+        !this.RestValidator
       ) {
         ctx.location = `${ctx.location}.${UnexpectedProperties[0]}`;
         throw await this._resolveErrorMessage(
@@ -148,28 +148,57 @@ export class ObjectValidator<
           }
       }
 
-      // if (this.RestValidator)
-      //   for (const Property of UnexpectedProperties)
-      //     try {
-      //       ctx.output[Property] =
-      //         (await this.RestValidator.validate(ctx.output[Property], {
-      //           ...ctx,
-      //           location: `${ctx.location}.${Property}`,
-      //           index: Property,
-      //           property: Property,
-      //           parent: ctx,
-      //         })) ?? ctx.output[Property];
+      if (this.RestValidator)
+        for (const Property of UnexpectedProperties)
+          try {
+            ctx.output[Property] =
+              (await this.RestValidator.validate(ctx.output[Property], {
+                ...ctx,
+                location: `${ctx.location}.${Property}`,
+                index: Property,
+                property: Property,
+                parent: ctx,
+              })) ?? ctx.output[Property];
 
-      //       if (
-      //   ctx.output[Property] === undefined &&
-      //   (!(Property in ctx.input) || ctx.input[Property] !== undefined)
-      // )
-      //   delete ctx.output[Property];
-      //     } catch (error) {
-      //       Exception.pushIssues(error);
-      //     }
+            if (
+              ctx.output[Property] === undefined &&
+              this.RestValidator instanceof OptionalValidator &&
+              (this.RestValidator["Options"].deletePropertyIfUndefined ===
+                true ||
+                (this.RestValidator["Options"].deletePropertyIfUndefined !==
+                  false &&
+                  !(Property in ctx.input)))
+            )
+              delete ctx.output[Property];
+          } catch (error) {
+            Exception.pushIssues(error);
+          }
 
       if (Exception.issues.length) throw Exception;
     });
+  }
+
+  public extends<
+    V extends ObjectValidator<any, any, any>,
+    I = V extends ObjectValidator<any, infer R, any> ? R : never,
+    O = V extends ObjectValidator<any, any, infer R> ? R : never
+  >(validator: V): ObjectValidator<Type, Input & I, Output & O> {
+    this.Shape = { ...this.Shape, ...validator["Shape"] };
+    return this as any;
+  }
+
+  public rest<
+    V extends BaseValidator<any, any, any>,
+    I = V extends BaseValidator<any, infer R, any> ? R : never,
+    O = V extends BaseValidator<any, any, infer R> ? R : never
+  >(
+    validator: V
+  ): ObjectValidator<
+    Type,
+    Input & Partial<{ [K: string]: I }>,
+    Output & Partial<{ [K: string]: O }>
+  > {
+    this.RestValidator = validator;
+    return this as any;
   }
 }
