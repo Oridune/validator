@@ -3,10 +3,13 @@ import { assertEquals } from "https://deno.land/std@0.165.0/testing/asserts.ts";
 
 Deno.test("And Validator Tests", async (ctx) => {
   await ctx.step("Truthy Validation", async () => {
-    const Target = "100";
+    const Target = { name: "John", age: 18 };
     const Result = await e
-      .and([e.string(), e.number({ cast: true })])
+      .and(
+        e.object({ name: e.string() }, { allowUnexpectedProps: true }),
+        e.object({ age: e.number() }, { allowUnexpectedProps: true })
+      )
       .validate(Target);
-    assertEquals(Result.toString(), Target);
+    assertEquals(JSON.stringify(Result), JSON.stringify(Target));
   });
 });

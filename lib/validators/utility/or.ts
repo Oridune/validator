@@ -68,16 +68,14 @@ export class OrValidator<Type, Input, Output> extends BaseValidator<
     });
   }
 
-  public or<V extends BaseValidator<any, any, any>>(validator: V) {
+  public or<V extends BaseValidator<any, any, any>>(
+    validator: V
+  ): OrValidator<Type | V, Input | inferInput<V>, Output | inferOutput<V>> {
     if (!(validator instanceof BaseValidator))
       throw new Error("Invalid validator instance has been provided!");
 
     this.Validators.push(validator);
 
-    return this as OrValidator<
-      Type | V,
-      Input | inferInput<V>,
-      Output | inferOutput<V>
-    >;
+    return this as any;
   }
 }
