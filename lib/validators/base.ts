@@ -62,9 +62,11 @@ export interface IBaseValidatorOptions {
 }
 
 export class BaseValidator<Type, Input, Output> {
+  protected Exception: ValidationException;
+
+  //! If any new class properties are created, remember to add them to the .clone() method!
   protected Description?: string;
   protected Sample?: any;
-  protected Exception: ValidationException;
   protected CustomValidators: TCustomValidator<any, any>[] = [];
 
   protected async _resolveErrorMessage(

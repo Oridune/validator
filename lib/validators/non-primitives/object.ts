@@ -20,8 +20,9 @@ export class ObjectValidator<
   Input,
   Output
 > extends BaseValidator<Type, Input, Output> {
-  protected Options: IObjectValidatorOptions;
+  //! If any new class properties are created, remember to add them to the .clone() method!
   protected Shape: Type;
+  protected Options: IObjectValidatorOptions;
   protected RestValidator?: BaseValidator<any, any, any>;
 
   protected _toJSON(_options?: IJSONSchemaOptions) {
@@ -67,6 +68,7 @@ export class ObjectValidator<
     );
   }
 
+  //! If any new class properties are created, remember to add them to the .clone() method!
   constructor(shape: Type, options: IObjectValidatorOptions = {}) {
     super(options);
 
@@ -201,5 +203,25 @@ export class ObjectValidator<
   > {
     this.RestValidator = validator;
     return this as any;
+  }
+
+  //! If any new class properties are created, remember to add them to the .clone() method!
+  public clone() {
+    const Validator = new ObjectValidator<Type, Input, Output>(
+      { ...this.Shape },
+      this.Options
+    );
+
+    if (this.RestValidator !== undefined)
+      Validator["RestValidator"] = this.RestValidator;
+    if (this.Description !== undefined)
+      Validator["Description"] = this.Description;
+    if (this.Sample !== undefined) Validator["Sample"] = this.Sample;
+
+    // Starting index is 1 because first validator need to be skipped.
+    for (let i = 1; i < this.CustomValidators.length; i++)
+      Validator["CustomValidators"].push(this.CustomValidators[i]);
+
+    return Validator;
   }
 }

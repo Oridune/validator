@@ -1,37 +1,46 @@
 import e from "./mod.ts";
 
-const S = e.optional(e.string().sample("Saif Ali Khan")).default("something");
-
-const Schema = e
-  .object({
-    name: S,
-    contact: e.number().length({ min: 11 }),
-    role: e.enum(["admin", "user"]),
-    active: e.boolean().custom(() => "active"),
-    priority: e.number().amount({ min: 0, max: 10 }),
-  })
-  .extends(
-    e.required(
-      e.object({
-        tags: e.record(e.string()),
-        metadata: e.any().sample({}),
-        note: e.optional(e.string()),
-      })
-    )
-  )
-  .rest(e.string());
-
-const User = await Schema.validate({
-  contact: 12345678909876,
-  role: "admin",
-  active: true,
-  priority: 1,
-  tags: {},
-  metadata: {},
-  something: "nothing",
+const Schema = e.object({
+  username: e.optional(e.string()),
+  password: e.optional(e.string()),
 });
 
-console.log(User);
+const RequiredSchema = e.required(Schema);
+
+console.log(await RequiredSchema.validate({}));
+
+// const S = e.optional(e.string().sample("Saif Ali Khan")).default("something");
+
+// const Schema = e
+//   .object({
+//     name: S,
+//     contact: e.number().length({ min: 11 }),
+//     role: e.enum(["admin", "user"]),
+//     active: e.boolean().custom(() => "active"),
+//     priority: e.number().amount({ min: 0, max: 10 }),
+//   })
+//   .extends(
+//     e.required(
+//       e.object({
+//         tags: e.record(e.string()),
+//         metadata: e.any().sample({}),
+//         note: e.optional(e.string()),
+//       })
+//     )
+//   )
+//   .rest(e.string());
+
+// const User = await Schema.validate({
+//   contact: 12345678909876,
+//   role: "admin",
+//   active: true,
+//   priority: 1,
+//   tags: {},
+//   metadata: {},
+//   something: "nothing",
+// });
+
+// console.log(User);
 
 // console.log(Schema.toSample().data);
 

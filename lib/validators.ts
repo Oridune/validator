@@ -307,10 +307,7 @@ const Validators = {
     if (!(validator instanceof ObjectValidator))
       throw new Error("Invalid object validator instance has been provided!");
     else {
-      const Validator = Object.assign(
-        Object.create(Object.getPrototypeOf(validator)),
-        validator
-      );
+      const Validator = validator.clone();
 
       Validator["Shape"] = Object.entries(Validator["Shape"]).reduce(
         (shape, [key, value]) =>
@@ -322,8 +319,8 @@ const Validators = {
 
       return Validator as ObjectValidator<
         T extends object ? T : never,
-        OmitAdvance<I, Keys>,
-        OmitAdvance<O, Keys>
+        OmitAdvance<I, Keys extends keyof I ? Keys : never>,
+        OmitAdvance<O, Keys extends keyof O ? Keys : never>
       >;
     }
   },
@@ -347,10 +344,7 @@ const Validators = {
     if (!(validator instanceof ObjectValidator))
       throw new Error("Invalid object validator instance has been provided!");
     else {
-      const Validator = Object.assign(
-        Object.create(Object.getPrototypeOf(validator)),
-        validator
-      );
+      const Validator = validator.clone();
 
       Validator["Shape"] = Object.entries(Validator["Shape"]).reduce(
         (shape, [key, value]) => ({
@@ -364,8 +358,8 @@ const Validators = {
 
       return Validator as ObjectValidator<
         T extends object ? T : never,
-        PartialAdvance<I, Ignore>,
-        PartialAdvance<O, Ignore>
+        PartialAdvance<I, Ignore extends keyof I ? Ignore : never>,
+        PartialAdvance<O, Ignore extends keyof O ? Ignore : never>
       >;
     }
   },
@@ -389,10 +383,7 @@ const Validators = {
     if (!(validator instanceof ObjectValidator))
       throw new Error("Invalid object validator instance has been provided!");
     else {
-      const Validator = Object.assign(
-        Object.create(Object.getPrototypeOf(validator)),
-        validator
-      );
+      const Validator = validator.clone();
 
       Validator["Shape"] = Object.entries(Validator["Shape"]).reduce(
         (shape, [key, value]) => ({
@@ -408,8 +399,8 @@ const Validators = {
 
       return Validator as ObjectValidator<
         T extends object ? T : never,
-        RequiredAdvance<I, Ignore>,
-        RequiredAdvance<O, Ignore>
+        RequiredAdvance<I, Ignore extends keyof I ? Ignore : never>,
+        RequiredAdvance<O, Ignore extends keyof O ? Ignore : never>
       >;
     }
   },
@@ -428,15 +419,12 @@ const Validators = {
     O = Validator extends ObjectValidator<any, any, infer R> ? R : never
   >(
     validator: Validator,
-    options: { keys: Keys[] }
+    options?: { keys?: Keys[] }
   ) => {
     if (!(validator instanceof ObjectValidator))
       throw new Error("Invalid object validator instance has been provided!");
     else {
-      const Validator = Object.assign(
-        Object.create(Object.getPrototypeOf(validator)),
-        validator
-      );
+      const Validator = validator.clone();
 
       Validator["Shape"] = Object.entries(Validator["Shape"]).reduce(
         (shape, [key, value]) =>
@@ -448,8 +436,8 @@ const Validators = {
 
       return Validator as ObjectValidator<
         T extends object ? T : never,
-        PickAdvance<I, Keys>,
-        PickAdvance<O, Keys>
+        PickAdvance<I, Keys extends keyof I ? Keys : never>,
+        PickAdvance<O, Keys extends keyof O ? Keys : never>
       >;
     }
   },

@@ -119,28 +119,18 @@ export type inferEachOutput<T extends Array<any>> = {
   [K in keyof T]: inferOutput<T[K]>;
 };
 
-export type OmitAdvance<
-  T,
-  K extends string | number | symbol
-> = K extends keyof T ? { [P in Exclude<keyof T, K>]: T[P] } : T;
+export type OmitAdvance<T, K extends keyof T> = Omit<T, K>;
 
-export type PartialAdvance<T, Ignore extends string | number | symbol> = {
-  [P in Exclude<keyof T, Ignore>]?: T[P];
-} & (Ignore extends keyof T
-  ? { [K in Ignore]: T[Ignore] }
-  : { [P in keyof T]?: T[P] });
+export type PartialAdvance<T, Ignore extends keyof T> = Partial<
+  Omit<T, Ignore>
+> &
+  Pick<T, Ignore>;
 
-export type RequiredAdvance<T, Ignore extends string | number | symbol> = {
-  [R in Exclude<keyof T, Ignore>]: T[R] extends undefined
-    ? T[R]
-    : Exclude<T[R], undefined>;
-} & (Ignore extends keyof T
-  ? { [K in Ignore]: T[Ignore] }
-  : {
-      [R in keyof T]: T[R] extends undefined ? T[R] : Exclude<T[R], undefined>;
-    });
+export type Required<T> = { [P in keyof T]-?: Exclude<T[P], undefined> };
 
-export type PickAdvance<
-  T,
-  K extends string | number | symbol
-> = K extends keyof T ? { [P in K]: T[P] } : {};
+export type RequiredAdvance<T, Ignore extends keyof T> = Required<
+  Omit<T, Ignore>
+> &
+  Pick<T, Ignore>;
+
+export type PickAdvance<T, K extends keyof T> = Pick<T, K>;
