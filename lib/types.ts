@@ -126,13 +126,19 @@ export type OmitAdvance<
 
 export type PartialAdvance<T, Ignore extends string | number | symbol> = {
   [P in Exclude<keyof T, Ignore>]?: T[P];
-} & (Ignore extends keyof T ? { [K in Ignore]: T[Ignore] } : {});
+} & (Ignore extends keyof T
+  ? { [K in Ignore]: T[Ignore] }
+  : { [P in keyof T]?: T[P] });
 
 export type RequiredAdvance<T, Ignore extends string | number | symbol> = {
   [R in Exclude<keyof T, Ignore>]: T[R] extends undefined
     ? T[R]
     : Exclude<T[R], undefined>;
-} & (Ignore extends keyof T ? { [K in Ignore]: T[Ignore] } : {});
+} & (Ignore extends keyof T
+  ? { [K in Ignore]: T[Ignore] }
+  : {
+      [R in keyof T]: T[R] extends undefined ? T[R] : Exclude<T[R], undefined>;
+    });
 
 export type PickAdvance<
   T,

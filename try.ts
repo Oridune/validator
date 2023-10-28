@@ -16,8 +16,7 @@ const Schema = e
         tags: e.record(e.string()),
         metadata: e.any().sample({}),
         note: e.optional(e.string()),
-      }),
-      { ignore: ["check"] }
+      })
     )
   )
   .rest(e.string());
@@ -32,7 +31,7 @@ const User = await Schema.validate({
   something: "nothing",
 });
 
-console.log(User.check);
+console.log(User);
 
 // console.log(Schema.toSample().data);
 
