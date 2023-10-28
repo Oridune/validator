@@ -11,13 +11,13 @@ const Schema = e
     priority: e.number().amount({ min: 0, max: 10 }),
   })
   .extends(
-    e.pick(
+    e.required(
       e.object({
         tags: e.record(e.string()),
         metadata: e.any().sample({}),
         note: e.optional(e.string()),
       }),
-      { keys: ["tags", "metadata"] }
+      { ignore: ["check"] }
     )
   )
   .rest(e.string());
@@ -30,9 +30,9 @@ const User = await Schema.validate({
   tags: {},
   metadata: {},
   something: "nothing",
-}).catch(console.error);
+});
 
-console.log(User);
+console.log(User.check);
 
 // console.log(Schema.toSample().data);
 

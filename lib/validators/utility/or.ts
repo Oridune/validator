@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-empty-interface no-explicit-any
 import { ValidationException } from "../../exceptions.ts";
+import { inferInput, inferOutput } from "../../types.ts";
 import {
   BaseValidator,
   IBaseValidatorOptions,
@@ -65,5 +66,18 @@ export class OrValidator<Type, Input, Output> extends BaseValidator<
 
       throw Exception;
     });
+  }
+
+  public or<V extends BaseValidator<any, any, any>>(validator: V) {
+    if (!(validator instanceof BaseValidator))
+      throw new Error("Invalid validator instance has been provided!");
+
+    this.Validators.push(validator);
+
+    return this as OrValidator<
+      Type | V,
+      Input | inferInput<V>,
+      Output | inferOutput<V>
+    >;
   }
 }
