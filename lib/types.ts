@@ -1,4 +1,4 @@
-// deno-lint-ignore-file no-explicit-any
+// deno-lint-ignore-file no-explicit-any ban-types
 import {
   BaseValidator,
   ObjectValidator,
@@ -17,9 +17,6 @@ import {
   OptionalValidator,
   AndValidator,
   OrValidator,
-  OmitValidator,
-  PartialValidator,
-  PickValidator,
   IfValidator,
   InstanceOfValidator,
 } from "./validators/mod.ts";
@@ -57,12 +54,6 @@ export type inferInput<T> = T extends ObjectValidator<any, infer R, any>
   : T extends AndValidator<any, infer R, any>
   ? R
   : T extends OrValidator<any, infer R, any>
-  ? R
-  : T extends OmitValidator<any, infer R, any>
-  ? R
-  : T extends PartialValidator<any, infer R, any>
-  ? R
-  : T extends PickValidator<any, infer R, any>
   ? R
   : T extends IfValidator<any, infer R, any>
   ? R
@@ -104,12 +95,6 @@ export type inferOutput<T> = T extends ObjectValidator<any, any, infer R>
   ? R
   : T extends OrValidator<any, any, infer R>
   ? R
-  : T extends OmitValidator<any, any, infer R>
-  ? R
-  : T extends PartialValidator<any, any, infer R>
-  ? R
-  : T extends PickValidator<any, any, infer R>
-  ? R
   : T extends IfValidator<any, any, infer R>
   ? R
   : T extends InstanceOfValidator<any, any, infer R>
@@ -133,3 +118,17 @@ export type inferEachInput<T extends Array<any>> = {
 export type inferEachOutput<T extends Array<any>> = {
   [K in keyof T]: inferOutput<T[K]>;
 };
+
+export type OmitAdvance<
+  T,
+  K extends string | number | symbol
+> = K extends keyof T ? { [P in Exclude<keyof T, K>]: T[P] } : T;
+
+export type PartialAdvance<T, I extends string | number | symbol> = {
+  [P in Exclude<keyof T, I>]?: T[P];
+} & (I extends keyof T ? { [K in I]: T[I] } : { [P in keyof T]?: T[P] });
+
+export type PickAdvance<
+  T,
+  K extends string | number | symbol
+> = K extends keyof T ? { [P in K]: T[P] } : {};

@@ -92,10 +92,11 @@ export class ObjectValidator<
           "Invalid object has been provided!"
         );
 
+      // De-referencing
       ctx.output = { ...ctx.output };
 
       // Unexpected Properties Check
-      const Properties = Object.keys(shape);
+      const Properties = Object.keys(this.Shape);
       const UnexpectedProperties = Object.keys(ctx.output).filter(
         (key) =>
           !Properties.includes(key) &&

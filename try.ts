@@ -1,4 +1,4 @@
-import e, { inferInput } from "./mod.ts";
+import e from "./mod.ts";
 
 const S = e.optional(e.string().sample("Saif Ali Khan")).default("something");
 
@@ -11,11 +11,14 @@ const Schema = e
     priority: e.number().amount({ min: 0, max: 10 }),
   })
   .extends(
-    e.object({
-      tags: e.record(e.string()),
-      metadata: e.any().sample({}),
-      note: e.optional(e.string()),
-    })
+    e.pick(
+      e.object({
+        tags: e.record(e.string()),
+        metadata: e.any().sample({}),
+        note: e.optional(e.string()),
+      }),
+      { keys: ["tags", "metadata"] }
+    )
   )
   .rest(e.string());
 
@@ -25,8 +28,9 @@ const User = await Schema.validate({
   active: true,
   priority: 1,
   tags: {},
+  metadata: {},
   something: "nothing",
-});
+}).catch(console.error);
 
 console.log(User);
 

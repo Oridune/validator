@@ -33,15 +33,6 @@ import {
   IAndValidatorOptions,
   IOrValidatorOptions,
   OrValidator,
-  IOmitValidatorOptions,
-  OmitAdvance,
-  OmitValidator,
-  IPartialValidatorOptions,
-  PartialAdvance,
-  PartialValidator,
-  IPickValidatorOptions,
-  PickAdvance,
-  PickValidator,
   IfValidator,
   IIfValidatorOptions,
   InstanceOfValidator,
@@ -55,6 +46,9 @@ import {
   inferObjectOutput,
   inferEachInput,
   inferEachOutput,
+  OmitAdvance,
+  PartialAdvance,
+  PickAdvance,
 } from "./types.ts";
 
 const Validators = {
@@ -290,15 +284,33 @@ const Validators = {
    * @param options
    * @returns
    */
-  omit: <Validator extends ObjectValidator<any, any, any>, Keys extends string>(
+  omit: <
+    Validator extends ObjectValidator<any, any, any>,
+    Keys extends string,
+    T = Validator extends ObjectValidator<infer R, any, any> ? R : never,
+    I = Validator extends ObjectValidator<any, infer R, any> ? R : never,
+    O = Validator extends ObjectValidator<any, any, infer R> ? R : never
+  >(
     validator: Validator,
-    options: IOmitValidatorOptions<Keys> = {}
-  ) =>
-    new OmitValidator<
-      Validator,
-      OmitAdvance<inferInput<Validator>, Keys>,
-      OmitAdvance<inferOutput<Validator>, Keys>
-    >(validator, options),
+    options: { keys: Keys[] }
+  ) => {
+    if (!(validator instanceof ObjectValidator))
+      throw new Error("Invalid object validator instance has been provided!");
+    else
+      validator["Shape"] = Object.entries(validator["Shape"]).reduce(
+        (shape, [key, value]) =>
+          options.keys.includes(key as Keys)
+            ? shape
+            : { ...shape, [key]: value },
+        {}
+      );
+
+    return validator as ObjectValidator<
+      T extends object ? T : never,
+      OmitAdvance<I, Keys>,
+      OmitAdvance<O, Keys>
+    >;
+  },
 
   /**
    * Convert all the validators of each property of an object to optional.
@@ -308,16 +320,33 @@ const Validators = {
    */
   partial: <
     Validator extends ObjectValidator<any, any, any>,
-    Ignore extends string
+    Ignore extends string,
+    T = Validator extends ObjectValidator<infer R, any, any> ? R : never,
+    I = Validator extends ObjectValidator<any, infer R, any> ? R : never,
+    O = Validator extends ObjectValidator<any, any, infer R> ? R : never
   >(
     validator: Validator,
-    options: IPartialValidatorOptions<Ignore> = {}
-  ) =>
-    new PartialValidator<
-      Validator,
-      PartialAdvance<inferInput<Validator>, Ignore>,
-      PartialAdvance<inferOutput<Validator>, Ignore>
-    >(validator, options),
+    options?: { ignore?: Ignore[] } & IOptionalValidatorOptions
+  ) => {
+    if (!(validator instanceof ObjectValidator))
+      throw new Error("Invalid object validator instance has been provided!");
+    else
+      validator["Shape"] = Object.entries(validator["Shape"]).reduce(
+        (shape, [key, value]) => ({
+          ...shape,
+          [key]: options?.ignore?.includes(key as Ignore)
+            ? value
+            : Validators.optional(value, options),
+        }),
+        {}
+      );
+
+    return validator as ObjectValidator<
+      T extends object ? T : never,
+      PartialAdvance<I, Ignore>,
+      PartialAdvance<O, Ignore>
+    >;
+  },
 
   /**
    * Validate some specific properties of an object.
@@ -325,15 +354,33 @@ const Validators = {
    * @param options
    * @returns
    */
-  pick: <Validator extends ObjectValidator<any, any, any>, Keys extends string>(
+  pick: <
+    Validator extends ObjectValidator<any, any, any>,
+    Keys extends string,
+    T = Validator extends ObjectValidator<infer R, any, any> ? R : never,
+    I = Validator extends ObjectValidator<any, infer R, any> ? R : never,
+    O = Validator extends ObjectValidator<any, any, infer R> ? R : never
+  >(
     validator: Validator,
-    options: IPickValidatorOptions<Keys> = {}
-  ) =>
-    new PickValidator<
-      Validator,
-      PickAdvance<inferInput<Validator>, Keys>,
-      PickAdvance<inferOutput<Validator>, Keys>
-    >(validator, options),
+    options: { keys: Keys[] }
+  ) => {
+    if (!(validator instanceof ObjectValidator))
+      throw new Error("Invalid object validator instance has been provided!");
+    else
+      validator["Shape"] = Object.entries(validator["Shape"]).reduce(
+        (shape, [key, value]) =>
+          options?.keys?.includes(key as Keys)
+            ? { ...shape, [key]: value }
+            : shape,
+        {}
+      );
+
+    return validator as ObjectValidator<
+      T extends object ? T : never,
+      PickAdvance<I, Keys>,
+      PickAdvance<O, Keys>
+    >;
+  },
 
   /**
    * Validate if the value matches the predicate
