@@ -186,8 +186,9 @@ export class ObjectValidator<
     I = V extends ObjectValidator<any, infer R, any> ? R : never,
     O = V extends ObjectValidator<any, any, infer R> ? R : never
   >(validator: V): ObjectValidator<Type, Input & I, Output & O> {
-    this.Shape = { ...this.Shape, ...validator["Shape"] };
-    return this as any;
+    const Validator = this.clone();
+    Validator["Shape"] = { ...this.Shape, ...validator["Shape"] };
+    return Validator as any;
   }
 
   public rest<
