@@ -51,6 +51,7 @@ import {
   PartialAdvance,
   PickAdvance,
   RequiredAdvance,
+  DeepPartial,
 } from "./types.ts";
 
 const Validators = {
@@ -306,23 +307,20 @@ const Validators = {
   ) => {
     if (!(validator instanceof ObjectValidator))
       throw new Error("Invalid object validator instance has been provided!");
-    else {
-      const Validator = validator.clone();
 
-      Validator["Shape"] = Object.entries(Validator["Shape"]).reduce(
-        (shape, [key, value]) =>
-          options.keys.includes(key as Keys)
-            ? shape
-            : { ...shape, [key]: value },
-        {}
-      );
+    const Validator = validator.clone();
 
-      return Validator as ObjectValidator<
-        T extends object ? T : never,
-        OmitAdvance<I, Keys extends keyof I ? Keys : never>,
-        OmitAdvance<O, Keys extends keyof O ? Keys : never>
-      >;
-    }
+    Validator["Shape"] = Object.entries(Validator["Shape"]).reduce(
+      (shape, [key, value]) =>
+        options.keys.includes(key as Keys) ? shape : { ...shape, [key]: value },
+      {}
+    );
+
+    return Validator as ObjectValidator<
+      T extends object ? T : never,
+      OmitAdvance<I, Keys extends keyof I ? Keys : never>,
+      OmitAdvance<O, Keys extends keyof O ? Keys : never>
+    >;
   },
 
   /**
@@ -343,25 +341,80 @@ const Validators = {
   ) => {
     if (!(validator instanceof ObjectValidator))
       throw new Error("Invalid object validator instance has been provided!");
-    else {
+
+    const Validator = validator.clone();
+
+    Validator["Shape"] = Object.entries(Validator["Shape"]).reduce(
+      (shape, [key, value]) => ({
+        ...shape,
+        [key]: options?.ignore?.includes(key as Ignore)
+          ? value
+          : Validators.optional(value, options),
+      }),
+      {}
+    );
+
+    return Validator as ObjectValidator<
+      T extends object ? T : never,
+      PartialAdvance<I, Ignore extends keyof I ? Ignore : never>,
+      PartialAdvance<O, Ignore extends keyof O ? Ignore : never>
+    >;
+  },
+
+  /**
+   * Deeply convert all the validators of each property of an object to optional.
+   * @param validator An object validator.
+   * @param options
+   * @returns
+   */
+  deepPartial: <
+    Validator extends ObjectValidator<any, any, any>,
+    T = Validator extends ObjectValidator<infer R, any, any> ? R : never,
+    I = Validator extends ObjectValidator<any, infer R, any> ? R : never,
+    O = Validator extends ObjectValidator<any, any, infer R> ? R : never
+  >(
+    validator: Validator,
+    options?: IOptionalValidatorOptions & {
+      /**
+       * By default the optional validators already defined are overridden. Set this property to `false` in order to keep the original optional validator settings.
+       */
+      overrideOptionalValidator?: boolean;
+    }
+  ) => {
+    if (!(validator instanceof ObjectValidator))
+      throw new Error("Invalid object validator instance has been provided!");
+
+    const deepPartialValidator = (
+      validator: ObjectValidator<any, any, any>
+    ) => {
       const Validator = validator.clone();
 
-      Validator["Shape"] = Object.entries(Validator["Shape"]).reduce(
-        (shape, [key, value]) => ({
-          ...shape,
-          [key]: options?.ignore?.includes(key as Ignore)
-            ? value
-            : Validators.optional(value, options),
-        }),
-        {}
-      );
+      const ValidatorShape = Validator["Shape"];
 
-      return Validator as ObjectValidator<
-        T extends object ? T : never,
-        PartialAdvance<I, Ignore extends keyof I ? Ignore : never>,
-        PartialAdvance<O, Ignore extends keyof O ? Ignore : never>
-      >;
-    }
+      for (const Key in ValidatorShape) {
+        const AnyValidator = ValidatorShape[Key];
+
+        if (AnyValidator instanceof ObjectValidator)
+          ValidatorShape[Key] = Validators.optional(
+            deepPartialValidator(AnyValidator),
+            options
+          );
+        else
+          ValidatorShape[Key] =
+            AnyValidator instanceof OptionalValidator &&
+            options?.overrideOptionalValidator === false
+              ? AnyValidator
+              : Validators.optional(ValidatorShape[Key], options);
+      }
+
+      return Validator;
+    };
+
+    return deepPartialValidator(validator) as ObjectValidator<
+      T extends object ? T : never,
+      DeepPartial<I>,
+      DeepPartial<O>
+    >;
   },
 
   /**
@@ -382,27 +435,26 @@ const Validators = {
   ) => {
     if (!(validator instanceof ObjectValidator))
       throw new Error("Invalid object validator instance has been provided!");
-    else {
-      const Validator = validator.clone();
 
-      Validator["Shape"] = Object.entries(Validator["Shape"]).reduce(
-        (shape, [key, value]) => ({
-          ...shape,
-          [key]: options?.ignore?.includes(key as Ignore)
-            ? value
-            : value instanceof OptionalValidator
-            ? value["Validator"]
-            : value,
-        }),
-        {}
-      );
+    const Validator = validator.clone();
 
-      return Validator as ObjectValidator<
-        T extends object ? T : never,
-        RequiredAdvance<I, Ignore extends keyof I ? Ignore : never>,
-        RequiredAdvance<O, Ignore extends keyof O ? Ignore : never>
-      >;
-    }
+    Validator["Shape"] = Object.entries(Validator["Shape"]).reduce(
+      (shape, [key, value]) => ({
+        ...shape,
+        [key]: options?.ignore?.includes(key as Ignore)
+          ? value
+          : value instanceof OptionalValidator
+          ? value["Validator"]
+          : value,
+      }),
+      {}
+    );
+
+    return Validator as ObjectValidator<
+      T extends object ? T : never,
+      RequiredAdvance<I, Ignore extends keyof I ? Ignore : never>,
+      RequiredAdvance<O, Ignore extends keyof O ? Ignore : never>
+    >;
   },
 
   /**
@@ -423,23 +475,22 @@ const Validators = {
   ) => {
     if (!(validator instanceof ObjectValidator))
       throw new Error("Invalid object validator instance has been provided!");
-    else {
-      const Validator = validator.clone();
 
-      Validator["Shape"] = Object.entries(Validator["Shape"]).reduce(
-        (shape, [key, value]) =>
-          options?.keys?.includes(key as Keys)
-            ? { ...shape, [key]: value }
-            : shape,
-        {}
-      );
+    const Validator = validator.clone();
 
-      return Validator as ObjectValidator<
-        T extends object ? T : never,
-        PickAdvance<I, Keys extends keyof I ? Keys : never>,
-        PickAdvance<O, Keys extends keyof O ? Keys : never>
-      >;
-    }
+    Validator["Shape"] = Object.entries(Validator["Shape"]).reduce(
+      (shape, [key, value]) =>
+        options?.keys?.includes(key as Keys)
+          ? { ...shape, [key]: value }
+          : shape,
+      {}
+    );
+
+    return Validator as ObjectValidator<
+      T extends object ? T : never,
+      PickAdvance<I, Keys extends keyof I ? Keys : never>,
+      PickAdvance<O, Keys extends keyof O ? Keys : never>
+    >;
   },
 
   /**

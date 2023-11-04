@@ -1,4 +1,4 @@
-// deno-lint-ignore-file no-explicit-any ban-types
+// deno-lint-ignore-file no-explicit-any
 import {
   BaseValidator,
   ObjectValidator,
@@ -126,9 +126,26 @@ export type PartialAdvance<T, Ignore extends keyof T> = Partial<
 > &
   Pick<T, Ignore>;
 
-export type Required<T> = { [P in keyof T]-?: Exclude<T[P], undefined> };
+export type IsObject<T, R, F = T> = T extends
+  | ((...args: any[]) => any)
+  | (new (...args: any[]) => any)
+  | { constructor: new (...args: any[]) => any }
+  | Date
+  | Array<any>
+  | URL
+  | URLSearchParams
+  ? F
+  : T extends object
+  ? R
+  : F;
 
-export type RequiredAdvance<T, Ignore extends keyof T> = Required<
+export type DeepPartial<T> = {
+  [K in keyof T]?: IsObject<T[K], DeepPartial<T[K]>, T[K]>;
+};
+
+export type CustomRequired<T> = { [P in keyof T]-?: Exclude<T[P], undefined> };
+
+export type RequiredAdvance<T, Ignore extends keyof T> = CustomRequired<
   Omit<T, Ignore>
 > &
   Pick<T, Ignore>;

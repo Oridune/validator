@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { ValidationException } from "../../exceptions.ts";
-import { TErrorMessage } from "../../types.ts";
+import { TErrorMessage, inferInput, inferOutput } from "../../types.ts";
 import {
   BaseValidator,
   IBaseValidatorOptions,
@@ -185,7 +185,13 @@ export class ObjectValidator<
     V extends ObjectValidator<any, any, any>,
     I = V extends ObjectValidator<any, infer R, any> ? R : never,
     O = V extends ObjectValidator<any, any, infer R> ? R : never
-  >(validator: V): ObjectValidator<Type, Input & I, Output & O> {
+  >(
+    validator: V
+  ): ObjectValidator<
+    Type,
+    Omit<Input, keyof I> & I,
+    Omit<Output, keyof O> & O
+  > {
     const Validator = this.clone();
     Validator["Shape"] = { ...this.Shape, ...validator["Shape"] };
     return Validator as any;
@@ -193,8 +199,8 @@ export class ObjectValidator<
 
   public rest<
     V extends BaseValidator<any, any, any>,
-    I = V extends BaseValidator<any, infer R, any> ? R : never,
-    O = V extends BaseValidator<any, any, infer R> ? R : never
+    I = inferInput<V>,
+    O = inferOutput<V>
   >(
     validator: V
   ): ObjectValidator<
