@@ -134,6 +134,7 @@ export type IsObject<T, R, F = T> = T extends
   | Array<any>
   | URL
   | URLSearchParams
+  | RegExp
   ? F
   : T extends object
   ? R

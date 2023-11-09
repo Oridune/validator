@@ -510,15 +510,23 @@ const Validators = {
    * @param options
    * @returns
    */
-  instanceOf: <T extends new (...args: any[]) => any>(
+  instanceOf: <
+    T extends new (...args: any[]) => any,
+    AllowUndefined extends boolean = false,
+    Proto = T extends { prototype: any } ? T["prototype"] : unknown,
+    RawInput = ConstructorParameters<T>[0],
+    Input = AllowUndefined extends true
+      ? RawInput | undefined
+      : Exclude<RawInput, undefined>,
+    RestArgs = ConstructorParameters<T> extends [any, ...infer R] ? R : never
+  >(
     constructor: T,
-    options?: IInstanceOfValidatorOptions
-  ) =>
-    // @ts-ignore
-    new InstanceOfValidator<T, T["prototype"], T["prototype"]>(
-      constructor,
-      options
-    ),
+    options?: IInstanceOfValidatorOptions<
+      AllowUndefined,
+      Input,
+      RestArgs extends Array<any> ? RestArgs : never
+    >
+  ) => new InstanceOfValidator<T, Proto | Input, Proto>(constructor, options),
 
   /**
    * Add an error to the validator.

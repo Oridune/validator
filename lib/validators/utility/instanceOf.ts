@@ -7,8 +7,18 @@ import {
   ISampleDataOptions,
 } from "../base.ts";
 
-export interface IInstanceOfValidatorOptions extends IBaseValidatorOptions {
+export interface IInstanceOfValidatorOptions<
+  AllowUndefined extends boolean,
+  Input,
+  RestArgs extends Array<any>,
+  Args = [Input, ...RestArgs][number]
+> extends IBaseValidatorOptions {
   messages?: Partial<Record<"typeError", TErrorMessage>>;
+
+  /**
+   * If passed `true` than the validator will act as an optional validator with the default value as the instance of the class passed.
+   */
+  allowUndefined?: AllowUndefined;
 
   /**
    * If passed `true` than the validator will try to instantiate the class with the input value.
@@ -18,7 +28,14 @@ export interface IInstanceOfValidatorOptions extends IBaseValidatorOptions {
   /**
    * If `instantiate` is set to `true`, the validator try to instantiate the class with the input value in the first argument, You can pass the rest of the arguments here if any.
    */
-  instantiationRestArgs?: any[] | ((value: any) => any[] | Promise<any[]>);
+  instantiationArgs?: Args[] | ((value: Input) => Args[] | Promise<Args[]>);
+
+  /**
+   * If `instantiate` is set to `true`, the validator try to instantiate the class with the input value in the first argument, You can pass the rest of the arguments here if any.
+   */
+  instantiationRestArgs?:
+    | RestArgs
+    | ((value: Input) => RestArgs | Promise<RestArgs>);
 }
 
 export class InstanceOfValidator<Type, Input, Output> extends BaseValidator<
@@ -39,7 +56,7 @@ export class InstanceOfValidator<Type, Input, Output> extends BaseValidator<
 
   constructor(
     protected Constructor: any,
-    protected Options: IInstanceOfValidatorOptions = {}
+    protected Options: IInstanceOfValidatorOptions<boolean, any, any> = {}
   ) {
     super(Options);
 
@@ -48,14 +65,25 @@ export class InstanceOfValidator<Type, Input, Output> extends BaseValidator<
 
       if (!(ctx.output instanceof this.Constructor))
         try {
-          if (!this.Options.instantiate) throw "";
+          if (
+            !this.Options.instantiate ||
+            (!this.Options.allowUndefined && ctx.output === undefined)
+          )
+            throw "";
 
-          return new this.Constructor(
-            ctx.output,
-            ...(typeof this.Options.instantiationRestArgs === "function"
-              ? await this.Options.instantiationRestArgs(ctx.output)
-              : this.Options.instantiationRestArgs ?? [])
-          );
+          const Args =
+            typeof this.Options.instantiationArgs === "function"
+              ? await this.Options.instantiationArgs(ctx.output)
+              : this.Options.instantiationArgs instanceof Array
+              ? this.Options.instantiationArgs
+              : [
+                  ctx.output,
+                  ...(typeof this.Options.instantiationRestArgs === "function"
+                    ? await this.Options.instantiationRestArgs(ctx.output)
+                    : this.Options.instantiationRestArgs ?? []),
+                ];
+
+          return new this.Constructor(...Args);
         } catch {
           throw await this._resolveErrorMessage(
             this.Options?.messages?.typeError,

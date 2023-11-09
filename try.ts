@@ -1,4 +1,4 @@
-import e, { inferOutput } from "./mod.ts";
+import e, { inferInput, inferOutput } from "./mod.ts";
 
 // const Schema = e.object({
 //   username: e.optional(e.string()),
@@ -37,8 +37,6 @@ const Schema = e.deepPartial(
   { overrideOptionalValidator: false }
 );
 // .rest(e.string());
-
-const Data = await Schema.validate({});
 
 // const User = await Schema.validate({
 //   contact: 12345678909876,

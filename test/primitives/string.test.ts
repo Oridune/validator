@@ -113,6 +113,74 @@ Deno.test("String Validator Tests", async (ctx) => {
     assertEquals(Result, NewValue);
   });
 
+  await ctx.step("string.isURL Truthy Validation Case 1", async () => {
+    const Value = "http://google.com/";
+
+    const Result = await e
+      .string()
+      .isURL()
+      .min(Value.length)
+      .max(Value.length)
+      .validate(Value)
+      .catch((error) => {
+        console.error(error);
+        throw error;
+      });
+
+    assertEquals(Result, Value);
+  });
+
+  await ctx.step("string.isURL Truthy Validation Case 2", async () => {
+    const Value = "http://google.com/";
+
+    const Result = await e
+      .string()
+      .isURL(true)
+      .min(Value.length)
+      .max(Value.length)
+      .validate(Value);
+
+    assertInstanceOf(Result, URL);
+  });
+
+  await ctx.step("string.isURL Falsy Validation Case 1", async () => {
+    try {
+      await e.string().isURL().validate("Something");
+      throw new Error(`Validation Invalid!`);
+    } catch (e) {
+      assertInstanceOf(e, ValidationException);
+      assertEquals(e.issues.length, 1);
+    }
+  });
+
+  await ctx.step("string.isURL Falsy Validation Case 2", async () => {
+    try {
+      await e.string().isURL(true).validate("Something");
+      throw new Error(`Validation Invalid!`);
+    } catch (e) {
+      assertInstanceOf(e, ValidationException);
+      assertEquals(e.issues.length, 1);
+    }
+  });
+
+  await ctx.step("string.isURL Falsy Validation Case 3", async () => {
+    try {
+      const Value = "http://google.com";
+
+      await e
+        .string()
+        .isURL(true)
+        .min(Value.length)
+        .max(Value.length)
+        .validate(Value);
+
+      throw new Error(`Validation Invalid!`);
+    } catch (e) {
+      assertInstanceOf(e, ValidationException);
+      assertEquals(e.issues.length, 1);
+    }
+  });
+
   await ctx.step("Termination Case 1", async () => {
     try {
       await e
