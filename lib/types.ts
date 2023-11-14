@@ -126,7 +126,7 @@ export type PartialAdvance<T, Ignore extends keyof T> = Partial<
 > &
   Pick<T, Ignore>;
 
-export type IsObject<T, R, F = T> = T extends
+export type IsObject<T, R, F = T, Excludes = never> = T extends
   | ((...args: any[]) => any)
   | (new (...args: any[]) => any)
   | { constructor: new (...args: any[]) => any }
@@ -135,6 +135,7 @@ export type IsObject<T, R, F = T> = T extends
   | URL
   | URLSearchParams
   | RegExp
+  | Excludes
   ? F
   : T extends object
   ? R
@@ -144,7 +145,7 @@ export type DeepPartial<T> = {
   [K in keyof T]?: IsObject<T[K], DeepPartial<T[K]>, T[K]>;
 };
 
-export type CustomRequired<T> = { [P in keyof T]-?: Exclude<T[P], undefined> };
+type CustomRequired<T> = { [P in keyof T]-?: Exclude<T[P], undefined> };
 
 export type RequiredAdvance<T, Ignore extends keyof T> = CustomRequired<
   Omit<T, Ignore>
