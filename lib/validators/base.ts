@@ -61,11 +61,19 @@ export interface IBaseValidatorOptions {
   throwsFatal?: boolean;
 }
 
+export enum ValidatorType {
+  PRIMITIVE = "primitive",
+  NON_PRIMITIVE = "non-primitive",
+  UTILITY = "utility",
+}
+
 export class BaseValidator<Type, Input, Output> {
   protected Exception: ValidationException;
 
   //! If any new class properties are created, remember to add them to the .clone() method!
+  protected Type: ValidatorType;
   protected Description?: string;
+  protected Options?: any;
   protected Sample?: any;
   protected CustomValidators: TCustomValidator<any, any>[] = [];
 
@@ -114,8 +122,10 @@ export class BaseValidator<Type, Input, Output> {
     return ctx;
   }
 
-  constructor(options: IBaseValidatorOptions) {
+  constructor(type: ValidatorType, options: IBaseValidatorOptions) {
     this.Exception = new ValidationException();
+    this.Type = type;
+
     if (options.throwsFatal) this.throwsFatal();
   }
 

@@ -1,5 +1,6 @@
 import { TErrorMessage } from "../../types.ts";
 import {
+  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
@@ -29,7 +30,7 @@ export class UndefinedValidator<Type, Input, Output> extends BaseValidator<
   }
 
   constructor(options: IUndefinedValidatorOptions = {}) {
-    super(options);
+    super(ValidatorType.PRIMITIVE, options);
 
     this.Options = options;
 

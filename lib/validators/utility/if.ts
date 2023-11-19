@@ -1,5 +1,6 @@
 import { TErrorMessage } from "../../types.ts";
 import {
+  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
@@ -33,7 +34,7 @@ export class IfValidator<Type, Input, Output> extends BaseValidator<
       | ((value: Input, ctx: IValidatorContext) => boolean),
     protected Options: IIfValidatorOptions = {}
   ) {
-    super(Options);
+    super(ValidatorType.UTILITY, Options);
 
     this.custom(async (ctx) => {
       ctx.output = ctx.input;

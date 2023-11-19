@@ -1,6 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { TErrorMessage } from "../../types.ts";
 import {
+  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
@@ -58,7 +59,7 @@ export class InstanceOfValidator<Type, Input, Output> extends BaseValidator<
     protected Constructor: any,
     protected Options: IInstanceOfValidatorOptions<boolean, any, any> = {}
   ) {
-    super(Options);
+    super(ValidatorType.UTILITY, Options);
 
     this.custom(async (ctx) => {
       ctx.output = ctx.input;

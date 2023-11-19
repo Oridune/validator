@@ -2,6 +2,7 @@
 import { ValidationException } from "../../exceptions.ts";
 import { TErrorMessage, inferInput, inferOutput } from "../../types.ts";
 import {
+  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
@@ -70,7 +71,7 @@ export class ObjectValidator<
 
   //! If any new class properties are created, remember to add them to the .clone() method!
   constructor(shape: Type, options: IObjectValidatorOptions = {}) {
-    super(options);
+    super(ValidatorType.NON_PRIMITIVE, options);
 
     if (typeof shape !== "object" || shape === null)
       throw new Error("Invalid object shape has been provided!");
@@ -218,6 +219,8 @@ export class ObjectValidator<
       { ...this.Shape },
       this.Options
     );
+
+    Validator["Type"] = this.Type;
 
     if (this.RestValidator !== undefined)
       Validator["RestValidator"] = this.RestValidator;

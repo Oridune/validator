@@ -141,8 +141,27 @@ export type IsObject<T, R, F = T, Excludes = never> = T extends
   ? R
   : F;
 
+export type IsTuple<T, R, F = R> = T extends [any, ...any] ? R : F;
+
+export type ExtendTuple<T, E, UseUnion extends boolean = true> = T extends [
+  any,
+  ...any
+]
+  ? {
+      [K in keyof T]: UseUnion extends true ? T[K] | E : T[K] & E;
+    }
+  : never;
+
 export type DeepPartial<T> = {
-  [K in keyof T]?: IsObject<T[K], DeepPartial<T[K]>, T[K]>;
+  [K in keyof T]?: IsObject<
+    T[K],
+    DeepPartial<T[K]>,
+    IsTuple<
+      T[K],
+      ExtendTuple<T[K], undefined>,
+      T[K] extends Array<infer R> ? Array<R | undefined> : T[K]
+    >
+  >;
 };
 
 type CustomRequired<T> = { [P in keyof T]-?: Exclude<T[P], undefined> };

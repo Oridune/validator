@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-empty-interface
 import {
+  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
@@ -27,7 +28,7 @@ export class AnyValidator<Type, Input, Output> extends BaseValidator<
   }
 
   constructor(options: IAnyValidatorOptions = {}) {
-    super(options);
+    super(ValidatorType.UTILITY, options);
 
     this.Options = options;
 

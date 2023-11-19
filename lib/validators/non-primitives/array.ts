@@ -2,6 +2,7 @@
 import { ValidationException } from "../../exceptions.ts";
 import { TErrorMessage } from "../../types.ts";
 import {
+  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
@@ -11,6 +12,7 @@ import {
 export interface IArrayValidatorOptions extends IBaseValidatorOptions {
   cast?: boolean;
   splitter?: string | RegExp;
+  ignoreNanKeys?: boolean;
   messages?: Partial<
     Record<"typeError" | "smallerLength" | "greaterLength", TErrorMessage>
   >;
@@ -48,7 +50,7 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
   }
 
   constructor(validator?: Type, options: IArrayValidatorOptions = {}) {
-    super(options);
+    super(ValidatorType.NON_PRIMITIVE, options);
 
     if (validator)
       if (!(validator instanceof BaseValidator))
@@ -60,19 +62,40 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
     this.custom(async (ctx) => {
       ctx.output = ctx.input;
 
-      if (this.Options?.cast && typeof ctx.output === "string")
-        try {
-          ctx.output = JSON.parse(ctx.output);
-        } catch {
-          if (this.Options.splitter)
-            ctx.output = ctx.output.toString().split(this.Options.splitter);
-        }
+      const Err = await this._resolveErrorMessage(
+        this.Options?.messages?.typeError,
+        "Invalid array has been provided!"
+      );
 
       if (!(ctx.output instanceof Array))
-        throw await this._resolveErrorMessage(
-          this.Options?.messages?.typeError,
-          "Invalid array has been provided!"
-        );
+        if (this.Options?.cast)
+          if (
+            typeof ctx.output === "object" &&
+            ctx.output !== null &&
+            ctx.output.constructor === Object
+          )
+            ctx.output = Object.keys(ctx.output).reduce((array, key) => {
+              const Key = parseInt(key);
+
+              if (isNaN(Key)) {
+                if (this.Options.ignoreNanKeys) return array;
+
+                throw Err;
+              }
+
+              array[Key] = ctx.output[key];
+
+              return array;
+            }, [] as any[]);
+          else if (typeof ctx.output === "string")
+            try {
+              ctx.output = JSON.parse(ctx.output);
+            } catch {
+              if (this.Options.splitter)
+                ctx.output = ctx.output.toString().split(this.Options.splitter);
+            }
+          else ctx.output = [ctx.output];
+        else throw Err;
 
       ctx.output = [...ctx.output];
 

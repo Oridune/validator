@@ -1,6 +1,7 @@
 // deno-lint-ignore-file no-empty-interface no-explicit-any
 import { inferInput, inferOutput } from "../../types.ts";
 import {
+  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
@@ -30,7 +31,7 @@ export class AndValidator<Type, Input, Output> extends BaseValidator<
   }
 
   constructor(validators: Type[], options: IAndValidatorOptions = {}) {
-    super(options);
+    super(ValidatorType.UTILITY, options);
 
     if (!(validators instanceof Array))
       throw new Error("Invalid validators list has been provided!");

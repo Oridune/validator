@@ -1,6 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import { TErrorMessage } from "../../types.ts";
 import {
+  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
@@ -71,7 +72,7 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
   }
 
   constructor(options: INumberValidatorOptions = {}) {
-    super(options);
+    super(ValidatorType.PRIMITIVE, options);
 
     this.Options = options;
 

@@ -37,6 +37,7 @@ import {
   IIfValidatorOptions,
   InstanceOfValidator,
   IInstanceOfValidatorOptions,
+  ValidatorType,
   BaseValidator,
 } from "./validators/mod.ts";
 import { IValidationIssue, ValidationException } from "./exceptions.ts";
@@ -384,33 +385,57 @@ const Validators = {
     if (!(validator instanceof ObjectValidator))
       throw new Error("Invalid object validator instance has been provided!");
 
-    const deepPartialValidator = (
+    const deepPartialValidator = (validator: BaseValidator<any, any, any>) => {
+      let Validator = validator;
+
+      if (
+        "Validator" in Validator &&
+        Validator["Validator"] instanceof BaseValidator
+      )
+        Validator["Validator"] = deepPartialValidator(Validator["Validator"]);
+
+      if (
+        "RestValidator" in Validator &&
+        Validator["RestValidator"] instanceof BaseValidator
+      )
+        Validator["RestValidator"] = deepPartialValidator(
+          Validator["RestValidator"]
+        );
+
+      if ("Validators" in Validator && Validator["Validators"] instanceof Array)
+        Validator["Validators"] = Validator["Validators"].map((validator) =>
+          deepPartialValidator(validator)
+        );
+
+      if (validator instanceof ObjectValidator)
+        Validator = Validators.optional(
+          deepPartialObjectValidator(validator),
+          options
+        );
+      else if (validator instanceof OptionalValidator)
+        Validator =
+          options?.overrideOptionalValidator === false
+            ? validator
+            : Validators.optional(validator, options);
+      else Validator = Validators.optional(validator, options);
+
+      return Validator;
+    };
+
+    const deepPartialObjectValidator = (
       validator: ObjectValidator<any, any, any>
     ) => {
       const Validator = validator.clone();
 
       const ValidatorShape = Validator["Shape"];
 
-      for (const Key in ValidatorShape) {
-        const AnyValidator = ValidatorShape[Key];
-
-        if (AnyValidator instanceof ObjectValidator)
-          ValidatorShape[Key] = Validators.optional(
-            deepPartialValidator(AnyValidator),
-            options
-          );
-        else
-          ValidatorShape[Key] =
-            AnyValidator instanceof OptionalValidator &&
-            options?.overrideOptionalValidator === false
-              ? AnyValidator
-              : Validators.optional(ValidatorShape[Key], options);
-      }
+      for (const Key in ValidatorShape)
+        ValidatorShape[Key] = deepPartialValidator(ValidatorShape[Key]);
 
       return Validator;
     };
 
-    return deepPartialValidator(validator) as ObjectValidator<
+    return deepPartialObjectValidator(validator) as ObjectValidator<
       T extends object ? T : never,
       DeepPartial<I>,
       DeepPartial<O>
@@ -527,6 +552,63 @@ const Validators = {
       RestArgs extends Array<any> ? RestArgs : never
     >
   ) => new InstanceOfValidator<T, Proto | Input, Proto>(constructor, options),
+
+  deepCast: <Validator extends BaseValidator<any, any, any>>(
+    validator: Validator
+  ) => {
+    if (!(validator instanceof BaseValidator))
+      throw new Error("Invalid validator instance has been provided!");
+
+    const castValidator = (validator: BaseValidator<any, any, any>) => {
+      let Validator = validator;
+
+      if (
+        "Validator" in Validator &&
+        Validator["Validator"] instanceof BaseValidator
+      )
+        Validator["Validator"] = castValidator(Validator["Validator"]);
+
+      if (
+        "RestValidator" in Validator &&
+        Validator["RestValidator"] instanceof BaseValidator
+      )
+        Validator["RestValidator"] = castValidator(Validator["RestValidator"]);
+
+      if ("Validators" in Validator && Validator["Validators"] instanceof Array)
+        Validator["Validators"] = Validator["Validators"].map((validator) =>
+          castValidator(validator)
+        );
+
+      if (Validator instanceof ObjectValidator)
+        Validator = castObjectValidator(Validator);
+      else if (
+        [ValidatorType.PRIMITIVE, ValidatorType.NON_PRIMITIVE].includes(
+          Validator["Type"]
+        )
+      ) {
+        Validator["Options"] ??= {};
+        Validator["Options"].cast = true;
+      }
+
+      return Validator;
+    };
+
+    const castObjectValidator = (validator: ObjectValidator<any, any, any>) => {
+      const Validator = validator.clone();
+
+      Validator["Options"] ??= {};
+      Validator["Options"].cast = true;
+
+      const ValidatorShape = Validator["Shape"];
+
+      for (const Key in ValidatorShape)
+        ValidatorShape[Key] = castValidator(ValidatorShape[Key]);
+
+      return Validator;
+    };
+
+    return castValidator(validator) as Validator;
+  },
 
   /**
    * Add an error to the validator.

@@ -2,6 +2,7 @@
 import { ValidationException } from "../../exceptions.ts";
 import { inferInput, inferOutput } from "../../types.ts";
 import {
+  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
@@ -36,7 +37,7 @@ export class OrValidator<Type, Input, Output> extends BaseValidator<
   }
 
   constructor(validators: Type[], options: IOrValidatorOptions = {}) {
-    super(options);
+    super(ValidatorType.UTILITY, options);
 
     this.Options = options;
 

@@ -2,6 +2,7 @@
 import { ValidationException } from "../../exceptions.ts";
 import { TErrorMessage } from "../../types.ts";
 import {
+  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
@@ -36,7 +37,7 @@ export class RecordValidator<Type, Input, Output> extends BaseValidator<
   }
 
   constructor(validator?: Type, options: IRecordValidatorOptions = {}) {
-    super(options);
+    super(ValidatorType.NON_PRIMITIVE, options);
 
     if (validator)
       if (!(validator instanceof BaseValidator))

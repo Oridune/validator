@@ -2,6 +2,7 @@
 import { ValidationException } from "../../exceptions.ts";
 import { TErrorMessage, inferInput, inferOutput } from "../../types.ts";
 import {
+  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
@@ -52,7 +53,7 @@ export class TupleValidator<
   }
 
   constructor(validators: Type[], options: ITupleValidatorOptions = {}) {
-    super(options);
+    super(ValidatorType.NON_PRIMITIVE, options);
 
     if (!(validators instanceof Array))
       throw new Error("Invalid validators list has been provided!");

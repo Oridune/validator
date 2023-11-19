@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import {
+  ValidatorType,
   BaseValidator,
   IJSONSchemaOptions,
   ISampleDataOptions,
@@ -40,7 +41,7 @@ export class OptionalValidator<Type, Input, Output> extends BaseValidator<
   }
 
   constructor(validator: Type, options: IOptionalValidatorOptions = {}) {
-    super({});
+    super(ValidatorType.UTILITY, {});
 
     if (!(validator instanceof BaseValidator))
       throw new Error("Invalid validator instance has been provided!");

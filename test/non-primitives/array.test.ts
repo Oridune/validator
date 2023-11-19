@@ -32,6 +32,47 @@ Deno.test("Array Validator Tests", async (ctx) => {
     assertEquals(Result, Target);
   });
 
+  await ctx.step("Truthy Validation Case 5", async () => {
+    const Target = { 0: "foo", "2": "bar", 5: "baz" };
+    const Expected: string[] = [];
+
+    Expected[0] = "foo";
+    Expected[2] = "bar";
+    Expected[5] = "baz";
+
+    const Result = await e
+      .deepCast(e.array(e.or([e.string(), e.undefined()])))
+      .validate(Target)
+      .catch((error) => {
+        console.error(error);
+        throw error;
+      });
+
+    assertEquals(Result.length, 6);
+  });
+
+  await ctx.step("Truthy Validation Case 6", async () => {
+    const Target = { 0: "foo", "2": "bar", 5: "baz", foo: "bar" };
+    const Expected: string[] = [];
+
+    Expected[0] = "foo";
+    Expected[2] = "bar";
+    Expected[5] = "baz";
+
+    const Result = await e
+      .array(e.or([e.string(), e.undefined()]), {
+        cast: true,
+        ignoreNanKeys: true,
+      })
+      .validate(Target)
+      .catch((error) => {
+        console.error(error);
+        throw error;
+      });
+
+    assertEquals(Result.length, 6);
+  });
+
   await ctx.step("Falsy Validation Case 1", async () => {
     try {
       await e.array().validate("hi");
@@ -59,6 +100,19 @@ Deno.test("Array Validator Tests", async (ctx) => {
     } catch (e) {
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 3);
+    }
+  });
+
+  await ctx.step("Falsy Validation Case 4", async () => {
+    try {
+      await e
+        .array(e.string(), { cast: true })
+        .validate({ 0: "foo", "2": "bar", 5: "baz", foo: "bar" });
+
+      throw new Error(`Validation Invalid!`);
+    } catch (e) {
+      assertInstanceOf(e, ValidationException);
+      assertEquals(e.issues.length, 1);
     }
   });
 

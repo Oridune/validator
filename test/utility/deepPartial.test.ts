@@ -32,6 +32,7 @@ Deno.test("Deep-Partial Validator Tests", async (ctx) => {
         profile: e.object({
           fullName: e.optional(e.string()).default("Anonymus"),
           dob: e.date(),
+          tags: e.array(e.string()),
         }),
       })
     );
@@ -40,6 +41,14 @@ Deno.test("Deep-Partial Validator Tests", async (ctx) => {
     const Result = await Schema.validate(Data);
 
     assertObjectMatch(Data, Result);
+
+    const Data2 = { profile: { tags: [undefined, "something"] } };
+    const Result2 = await Schema.validate(Data2).catch((error) => {
+      console.error(error);
+      throw error;
+    });
+
+    assertObjectMatch(Data2, Result2);
   });
 
   await ctx.step("Truthy Validation Case 3", async () => {
