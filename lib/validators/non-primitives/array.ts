@@ -11,8 +11,21 @@ import {
 
 export interface IArrayValidatorOptions extends IBaseValidatorOptions {
   cast?: boolean;
+
+  /**
+   * Requires `cast` to be `true`
+   */
   splitter?: string | RegExp;
+
+  /**
+   * Requires `cast` to be `true`
+   */
   ignoreNanKeys?: boolean;
+
+  /**
+   * Requires `cast` to be `true`
+   */
+  castToArray?: boolean;
   messages?: Partial<
     Record<"typeError" | "smallerLength" | "greaterLength", TErrorMessage>
   >;
@@ -62,7 +75,12 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
     this.custom(async (ctx) => {
       ctx.output = ctx.input;
 
-      if (!(ctx.output instanceof Array))
+      if (!(ctx.output instanceof Array)) {
+        const Err = await this._resolveErrorMessage(
+          this.Options?.messages?.typeError,
+          "Invalid array has been provided!"
+        );
+
         if (this.Options?.cast)
           if (typeof ctx.output === "string")
             try {
@@ -76,29 +94,23 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
             ctx.output !== null &&
             ctx.output.constructor === Object
           )
-            try {
-              ctx.output = Object.keys(ctx.output).reduce((array, key) => {
-                const Key = parseInt(key);
+            ctx.output = Object.keys(ctx.output).reduce((array, key) => {
+              const Key = parseInt(key);
 
-                if (isNaN(Key)) {
-                  if (this.Options.ignoreNanKeys) return array;
+              if (isNaN(Key)) {
+                if (this.Options.ignoreNanKeys) return array;
 
-                  throw new Error(`Invalid NaN key ${Key}!`);
-                }
+                throw Err;
+              }
 
-                array[Key] = ctx.output[key];
+              array[Key] = ctx.output[key];
 
-                return array;
-              }, [] as any[]);
-            } catch {
-              ctx.output = [ctx.output];
-            }
-          else ctx.output = [ctx.output];
-        else
-          throw await this._resolveErrorMessage(
-            this.Options?.messages?.typeError,
-            "Invalid array has been provided!"
-          );
+              return array;
+            }, [] as any[]);
+          else if (this.Options.castToArray) ctx.output = [ctx.output];
+          else throw Err;
+        else throw Err;
+      }
 
       ctx.output = [...ctx.output];
 
