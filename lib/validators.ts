@@ -594,17 +594,15 @@ const Validators = {
     };
 
     const castObjectValidator = (validator: ObjectValidator<any, any, any>) => {
-      const Validator = validator.clone();
+      validator["Options"] ??= {};
+      validator["Options"].cast = true;
 
-      Validator["Options"] ??= {};
-      Validator["Options"].cast = true;
-
-      const ValidatorShape = Validator["Shape"];
+      const ValidatorShape = validator["Shape"];
 
       for (const Key in ValidatorShape)
         ValidatorShape[Key] = castValidator(ValidatorShape[Key]);
 
-      return Validator;
+      return validator;
     };
 
     return castValidator(validator) as Validator;

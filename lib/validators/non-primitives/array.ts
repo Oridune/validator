@@ -62,40 +62,43 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
     this.custom(async (ctx) => {
       ctx.output = ctx.input;
 
-      const Err = await this._resolveErrorMessage(
-        this.Options?.messages?.typeError,
-        "Invalid array has been provided!"
-      );
-
       if (!(ctx.output instanceof Array))
         if (this.Options?.cast)
-          if (
-            typeof ctx.output === "object" &&
-            ctx.output !== null &&
-            ctx.output.constructor === Object
-          )
-            ctx.output = Object.keys(ctx.output).reduce((array, key) => {
-              const Key = parseInt(key);
-
-              if (isNaN(Key)) {
-                if (this.Options.ignoreNanKeys) return array;
-
-                throw Err;
-              }
-
-              array[Key] = ctx.output[key];
-
-              return array;
-            }, [] as any[]);
-          else if (typeof ctx.output === "string")
+          if (typeof ctx.output === "string")
             try {
               ctx.output = JSON.parse(ctx.output);
             } catch {
               if (this.Options.splitter)
                 ctx.output = ctx.output.toString().split(this.Options.splitter);
             }
+          else if (
+            typeof ctx.output === "object" &&
+            ctx.output !== null &&
+            ctx.output.constructor === Object
+          )
+            try {
+              ctx.output = Object.keys(ctx.output).reduce((array, key) => {
+                const Key = parseInt(key);
+
+                if (isNaN(Key)) {
+                  if (this.Options.ignoreNanKeys) return array;
+
+                  throw new Error(`Invalid NaN key ${Key}!`);
+                }
+
+                array[Key] = ctx.output[key];
+
+                return array;
+              }, [] as any[]);
+            } catch {
+              ctx.output = [ctx.output];
+            }
           else ctx.output = [ctx.output];
-        else throw Err;
+        else
+          throw await this._resolveErrorMessage(
+            this.Options?.messages?.typeError,
+            "Invalid array has been provided!"
+          );
 
       ctx.output = [...ctx.output];
 
