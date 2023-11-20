@@ -386,6 +386,8 @@ const Validators = {
       throw new Error("Invalid object validator instance has been provided!");
 
     const deepPartialValidator = (validator: BaseValidator<any, any, any>) => {
+      if (validator["DeepPartialed"]) return validator;
+
       let Validator = validator;
 
       if (
@@ -427,6 +429,8 @@ const Validators = {
     const deepPartialObjectValidator = (
       validator: ObjectValidator<any, any, any>
     ) => {
+      if (validator["DeepPartialed"]) return validator;
+
       const Validator = validator.clone();
 
       const ValidatorShape = Validator["Shape"];
@@ -438,8 +442,6 @@ const Validators = {
 
       return Validator;
     };
-
-    if (validator["DeepPartialed"]) return validator;
 
     return deepPartialObjectValidator(validator) as ObjectValidator<
       T extends object ? T : never,
@@ -566,6 +568,8 @@ const Validators = {
       throw new Error("Invalid validator instance has been provided!");
 
     const castValidator = (validator: BaseValidator<any, any, any>) => {
+      if (validator["DeepCasted"]) return validator;
+
       let Validator = validator;
 
       if (
@@ -602,6 +606,8 @@ const Validators = {
     };
 
     const castObjectValidator = (validator: ObjectValidator<any, any, any>) => {
+      if (validator["DeepCasted"]) return validator;
+
       validator["Options"] ??= {};
       validator["Options"].cast = true;
 
@@ -614,8 +620,6 @@ const Validators = {
 
       return validator;
     };
-
-    if (validator["DeepCasted"]) return validator;
 
     return castValidator(validator) as Validator;
   },
