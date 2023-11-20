@@ -419,6 +419,8 @@ const Validators = {
             : Validators.optional(validator, options);
       else Validator = Validators.optional(validator, options);
 
+      Validator["DeepPartialed"] = true;
+
       return Validator;
     };
 
@@ -431,6 +433,8 @@ const Validators = {
 
       for (const Key in ValidatorShape)
         ValidatorShape[Key] = deepPartialValidator(ValidatorShape[Key]);
+
+      Validator["DeepPartialed"] = true;
 
       return Validator;
     };
@@ -592,6 +596,8 @@ const Validators = {
         Validator["Options"].cast = true;
       }
 
+      Validator["DeepCasted"] = true;
+
       return Validator;
     };
 
@@ -603,6 +609,8 @@ const Validators = {
 
       for (const Key in ValidatorShape)
         ValidatorShape[Key] = castValidator(ValidatorShape[Key]);
+
+      validator["DeepCasted"] = true;
 
       return validator;
     };
