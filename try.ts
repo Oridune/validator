@@ -15,21 +15,23 @@ const Schema = e.deepPartial(
   e
     .object({
       name: S,
-      contact: e.number().length({ min: 11 }),
-      role: e.enum(["admin", "user"]),
-      active: e.boolean().custom(() => "active"),
-      priority: e.number().amount({ min: 0, max: 10 }),
-      profile: e.object({
-        fullName: e.string(),
-        dob: e.date(),
-      }),
-      tags: e.array(e.string()),
+      contact: e.optional(e.optional(e.number().length({ min: 11 }))),
+      role: e.optional(e.enum(["admin", "user"])),
+      active: e.optional(e.boolean().custom(() => "active")),
+      priority: e.optional(e.number().amount({ min: 0, max: 10 })),
+      profile: e.optional(
+        e.object({
+          fullName: e.string(),
+          dob: e.date(),
+        })
+      ),
+      tags: e.optional(e.array(e.string())),
     })
     .extends(
       e.required(
         e.object({
-          tags: e.record(e.string()),
-          metadata: e.any().sample({}),
+          tags: e.optional(e.record(e.string())),
+          metadata: e.optional(e.any().sample({})),
           note: e.optional(e.string()),
         })
       )

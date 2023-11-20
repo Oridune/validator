@@ -435,6 +435,8 @@ const Validators = {
       return Validator;
     };
 
+    if (validator["DeepPartialed"]) return validator;
+
     return deepPartialObjectValidator(validator) as ObjectValidator<
       T extends object ? T : never,
       DeepPartial<I>,
@@ -604,6 +606,8 @@ const Validators = {
 
       return validator;
     };
+
+    if (validator["DeepCasted"]) return validator;
 
     return castValidator(validator) as Validator;
   },

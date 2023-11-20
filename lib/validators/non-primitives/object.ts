@@ -221,6 +221,8 @@ export class ObjectValidator<
     );
 
     Validator["Type"] = this.Type;
+    Validator["DeepPartialed"] = this.DeepPartialed;
+    Validator["DeepCasted"] = this.DeepCasted;
 
     if (this.RestValidator !== undefined)
       Validator["RestValidator"] = this.RestValidator;

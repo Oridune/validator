@@ -77,6 +77,9 @@ export class BaseValidator<Type, Input, Output> {
   protected Sample?: any;
   protected CustomValidators: TCustomValidator<any, any>[] = [];
 
+  protected DeepPartialed = false;
+  protected DeepCasted = false;
+
   protected async _resolveErrorMessage(
     message: TErrorMessage | undefined,
     defaultMessage: string
