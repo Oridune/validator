@@ -40,6 +40,16 @@ const Schema = e.deepPartial(
 );
 // .rest(e.string());
 
+console.log(
+  await e
+    .optional(e.record(e.number({ cast: true }).max(1).min(0), { cast: true }))
+    .validate({ collaborates: -10 })
+    .catch((error) => {
+      console.error(error);
+      throw error;
+    })
+);
+
 // const User = await Schema.validate({
 //   contact: 12345678909876,
 //   role: "admin",

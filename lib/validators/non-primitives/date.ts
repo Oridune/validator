@@ -60,13 +60,13 @@ export class DateValidator<Type, Input, Output> extends BaseValidator<
     const Validator = this.custom(async (ctx) => {
       const Input = Number(ctx.output);
 
-      if (Input < Number(options.start || 0))
+      if (Input < Number(options.start ?? 0))
         throw await this._resolveErrorMessage(
           this.Options?.messages?.smaller,
           "Date is smaller than minimum!"
         );
 
-      if (Input > Number(options.end || Infinity))
+      if (Input > Number(options.end ?? Infinity))
         throw await this._resolveErrorMessage(
           this.Options?.messages?.greater,
           "Date is greater than maximum!"

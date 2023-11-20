@@ -142,13 +142,13 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
     this.MaxLength = Options.max;
 
     const Validator = this.custom(async (ctx) => {
-      if (ctx.output?.length < (Options.min || 0))
+      if (ctx.output?.length < (Options.min ?? 0))
         throw await this._resolveErrorMessage(
           this.Options.messages?.smallerLength,
           "Array is smaller than minimum length!"
         );
 
-      if (ctx.output?.length > (Options.max || Infinity))
+      if (ctx.output?.length > (Options.max ?? Infinity))
         throw await this._resolveErrorMessage(
           this.Options.messages?.greaterLength,
           "Array is greater than maximum length!"

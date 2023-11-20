@@ -67,10 +67,18 @@ Deno.test("Number Validator Tests", async (ctx) => {
   });
 
   await ctx.step("Falsy Amount Check", async () => {
-    const Target = -1;
-    const Results = await e.number().min(0).max(1).validate(Target);
-
-    assertEquals(Results, Target);
+    try {
+      const Target = -1;
+      await e.number().min(0).max(1).validate(Target);
+      throw new Error(`Validation Invalid!`);
+    } catch (e) {
+      assertInstanceOf(e, ValidationException);
+      assertEquals(e.issues.length, 1);
+      assertEquals(
+        e.issues[0].message,
+        "Number is smaller than minimum amount!"
+      );
+    }
   });
 
   await ctx.step("Truthy Integer Check", async () => {

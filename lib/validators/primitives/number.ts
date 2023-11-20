@@ -99,13 +99,13 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
     const Validator = this.custom(async (ctx) => {
       const Input = `${ctx.output}`;
 
-      if (Input.length < (Options.min || 0))
+      if (Input.length < (Options.min ?? 0))
         throw await this._resolveErrorMessage(
           this.Options?.messages?.smallerLength,
           "Number is smaller than minimum length!"
         );
 
-      if (Input.length > (Options.max || Infinity))
+      if (Input.length > (Options.max ?? Infinity))
         throw await this._resolveErrorMessage(
           this.Options?.messages?.greaterLength,
           "Number is greater than maximum length!"
@@ -125,13 +125,14 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
     this.MaxAmount = Options.max;
 
     const Validator = this.custom(async (ctx) => {
-      if (ctx.output < (Options.min || -Infinity))
+      if (ctx.output < (Options.min ?? -Infinity)) {
         throw await this._resolveErrorMessage(
           this.Options?.messages?.smallerAmount,
           "Number is smaller than minimum amount!"
         );
+      }
 
-      if (ctx.output > (Options.max || Infinity))
+      if (ctx.output > (Options.max ?? Infinity))
         throw await this._resolveErrorMessage(
           this.Options?.messages?.greaterAmount,
           "Number is greater than maximum amount!"
