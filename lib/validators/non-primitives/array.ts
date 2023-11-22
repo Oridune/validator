@@ -25,7 +25,7 @@ export interface IArrayValidatorOptions extends IBaseValidatorOptions {
   /**
    * Requires `cast` to be `true`
    */
-  castToArray?: boolean;
+  noCastToArray?: boolean;
   messages?: Partial<
     Record<"typeError" | "smallerLength" | "greaterLength", TErrorMessage>
   >;
@@ -81,35 +81,40 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
           "Invalid array has been provided!"
         );
 
-        if (this.Options?.cast)
-          if (typeof ctx.output === "string")
-            try {
-              ctx.output = JSON.parse(ctx.output);
-            } catch {
-              if (this.Options.splitter)
-                ctx.output = ctx.output.toString().split(this.Options.splitter);
+        if (!this.Options?.cast) throw Err;
+
+        if (typeof ctx.output === "string")
+          try {
+            return (ctx.output = JSON.parse(ctx.output));
+          } catch {
+            if (this.Options.splitter)
+              return (ctx.output = ctx.output
+                .toString()
+                .split(this.Options.splitter));
+          }
+
+        if (
+          typeof ctx.output === "object" &&
+          ctx.output !== null &&
+          ctx.output.constructor === Object
+        )
+          return (ctx.output = Object.keys(ctx.output).reduce((array, key) => {
+            const Key = parseInt(key);
+
+            if (isNaN(Key)) {
+              if (this.Options.ignoreNanKeys) return array;
+
+              throw Err;
             }
-          else if (
-            typeof ctx.output === "object" &&
-            ctx.output !== null &&
-            ctx.output.constructor === Object
-          )
-            ctx.output = Object.keys(ctx.output).reduce((array, key) => {
-              const Key = parseInt(key);
 
-              if (isNaN(Key)) {
-                if (this.Options.ignoreNanKeys) return array;
+            array[Key] = ctx.output[key];
 
-                throw Err;
-              }
+            return array;
+          }, [] as any[]));
 
-              array[Key] = ctx.output[key];
+        if (this.Options.noCastToArray) throw Err;
 
-              return array;
-            }, [] as any[]);
-          else if (this.Options.castToArray) ctx.output = [ctx.output];
-          else throw Err;
-        else throw Err;
+        return (ctx.output = [ctx.output]);
       }
 
       ctx.output = [...ctx.output];

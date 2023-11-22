@@ -2,6 +2,7 @@ import e, { ValidationException } from "../../mod.ts";
 import {
   assertEquals,
   assertInstanceOf,
+  assertObjectMatch,
 } from "https://deno.land/std@0.165.0/testing/asserts.ts";
 
 Deno.test("Array Validator Tests", async (ctx) => {
@@ -52,6 +53,40 @@ Deno.test("Array Validator Tests", async (ctx) => {
   });
 
   await ctx.step("Truthy Validation Case 6", async () => {
+    const Target = null;
+
+    const Result = await e
+      .array(e.or([e.null()]), { cast: true })
+      .validate(Target)
+      .catch((error) => {
+        console.error(error);
+        throw error;
+      });
+
+    assertEquals(Result.length, 1);
+
+    // deno-lint-ignore no-explicit-any
+    assertObjectMatch([Target], [null] as any);
+  });
+
+  await ctx.step("Truthy Validation Case 7", async () => {
+    const Target = "foo, bar";
+
+    const Result = await e
+      .array(e.or([e.string()]), { cast: true, splitter: /\s*,\s*/ })
+      .validate(Target)
+      .catch((error) => {
+        console.error(error);
+        throw error;
+      });
+
+    assertEquals(Result.length, 2);
+
+    // deno-lint-ignore no-explicit-any
+    assertObjectMatch(Result, ["foo", "bar"] as any);
+  });
+
+  await ctx.step("Truthy Validation Case 8", async () => {
     const Target = { 0: "foo", "2": "bar", 5: "baz", foo: "bar" };
     const Expected: string[] = [];
 
@@ -108,6 +143,32 @@ Deno.test("Array Validator Tests", async (ctx) => {
       await e
         .array(e.string(), { cast: true })
         .validate({ 0: "foo", "2": "bar", 5: "baz", foo: "bar" });
+
+      throw new Error(`Validation Invalid!`);
+    } catch (e) {
+      assertInstanceOf(e, ValidationException);
+      assertEquals(e.issues.length, 1);
+    }
+  });
+
+  await ctx.step("Falsy Validation Case 5", async () => {
+    try {
+      await e
+        .array(e.string(), { cast: true, noCastToArray: true })
+        .validate("string");
+
+      throw new Error(`Validation Invalid!`);
+    } catch (e) {
+      assertInstanceOf(e, ValidationException);
+      assertEquals(e.issues.length, 1);
+    }
+  });
+
+  await ctx.step("Falsy Validation Case 6", async () => {
+    try {
+      await e
+        .array(e.string(), { cast: true, noCastToArray: true })
+        .validate("foo,bar");
 
       throw new Error(`Validation Invalid!`);
     } catch (e) {
