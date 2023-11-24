@@ -6,6 +6,7 @@ import {
   ISampleDataOptions,
   IValidatorContext,
 } from "../base.ts";
+import { AnyValidator } from "./any.ts";
 
 export interface IOptionalValidatorOptions {
   nullish?: boolean;
@@ -53,9 +54,10 @@ export class OptionalValidator<Type, Input, Output> extends BaseValidator<
       ctx.output = ctx.input;
 
       if (
-        ctx.output !== undefined &&
-        (this.Options.nullish !== true ||
-          (this.Options.nullish && !!ctx.output))
+        this.Validator instanceof AnyValidator ||
+        (ctx.output !== undefined &&
+          (this.Options.nullish !== true ||
+            (this.Options.nullish && !!ctx.output)))
       )
         return await this.Validator.validate(ctx.output, ctx);
 

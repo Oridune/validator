@@ -451,6 +451,74 @@ const Validators = {
   },
 
   /**
+   * Deeply forces all validators to cast the value before validation.
+   * @param validator Any validator can be passed.
+   * @returns
+   */
+  deepCast: <Validator extends BaseValidator<any, any, any>>(
+    validator: Validator
+  ) => {
+    if (!(validator instanceof BaseValidator))
+      throw new Error("Invalid validator instance has been provided!");
+
+    const castValidator = (validator: BaseValidator<any, any, any>) => {
+      if (validator["DeepCasted"]) return validator;
+
+      let Validator = validator;
+
+      if (
+        "Validator" in Validator &&
+        Validator["Validator"] instanceof BaseValidator
+      )
+        Validator["Validator"] = castValidator(Validator["Validator"]);
+
+      if (
+        "RestValidator" in Validator &&
+        Validator["RestValidator"] instanceof BaseValidator
+      )
+        Validator["RestValidator"] = castValidator(Validator["RestValidator"]);
+
+      if ("Validators" in Validator && Validator["Validators"] instanceof Array)
+        Validator["Validators"] = Validator["Validators"].map((validator) =>
+          castValidator(validator)
+        );
+
+      if (Validator instanceof ObjectValidator)
+        Validator = castObjectValidator(Validator);
+      else if (
+        [ValidatorType.PRIMITIVE, ValidatorType.NON_PRIMITIVE].includes(
+          Validator["Type"]
+        )
+      ) {
+        Validator["Options"] ??= {};
+        Validator["Options"].cast = true;
+      }
+
+      Validator["DeepCasted"] = true;
+
+      return Validator;
+    };
+
+    const castObjectValidator = (validator: ObjectValidator<any, any, any>) => {
+      if (validator["DeepCasted"]) return validator;
+
+      validator["Options"] ??= {};
+      validator["Options"].cast = true;
+
+      const ValidatorShape = validator["Shape"];
+
+      for (const Key in ValidatorShape)
+        ValidatorShape[Key] = castValidator(ValidatorShape[Key]);
+
+      validator["DeepCasted"] = true;
+
+      return validator;
+    };
+
+    return castValidator(validator) as Validator;
+  },
+
+  /**
    * Convert all the validators of each optional property of an object to required.
    * @param validator An object validator.
    * @param options
@@ -561,68 +629,13 @@ const Validators = {
     >
   ) => new InstanceOfValidator<T, Proto | Input, Proto>(constructor, options),
 
-  deepCast: <Validator extends BaseValidator<any, any, any>>(
-    validator: Validator
-  ) => {
-    if (!(validator instanceof BaseValidator))
-      throw new Error("Invalid validator instance has been provided!");
-
-    const castValidator = (validator: BaseValidator<any, any, any>) => {
-      if (validator["DeepCasted"]) return validator;
-
-      let Validator = validator;
-
-      if (
-        "Validator" in Validator &&
-        Validator["Validator"] instanceof BaseValidator
-      )
-        Validator["Validator"] = castValidator(Validator["Validator"]);
-
-      if (
-        "RestValidator" in Validator &&
-        Validator["RestValidator"] instanceof BaseValidator
-      )
-        Validator["RestValidator"] = castValidator(Validator["RestValidator"]);
-
-      if ("Validators" in Validator && Validator["Validators"] instanceof Array)
-        Validator["Validators"] = Validator["Validators"].map((validator) =>
-          castValidator(validator)
-        );
-
-      if (Validator instanceof ObjectValidator)
-        Validator = castObjectValidator(Validator);
-      else if (
-        [ValidatorType.PRIMITIVE, ValidatorType.NON_PRIMITIVE].includes(
-          Validator["Type"]
-        )
-      ) {
-        Validator["Options"] ??= {};
-        Validator["Options"].cast = true;
-      }
-
-      Validator["DeepCasted"] = true;
-
-      return Validator;
-    };
-
-    const castObjectValidator = (validator: ObjectValidator<any, any, any>) => {
-      if (validator["DeepCasted"]) return validator;
-
-      validator["Options"] ??= {};
-      validator["Options"].cast = true;
-
-      const ValidatorShape = validator["Shape"];
-
-      for (const Key in ValidatorShape)
-        ValidatorShape[Key] = castValidator(ValidatorShape[Key]);
-
-      validator["DeepCasted"] = true;
-
-      return validator;
-    };
-
-    return castValidator(validator) as Validator;
-  },
+  /**
+   * Validate a URL.
+   * @param options String validation options.
+   * @returns
+   */
+  url: (options?: IStringValidatorOptions & { returnURLInstance?: boolean }) =>
+    Validators.string(options).isURL(options?.returnURLInstance),
 
   /**
    * Add an error to the validator.
