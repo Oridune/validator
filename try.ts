@@ -17,35 +17,37 @@ enum Role {
   USER = "user",
 }
 
-const Schema = () =>
-  e
-    .object({
-      name: S,
-      contact: e.optional(e.optional(e.number().length({ min: 11 }))),
-      role: e.optional(e.enum(Object.values(Role))),
-      active: () => e.optional(e.boolean().custom(() => "active")),
-      priority: e.optional(e.number().amount({ min: 0, max: 10 })),
-      profile: e.optional(
-        e.object({
-          fullName: e.string(),
-          dob: e.date(),
-        })
-      ),
-      tags: e.optional(e.array(e.string())),
-    })
-    .extends(
-      e.required(
-        e.object({
-          tags: e.optional(e.record(e.string())),
-          metadata: e.optional(e.any().sample({})),
-          note: e.optional(e.string()),
-        })
-      )
-    );
+const User = e.object({
+  oauthAppId: e.string(),
+});
 
-type T = inferInput<typeof Schema>;
+console.log(User.toSample());
 
-type R = T["name"];
+// const Schema = () =>
+//   e
+//     .object({
+//       name: S,
+//       contact: e.optional(e.optional(e.number().length({ min: 11 }))),
+//       role: e.optional(e.enum(Object.values(Role))),
+//       active: () => e.optional(e.boolean().custom(() => "active")),
+//       priority: e.optional(e.number().amount({ min: 0, max: 10 })),
+//       profile: e.optional(
+//         e.object({
+//           fullName: e.string(),
+//           dob: e.date(),
+//         })
+//       ),
+//       tags: e.optional(e.array(e.string())),
+//     })
+//     .extends(
+//       e.required(
+//         e.object({
+//           tags: e.optional(e.record(e.string())),
+//           metadata: e.optional(e.any().sample({})),
+//           note: e.optional(e.string()),
+//         })
+//       )
+//     );
 
 // for (let i = 0; i < 1000; i++) {
 //   console.log(i);

@@ -34,7 +34,8 @@ export class TupleValidator<
   protected MaxLength = 0;
 
   protected _toJSON(_options?: IJSONSchemaOptions) {
-    const RestValidator = BaseValidator.resolveValidator(this.Validator);
+    const RestValidator =
+      this.Validator && BaseValidator.resolveValidator(this.Validator);
 
     return {
       type: "array",
@@ -45,7 +46,7 @@ export class TupleValidator<
         const Validator = BaseValidator.resolveValidator(validator);
         return Validator["_toJSON"]();
       }).filter(Boolean),
-      items: RestValidator["_toJSON"](),
+      items: RestValidator?.["_toJSON"](),
     };
   }
 
@@ -54,9 +55,10 @@ export class TupleValidator<
 
     for (let i = 0; i < (this.MinLength ?? 1); i++) {
       const Validator = BaseValidator.resolveValidator(this.Validators[i]);
-      const RestValidator = BaseValidator.resolveValidator(this.Validator);
+      const RestValidator =
+        this.Validator && BaseValidator.resolveValidator(this.Validator);
 
-      Output.push((Validator ?? RestValidator)["_toSample"](options));
+      Output.push((Validator ?? RestValidator)?.["_toSample"](options));
     }
 
     return this.Sample ?? Output.filter(Boolean);

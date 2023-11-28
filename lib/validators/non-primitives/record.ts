@@ -25,12 +25,13 @@ export class RecordValidator<
   protected Validator?: Type | (() => Type);
 
   protected _toJSON(_options?: IJSONSchemaOptions) {
-    const Validator = BaseValidator.resolveValidator(this.Validator);
+    const Validator =
+      this.Validator && BaseValidator.resolveValidator(this.Validator);
 
     return {
       type: "object",
       description: this.Description,
-      additionalProperties: Validator["_toJSON"](),
+      additionalProperties: Validator?.["_toJSON"](),
     };
   }
 

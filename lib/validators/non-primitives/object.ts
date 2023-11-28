@@ -36,7 +36,8 @@ export class ObjectValidator<
 
     const RequiredProps = new Set(Properties);
 
-    const RestValidator = BaseValidator.resolveValidator(this.RestValidator);
+    const RestValidator =
+      this.RestValidator && BaseValidator.resolveValidator(this.RestValidator);
 
     return {
       type: "object",
@@ -51,7 +52,7 @@ export class ObjectValidator<
           [key]: Validator["_toJSON"](),
         };
       }, {}),
-      additionalProperties: RestValidator["_toJSON"](),
+      additionalProperties: RestValidator?.["_toJSON"](),
       requiredProperties: Array.from(RequiredProps),
     };
   }

@@ -43,23 +43,27 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
   protected MaxLength?: number;
 
   protected _toJSON(_options?: IJSONSchemaOptions) {
-    const Validator = BaseValidator.resolveValidator(this.Validator);
+    const Validator =
+      this.Validator && BaseValidator.resolveValidator(this.Validator);
 
     return {
       type: "array",
       description: this.Description,
       minLength: this.MinLength,
       maxLength: this.MaxLength,
-      items: Validator["_toJSON"](),
+      items: Validator?.["_toJSON"](),
     };
   }
 
   protected _toSample(options?: ISampleDataOptions) {
     const Output = [] as Input & Array<any>;
-    const Validator = BaseValidator.resolveValidator(this.Validator);
 
-    for (let i = 0; i < (this.MinLength ?? 1); i++)
-      Output.push(Validator["_toSample"](options));
+    if (this.Validator) {
+      const Validator = BaseValidator.resolveValidator(this.Validator);
+
+      for (let i = 0; i < (this.MinLength ?? 1); i++)
+        Output.push(Validator["_toSample"](options));
+    }
 
     return this.Sample ?? Output;
   }
