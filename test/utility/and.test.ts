@@ -6,7 +6,7 @@ Deno.test("And Validator Tests", async (ctx) => {
     const Target = { name: "John", age: 18 };
     const Result = await e
       .and(
-        e.object({ name: e.string() }, { allowUnexpectedProps: true }),
+        () => e.object({ name: e.string() }, { allowUnexpectedProps: true }),
         e.object({ age: e.number() }, { allowUnexpectedProps: true })
       )
       .validate(Target);

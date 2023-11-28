@@ -22,10 +22,10 @@ Deno.test("Required Validator Tests", async (ctx) => {
   });
 
   await ctx.step("Truthy Validation Case 2", async () => {
-    const Schema = e.required(
+    const Schema = e.required(() =>
       e.object({
         username: e.optional(e.string()),
-        password: e.optional(e.string()),
+        password: () => e.optional(e.string()),
       })
     );
 

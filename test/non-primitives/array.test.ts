@@ -14,7 +14,8 @@ Deno.test("Array Validator Tests", async (ctx) => {
 
   await ctx.step("Truthy Validation Case 2", async () => {
     const Target: string[] = [];
-    const Result = await e.array(e.string()).validate(Target);
+    const Validator = () => e.string();
+    const Result = await e.array(Validator).validate(Target);
     assertEquals(Result, Target);
   });
 
@@ -41,8 +42,10 @@ Deno.test("Array Validator Tests", async (ctx) => {
     Expected[2] = "bar";
     Expected[5] = "baz";
 
+    const Validator = () => e.array(e.or([e.string(), e.undefined()]));
+
     const Result = await e
-      .deepCast(e.array(e.or([e.string(), e.undefined()])))
+      .deepCast(Validator)
       .validate(Target)
       .catch((error) => {
         console.error(error);

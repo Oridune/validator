@@ -6,12 +6,28 @@ import {
 } from "https://deno.land/std@0.165.0/testing/asserts.ts";
 
 Deno.test("Omit Validator Tests", async (ctx) => {
-  await ctx.step("Truthy Validation", async () => {
+  await ctx.step("Truthy Validation Case 1", async () => {
     const Schema = e.omit(
       e.object({
         username: e.string(),
         password: e.string(),
       }),
+      { keys: ["password"] }
+    );
+
+    const Data = { username: "john" };
+    const Result = await Schema.validate(Data);
+
+    assertObjectMatch(Data, Result);
+  });
+
+  await ctx.step("Truthy Validation Case 2", async () => {
+    const Schema = e.omit(
+      () =>
+        e.object({
+          username: e.string(),
+          password: e.string(),
+        }),
       { keys: ["password"] }
     );
 

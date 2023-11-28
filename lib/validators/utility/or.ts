@@ -11,28 +11,35 @@ import {
 
 export interface IOrValidatorOptions extends IBaseValidatorOptions {}
 
-export class OrValidator<Type, Input, Output> extends BaseValidator<
-  Type,
+export class OrValidator<
+  Type extends
+    | BaseValidator<any, any, any>
+    | (() => BaseValidator<any, any, any>),
   Input,
   Output
-> {
+> extends BaseValidator<Type, Input, Output> {
   protected Options: IOrValidatorOptions;
-  protected Validators: BaseValidator<any, any, any>[] = [];
+  protected Validators: (
+    | BaseValidator<any, any, any>
+    | (() => BaseValidator<any, any, any>)
+  )[] = [];
 
   protected _toJSON(_options?: IJSONSchemaOptions) {
     return {
       type: "or",
       description: this.Description,
-      anyOf: this.Validators.map((validator) => validator["_toJSON"]()),
+      anyOf: this.Validators.map((validator) =>
+        BaseValidator.resolveValidator(validator)["_toJSON"]()
+      ),
     };
   }
 
   protected _toSample(options?: ISampleDataOptions) {
     return (
       this.Sample ??
-      this.Validators[Math.floor(Math.random() * this.Validators.length)][
-        "_toSample"
-      ](options)
+      BaseValidator.resolveValidator(
+        this.Validators[Math.floor(Math.random() * this.Validators.length)]
+      )["_toSample"](options)
     );
   }
 
@@ -44,12 +51,7 @@ export class OrValidator<Type, Input, Output> extends BaseValidator<
     if (!(validators instanceof Array))
       throw new Error("Invalid validators list has been provided!");
 
-    validators.forEach((validator) => {
-      if (!(validator instanceof BaseValidator))
-        throw new Error("Invalid validator instance has been provided!");
-
-      this.Validators.push(validator);
-    });
+    this.Validators = validators;
 
     this.custom(async (ctx) => {
       ctx.output = ctx.input;
@@ -57,20 +59,22 @@ export class OrValidator<Type, Input, Output> extends BaseValidator<
       const Exception = new ValidationException();
 
       for (const Validator of this.Validators)
-        if (Validator instanceof BaseValidator)
-          try {
-            await Validator.validate(ctx.output, ctx);
-            return;
-          } catch (error) {
-            Exception.pushIssues(error);
-          }
+        try {
+          await BaseValidator.resolveValidator(Validator).validate(
+            ctx.output,
+            ctx
+          );
+          return;
+        } catch (error) {
+          Exception.pushIssues(error);
+        }
 
       throw Exception;
     });
   }
 
   public or<V extends BaseValidator<any, any, any>>(
-    validator: V
+    validator: V | (() => V)
   ): OrValidator<Type | V, Input | inferInput<V>, Output | inferOutput<V>> {
     if (!(validator instanceof BaseValidator))
       throw new Error("Invalid validator instance has been provided!");

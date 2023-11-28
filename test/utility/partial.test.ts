@@ -21,9 +21,9 @@ Deno.test("Partial Validator Tests", async (ctx) => {
   });
 
   await ctx.step("Truthy Validation Case 2", async () => {
-    const Schema = e.partial(
+    const Schema = e.partial(() =>
       e.object({
-        username: e.string(),
+        username: () => e.string(),
         password: e.string(),
       })
     );

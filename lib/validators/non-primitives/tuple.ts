@@ -18,56 +18,58 @@ export interface ITupleValidatorOptions extends IBaseValidatorOptions {
 }
 
 export class TupleValidator<
-  Type extends Array<any>,
+  Type extends Array<
+    BaseValidator<any, any, any> | (() => BaseValidator<any, any, any>)
+  >,
   Input,
   Output
 > extends BaseValidator<Type, Input, Output> {
   protected Options: ITupleValidatorOptions;
-  protected Validators: BaseValidator<any, any, any>[] = [];
-  protected Validator?: BaseValidator<any, any, any>;
+  protected Validators: Type;
+  protected Validator?:
+    | BaseValidator<any, any, any>
+    | (() => BaseValidator<any, any, any>);
 
   protected MinLength = 0;
   protected MaxLength = 0;
 
   protected _toJSON(_options?: IJSONSchemaOptions) {
+    const RestValidator = BaseValidator.resolveValidator(this.Validator);
+
     return {
       type: "array",
       description: this.Description,
       minLength: this.MinLength,
       maxLength: this.MaxLength,
-      tuple: this.Validators.map((validator) => validator["_toJSON"]()),
-      items: this.Validator?.["_toJSON"](),
+      tuple: this.Validators.map((validator) => {
+        const Validator = BaseValidator.resolveValidator(validator);
+        return Validator["_toJSON"]();
+      }).filter(Boolean),
+      items: RestValidator["_toJSON"](),
     };
   }
 
   protected _toSample(options?: ISampleDataOptions) {
     const Output = [] as Input & Array<any>;
 
-    if (this.Validator instanceof BaseValidator)
-      for (let i = 0; i < (this.MinLength ?? 1); i++)
-        Output.push(
-          (this.Validators[i] ?? this.Validator)["_toSample"](options)
-        );
+    for (let i = 0; i < (this.MinLength ?? 1); i++) {
+      const Validator = BaseValidator.resolveValidator(this.Validators[i]);
+      const RestValidator = BaseValidator.resolveValidator(this.Validator);
 
-    return this.Sample ?? Output;
+      Output.push((Validator ?? RestValidator)["_toSample"](options));
+    }
+
+    return this.Sample ?? Output.filter(Boolean);
   }
 
-  constructor(validators: Type[], options: ITupleValidatorOptions = {}) {
+  constructor(validators: Type, options: ITupleValidatorOptions = {}) {
     super(ValidatorType.NON_PRIMITIVE, options);
 
     if (!(validators instanceof Array))
       throw new Error("Invalid validators list has been provided!");
 
-    validators.forEach((validator) => {
-      if (!(validator instanceof BaseValidator))
-        throw new Error("Invalid validator instance has been provided!");
-
-      this.MinLength += 1;
-      this.MaxLength += 1;
-
-      this.Validators.push(validator);
-    });
-
+    this.Validators = validators;
+    this.MinLength = this.MaxLength = validators.length;
     this.Options = options;
 
     this.custom(async (ctx) => {
@@ -93,7 +95,7 @@ export class TupleValidator<
           "Array is smaller than minimum length!"
         );
 
-      if (!(this.Validator instanceof BaseValidator))
+      if (!this.Validator)
         if (ctx.output.length > this.Validators.length)
           throw await this._resolveErrorMessage(
             this.Options?.messages?.greaterLength,
@@ -104,37 +106,40 @@ export class TupleValidator<
 
       const Exception = new ValidationException();
 
-      for (const [Index, Input] of Object.entries(ctx.output)) {
-        const Validator = this.Validators[parseInt(Index)] ?? this.Validator;
+      for (const [Key, Value] of Object.entries(ctx.output)) {
+        const Index = parseInt(Key);
+        const Validator = BaseValidator.resolveValidator(
+          this.Validators[Index] ?? this.Validator
+        );
 
-        if (Validator instanceof BaseValidator)
-          try {
-            ctx.output[parseInt(Index)] = await Validator.validate(Input, {
-              ...ctx,
-              location: `${ctx.location}.${Index}`,
-              index: parseInt(Index),
-              property: Index,
-              parent: ctx,
-            });
-          } catch (error) {
-            Exception.pushIssues(error);
-          }
+        try {
+          ctx.output[Index] = await Validator.validate(Value, {
+            ...ctx,
+            location: `${ctx.location}.${Index}`,
+            index: Index,
+            property: Key,
+            parent: ctx,
+          });
+        } catch (error) {
+          Exception.pushIssues(error);
+        }
       }
 
       if (Exception.issues.length) throw Exception;
     });
   }
 
-  public rest<Validator, T extends Array<any> = [...Type, ...Validator[]]>(
-    validator: Validator
+  public rest<
+    Validator extends BaseValidator<any, any, any>,
+    T extends Array<any> = [...Type, ...Validator[]]
+  >(
+    validator: Validator | (() => Validator)
   ): TupleValidator<T, inferInput<T>, inferOutput<T>> {
-    if (this.Validator instanceof BaseValidator)
+    if (this.Validator)
       throw new Error("A rest validator cannot follow another rest validator.");
 
-    if (!(validator instanceof BaseValidator))
-      throw new Error("Invalid validator instance has been provided!");
-
     this.Validator = validator;
+
     return this as any;
   }
 

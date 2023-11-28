@@ -23,7 +23,10 @@ import {
 
 export type TErrorMessage = string | (() => string | Promise<string>);
 
-export type inferInput<T> = T extends ObjectValidator<any, infer R, any>
+export type inferInput<
+  S,
+  T = S extends () => infer V ? V : S
+> = T extends ObjectValidator<any, infer R, any>
   ? R
   : T extends RecordValidator<any, infer R, any>
   ? R
@@ -63,7 +66,10 @@ export type inferInput<T> = T extends ObjectValidator<any, infer R, any>
   ? R
   : never;
 
-export type inferOutput<T> = T extends ObjectValidator<any, any, infer R>
+export type inferOutput<
+  S,
+  T = S extends () => infer V ? V : S
+> = T extends ObjectValidator<any, any, infer R>
   ? R
   : T extends RecordValidator<any, any, infer R>
   ? R

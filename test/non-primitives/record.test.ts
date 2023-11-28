@@ -35,7 +35,7 @@ Deno.test("Record Validator Tests", async (ctx) => {
     };
 
     const Result = await e
-      .record(
+      .record(() =>
         e
           .string()
           .custom((ctx) => {

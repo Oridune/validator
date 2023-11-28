@@ -68,6 +68,17 @@ export enum ValidatorType {
 }
 
 export class BaseValidator<Type, Input, Output> {
+  static resolveValidator<V extends BaseValidator<any, any, any>>(
+    validator: any
+  ): V {
+    const Validator = typeof validator === "function" ? validator() : validator;
+
+    if (!(Validator instanceof BaseValidator))
+      throw new Error(`Invalid validator provided!`);
+
+    return Validator as V;
+  }
+
   protected Exception: ValidationException;
 
   //! If any new class properties are created, remember to add them to the .clone() method!

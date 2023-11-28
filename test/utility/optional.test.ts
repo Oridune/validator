@@ -68,7 +68,7 @@ Deno.test("Optional Validator Tests", async (ctx) => {
       await e
         .object({
           foo: e.string(),
-          baz: e.optional(e.string()),
+          baz: () => e.optional(e.string()),
         })
         .validate({
           foo: "bar",

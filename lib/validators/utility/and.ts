@@ -10,24 +10,34 @@ import {
 
 export interface IAndValidatorOptions extends IBaseValidatorOptions {}
 
-export class AndValidator<Type, Input, Output> extends BaseValidator<
-  Type,
+export class AndValidator<
+  Type extends
+    | BaseValidator<any, any, any>
+    | (() => BaseValidator<any, any, any>),
   Input,
   Output
-> {
+> extends BaseValidator<Type, Input, Output> {
   protected Options: IAndValidatorOptions;
-  protected Validators: BaseValidator<any, any, any>[] = [];
+  protected Validators: (
+    | BaseValidator<any, any, any>
+    | (() => BaseValidator<any, any, any>)
+  )[] = [];
 
   protected _toJSON(_options?: IJSONSchemaOptions) {
     return {
       type: "and",
       description: this.Description,
-      allOf: this.Validators.map((validator) => validator["_toJSON"]()),
+      allOf: this.Validators.map((validator) =>
+        BaseValidator.resolveValidator(validator)["_toJSON"]()
+      ),
     };
   }
 
   protected _toSample(options?: ISampleDataOptions) {
-    return this.Sample ?? this.Validators[0]["_toSample"](options);
+    return (
+      this.Sample ??
+      BaseValidator.resolveValidator(this.Validators[0])["_toSample"](options)
+    );
   }
 
   constructor(validators: Type[], options: IAndValidatorOptions = {}) {
@@ -36,32 +46,24 @@ export class AndValidator<Type, Input, Output> extends BaseValidator<
     if (!(validators instanceof Array))
       throw new Error("Invalid validators list has been provided!");
 
-    validators.forEach((validator) => {
-      if (!(validator instanceof BaseValidator))
-        throw new Error("Invalid validator instance has been provided!");
-
-      this.Validators.push(validator);
-    });
-
+    this.Validators = validators;
     this.Options = options;
 
     this.custom(async (ctx) => {
       ctx.output = ctx.input;
 
       for (const Validator of this.Validators)
-        if (Validator instanceof BaseValidator)
-          ctx.output = await Validator.validate(ctx.output, ctx);
+        ctx.output = await BaseValidator.resolveValidator(Validator).validate(
+          ctx.output,
+          ctx
+        );
     });
   }
 
   public and<V extends BaseValidator<any, any, any>>(
-    validator: V
+    validator: V | (() => V)
   ): AndValidator<Type | V, Input & inferInput<V>, Output & inferOutput<V>> {
-    if (!(validator instanceof BaseValidator))
-      throw new Error("Invalid validator instance has been provided!");
-
     this.Validators.push(validator);
-
     return this as any;
   }
 }

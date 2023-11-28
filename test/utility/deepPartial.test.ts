@@ -53,14 +53,15 @@ Deno.test("Deep-Partial Validator Tests", async (ctx) => {
 
   await ctx.step("Truthy Validation Case 3", async () => {
     const Schema = e.deepPartial(
-      e.object({
-        username: e.optional(e.string()).default("Someone"),
-        password: e.string(),
-        profile: e.object({
-          fullName: e.optional(e.string()).default("Anonymus"),
-          dob: e.date(),
+      () =>
+        e.object({
+          username: e.optional(e.string()).default("Someone"),
+          password: e.string(),
+          profile: e.object({
+            fullName: e.optional(e.string()).default("Anonymus"),
+            dob: e.date(),
+          }),
         }),
-      }),
       { overrideOptionalValidator: false }
     );
 

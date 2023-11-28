@@ -37,39 +37,40 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
   Output
 > {
   protected Options: IArrayValidatorOptions;
-  protected Validator?: BaseValidator<any, any, any>;
+  protected Validator?: Type | (() => Type);
 
   protected MinLength?: number;
   protected MaxLength?: number;
 
   protected _toJSON(_options?: IJSONSchemaOptions) {
+    const Validator = BaseValidator.resolveValidator(this.Validator);
+
     return {
       type: "array",
       description: this.Description,
       minLength: this.MinLength,
       maxLength: this.MaxLength,
-      items: this.Validator?.["_toJSON"](),
+      items: Validator["_toJSON"](),
     };
   }
 
   protected _toSample(options?: ISampleDataOptions) {
     const Output = [] as Input & Array<any>;
+    const Validator = BaseValidator.resolveValidator(this.Validator);
 
-    if (this.Validator instanceof BaseValidator)
-      for (let i = 0; i < (this.MinLength ?? 1); i++)
-        Output.push(this.Validator["_toSample"](options));
+    for (let i = 0; i < (this.MinLength ?? 1); i++)
+      Output.push(Validator["_toSample"](options));
 
     return this.Sample ?? Output;
   }
 
-  constructor(validator?: Type, options: IArrayValidatorOptions = {}) {
+  constructor(
+    validator?: Type | (() => Type),
+    options: IArrayValidatorOptions = {}
+  ) {
     super(ValidatorType.NON_PRIMITIVE, options);
 
-    if (validator)
-      if (!(validator instanceof BaseValidator))
-        throw new Error("Invalid validator instance has been provided!");
-      else this.Validator = validator;
-
+    this.Validator = validator;
     this.Options = options;
 
     this.custom(async (ctx) => {
@@ -121,11 +122,14 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
 
       const Exception = new ValidationException();
 
-      if (this.Validator)
+      if (this.Validator) {
+        const Validator = BaseValidator.resolveValidator(this.Validator);
+
         for (const [Index, Input] of Object.entries(ctx.output))
           try {
             const Key = parseInt(Index);
-            ctx.output[Key] = await this.Validator.validate(Input, {
+
+            ctx.output[Key] = await Validator.validate(Input, {
               ...ctx,
               location: `${ctx.location}.${Index}`,
               index: Key,
@@ -135,6 +139,7 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
           } catch (error) {
             Exception.pushIssues(error);
           }
+      }
 
       if (Exception.issues.length) throw Exception;
     });

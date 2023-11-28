@@ -22,9 +22,9 @@ Deno.test("Pick Validator Tests", async (ctx) => {
   });
 
   await ctx.step("Truthy Validation Case 2", async () => {
-    const Schema = e.pick(
+    const Schema = e.pick(() =>
       e.object({
-        username: e.string(),
+        username: () => e.string(),
         password: e.string(),
       })
     );

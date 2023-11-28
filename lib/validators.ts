@@ -78,8 +78,11 @@ const Validators = {
    * @param options
    * @returns
    */
-  record: <Validator, Index extends string | number | symbol = string>(
-    validator?: Validator,
+  record: <
+    Validator extends BaseValidator<any, any, any>,
+    Index extends string | number | symbol = string
+  >(
+    validator?: Validator | (() => Validator),
     options?: IRecordValidatorOptions
   ) =>
     new RecordValidator<
@@ -94,7 +97,10 @@ const Validators = {
    * @param options
    * @returns
    */
-  array: <Validator>(validator?: Validator, options?: IArrayValidatorOptions) =>
+  array: <Validator extends BaseValidator<any, any, any>>(
+    validator?: Validator | (() => Validator),
+    options?: IArrayValidatorOptions
+  ) =>
     new ArrayValidator<
       Validator,
       inferInput<Validator>[],
@@ -107,7 +113,11 @@ const Validators = {
    * @param options
    * @returns
    */
-  tuple: <Validator extends Array<any>>(
+  tuple: <
+    Validator extends Array<
+      BaseValidator<any, any, any> | (() => BaseValidator<any, any, any>)
+    >
+  >(
     validators: [...Validator],
     options?: ITupleValidatorOptions
   ) =>
@@ -248,7 +258,11 @@ const Validators = {
    * @param options
    * @returns
    */
-  optional: <Validator>(
+  optional: <
+    Validator extends
+      | BaseValidator<any, any, any>
+      | (() => BaseValidator<any, any, any>)
+  >(
     validator: Validator,
     options?: IOptionalValidatorOptions
   ) =>
@@ -265,8 +279,12 @@ const Validators = {
    * @returns
    */
   and: <
-    A extends BaseValidator<any, any, any>,
-    B extends BaseValidator<any, any, any>
+    A extends
+      | BaseValidator<any, any, any>
+      | (() => BaseValidator<any, any, any>),
+    B extends
+      | BaseValidator<any, any, any>
+      | (() => BaseValidator<any, any, any>)
   >(
     a: A,
     b: B,
@@ -284,7 +302,14 @@ const Validators = {
    * @param options
    * @returns
    */
-  or: <Validator>(validators: Validator[], options?: IOrValidatorOptions) =>
+  or: <
+    Validator extends
+      | BaseValidator<any, any, any>
+      | (() => BaseValidator<any, any, any>)
+  >(
+    validators: Validator[],
+    options?: IOrValidatorOptions
+  ) =>
     new OrValidator<Validator, inferInput<Validator>, inferOutput<Validator>>(
       validators,
       options
@@ -303,21 +328,23 @@ const Validators = {
     I = Validator extends ObjectValidator<any, infer R, any> ? R : never,
     O = Validator extends ObjectValidator<any, any, infer R> ? R : never
   >(
-    validator: Validator,
+    validator: Validator | (() => Validator),
     options: { keys: Keys[] }
   ) => {
-    if (!(validator instanceof ObjectValidator))
+    const TargetValidator = BaseValidator.resolveValidator(validator);
+
+    if (!(TargetValidator instanceof ObjectValidator))
       throw new Error("Invalid object validator instance has been provided!");
 
-    const Validator = validator.clone();
+    const ClonedValidator = TargetValidator.clone();
 
-    Validator["Shape"] = Object.entries(Validator["Shape"]).reduce(
+    ClonedValidator["Shape"] = Object.entries(ClonedValidator["Shape"]).reduce(
       (shape, [key, value]) =>
         options.keys.includes(key as Keys) ? shape : { ...shape, [key]: value },
       {}
     );
 
-    return Validator as ObjectValidator<
+    return ClonedValidator as ObjectValidator<
       T extends object ? T : never,
       OmitAdvance<I, Keys extends keyof I ? Keys : never>,
       OmitAdvance<O, Keys extends keyof O ? Keys : never>
@@ -337,25 +364,27 @@ const Validators = {
     I = Validator extends ObjectValidator<any, infer R, any> ? R : never,
     O = Validator extends ObjectValidator<any, any, infer R> ? R : never
   >(
-    validator: Validator,
+    validator: Validator | (() => Validator),
     options?: { ignore?: Ignore[] } & IOptionalValidatorOptions
   ) => {
-    if (!(validator instanceof ObjectValidator))
+    const TargetValidator = BaseValidator.resolveValidator(validator);
+
+    if (!(TargetValidator instanceof ObjectValidator))
       throw new Error("Invalid object validator instance has been provided!");
 
-    const Validator = validator.clone();
+    const ClonedValidator = TargetValidator.clone();
 
-    Validator["Shape"] = Object.entries(Validator["Shape"]).reduce(
+    ClonedValidator["Shape"] = Object.entries(ClonedValidator["Shape"]).reduce(
       (shape, [key, value]) => ({
         ...shape,
         [key]: options?.ignore?.includes(key as Ignore)
           ? value
-          : Validators.optional(value, options),
+          : Validators.optional(value as any, options),
       }),
       {}
     );
 
-    return Validator as ObjectValidator<
+    return ClonedValidator as ObjectValidator<
       T extends object ? T : never,
       PartialAdvance<I, Ignore extends keyof I ? Ignore : never>,
       PartialAdvance<O, Ignore extends keyof O ? Ignore : never>
@@ -374,7 +403,7 @@ const Validators = {
     I = Validator extends ObjectValidator<any, infer R, any> ? R : never,
     O = Validator extends ObjectValidator<any, any, infer R> ? R : never
   >(
-    validator: Validator,
+    validator: Validator | (() => Validator),
     options?: IOptionalValidatorOptions & {
       /**
        * By default the optional validators already defined are overridden. Set this property to `false` in order to keep the original optional validator settings.
@@ -382,7 +411,9 @@ const Validators = {
       overrideOptionalValidator?: boolean;
     }
   ) => {
-    if (!(validator instanceof ObjectValidator))
+    const TargetValidator = BaseValidator.resolveValidator(validator);
+
+    if (!(TargetValidator instanceof ObjectValidator))
       throw new Error("Invalid object validator instance has been provided!");
 
     const deepPartialValidator = (validator: BaseValidator<any, any, any>) => {
@@ -443,7 +474,7 @@ const Validators = {
       return Validator;
     };
 
-    return deepPartialObjectValidator(validator) as ObjectValidator<
+    return deepPartialObjectValidator(TargetValidator) as ObjectValidator<
       T extends object ? T : never,
       DeepPartial<I>,
       DeepPartial<O>
@@ -456,10 +487,9 @@ const Validators = {
    * @returns
    */
   deepCast: <Validator extends BaseValidator<any, any, any>>(
-    validator: Validator
+    validator: Validator | (() => Validator)
   ) => {
-    if (!(validator instanceof BaseValidator))
-      throw new Error("Invalid validator instance has been provided!");
+    const TargetValidator = BaseValidator.resolveValidator(validator);
 
     const castValidator = (validator: BaseValidator<any, any, any>) => {
       if (validator["DeepCasted"]) return validator;
@@ -515,7 +545,7 @@ const Validators = {
       return validator;
     };
 
-    return castValidator(validator) as Validator;
+    return castValidator(TargetValidator) as Validator;
   },
 
   /**
@@ -531,15 +561,17 @@ const Validators = {
     I = Validator extends ObjectValidator<any, infer R, any> ? R : never,
     O = Validator extends ObjectValidator<any, any, infer R> ? R : never
   >(
-    validator: Validator,
+    validator: Validator | (() => Validator),
     options?: { ignore?: Ignore[] }
   ) => {
-    if (!(validator instanceof ObjectValidator))
+    const TargetValidator = BaseValidator.resolveValidator(validator);
+
+    if (!(TargetValidator instanceof ObjectValidator))
       throw new Error("Invalid object validator instance has been provided!");
 
-    const Validator = validator.clone();
+    const ClonedValidator = TargetValidator.clone();
 
-    Validator["Shape"] = Object.entries(Validator["Shape"]).reduce(
+    ClonedValidator["Shape"] = Object.entries(ClonedValidator["Shape"]).reduce(
       (shape, [key, value]) => ({
         ...shape,
         [key]: options?.ignore?.includes(key as Ignore)
@@ -551,7 +583,7 @@ const Validators = {
       {}
     );
 
-    return Validator as ObjectValidator<
+    return ClonedValidator as ObjectValidator<
       T extends object ? T : never,
       RequiredAdvance<I, Ignore extends keyof I ? Ignore : never>,
       RequiredAdvance<O, Ignore extends keyof O ? Ignore : never>
@@ -571,15 +603,17 @@ const Validators = {
     I = Validator extends ObjectValidator<any, infer R, any> ? R : never,
     O = Validator extends ObjectValidator<any, any, infer R> ? R : never
   >(
-    validator: Validator,
+    validator: Validator | (() => Validator),
     options?: { keys?: Keys[] }
   ) => {
-    if (!(validator instanceof ObjectValidator))
+    const TargetValidator = BaseValidator.resolveValidator(validator);
+
+    if (!(TargetValidator instanceof ObjectValidator))
       throw new Error("Invalid object validator instance has been provided!");
 
-    const Validator = validator.clone();
+    const ClonedValidator = TargetValidator.clone();
 
-    Validator["Shape"] = Object.entries(Validator["Shape"]).reduce(
+    ClonedValidator["Shape"] = Object.entries(ClonedValidator["Shape"]).reduce(
       (shape, [key, value]) =>
         options?.keys?.includes(key as Keys)
           ? { ...shape, [key]: value }
@@ -587,7 +621,7 @@ const Validators = {
       {}
     );
 
-    return Validator as ObjectValidator<
+    return ClonedValidator as ObjectValidator<
       T extends object ? T : never,
       PickAdvance<I, Keys extends keyof I ? Keys : never>,
       PickAdvance<O, Keys extends keyof O ? Keys : never>

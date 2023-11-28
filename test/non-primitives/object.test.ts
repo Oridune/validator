@@ -109,17 +109,18 @@ Deno.test("Object Validator Tests", async (ctx) => {
     const Result = await e
       .object({
         foo: e.string(),
-        bar: e
-          .string()
-          .custom((ctx) => {
-            assertEquals(ctx.input, Target.bar);
-            assertEquals(ctx.output, Target.bar);
-            ctx.output = "buzz";
-          })
-          .custom((ctx) => {
-            assertEquals(ctx.input, Target.bar);
-            assertEquals(ctx.output, "buzz");
-          }),
+        bar: () =>
+          e
+            .string()
+            .custom((ctx) => {
+              assertEquals(ctx.input, Target.bar);
+              assertEquals(ctx.output, Target.bar);
+              ctx.output = "buzz";
+            })
+            .custom((ctx) => {
+              assertEquals(ctx.input, Target.bar);
+              assertEquals(ctx.output, "buzz");
+            }),
         hello: e.string().custom((ctx) => {
           assertEquals(ctx.input, Target.hello);
           assertEquals(ctx.output, Target.hello);
@@ -155,24 +156,25 @@ Deno.test("Object Validator Tests", async (ctx) => {
     const Result = await e
       .object({
         foo: e.string(),
-        bar: e
-          .string()
-          .custom((ctx) => {
-            assertObjectMatch(ctx.context, Context);
-            assertEquals(ctx.input, Target.bar);
-            assertEquals(ctx.output, Target.bar);
-            ctx.output = "buzz";
-            ctx.context.password = "xyz123";
-            ctx.context.secret = Context.password;
-          })
-          .custom((ctx) => {
-            assertObjectMatch(ctx.context, {
-              password: "xyz123",
-              secret: Context.password,
-            });
-            assertEquals(ctx.input, Target.bar);
-            assertEquals(ctx.output, "buzz");
-          }),
+        bar: () =>
+          e
+            .string()
+            .custom((ctx) => {
+              assertObjectMatch(ctx.context, Context);
+              assertEquals(ctx.input, Target.bar);
+              assertEquals(ctx.output, Target.bar);
+              ctx.output = "buzz";
+              ctx.context.password = "xyz123";
+              ctx.context.secret = Context.password;
+            })
+            .custom((ctx) => {
+              assertObjectMatch(ctx.context, {
+                password: "xyz123",
+                secret: Context.password,
+              });
+              assertEquals(ctx.input, Target.bar);
+              assertEquals(ctx.output, "buzz");
+            }),
         hello: e.string().custom((ctx) => {
           assertObjectMatch(ctx.context, {
             password: "xyz123",
@@ -366,15 +368,16 @@ Deno.test("Object Validator Tests", async (ctx) => {
           {
             foo: e.number(),
             bar: e.string(),
-            baz: e
-              .string()
-              .custom((ctx) => {
-                ctx.throwsFatal();
-                throw "Another error!";
-              })
-              .custom(() => {
-                throw "Another one!";
-              }),
+            baz: () =>
+              e
+                .string()
+                .custom((ctx) => {
+                  ctx.throwsFatal();
+                  throw "Another error!";
+                })
+                .custom(() => {
+                  throw "Another one!";
+                }),
             hello: e.number(),
             hola: e.bigint(),
           },

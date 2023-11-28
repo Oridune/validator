@@ -21,31 +21,33 @@ export type IDefaultValueType<D> = D extends (
   ? T
   : D;
 
-export class OptionalValidator<Type, Input, Output> extends BaseValidator<
-  Type,
+export class OptionalValidator<
+  Type extends
+    | BaseValidator<any, any, any>
+    | (() => BaseValidator<any, any, any>),
   Input,
   Output
-> {
+> extends BaseValidator<Type, Input, Output> {
   protected Options: IOptionalValidatorOptions;
-  protected Validator: BaseValidator<any, any, any>;
+  protected Validator: Type;
   protected Default?: {
     value: any;
     validate: boolean;
   };
 
   protected _toJSON(_options?: IJSONSchemaOptions) {
-    return this.Validator["_toJSON"]();
+    return BaseValidator.resolveValidator(this.Validator)["_toJSON"]();
   }
 
   protected _toSample(options?: ISampleDataOptions) {
-    return this.Sample ?? this.Validator["_toSample"](options);
+    return (
+      this.Sample ??
+      BaseValidator.resolveValidator(this.Validator)["_toSample"](options)
+    );
   }
 
   constructor(validator: Type, options: IOptionalValidatorOptions = {}) {
     super(ValidatorType.UTILITY, {});
-
-    if (!(validator instanceof BaseValidator))
-      throw new Error("Invalid validator instance has been provided!");
 
     this.Options = options;
     this.Validator = validator;
@@ -53,13 +55,15 @@ export class OptionalValidator<Type, Input, Output> extends BaseValidator<
     this.custom(async (ctx) => {
       ctx.output = ctx.input;
 
+      const Validator = BaseValidator.resolveValidator(this.Validator);
+
       if (
-        this.Validator instanceof AnyValidator ||
+        Validator instanceof AnyValidator ||
         (ctx.output !== undefined &&
           (this.Options.nullish !== true ||
             (this.Options.nullish && !!ctx.output)))
       )
-        return await this.Validator.validate(ctx.output, ctx);
+        return await Validator.validate(ctx.output, ctx);
 
       const DefaultValue =
         typeof this.Default?.value === "function"
@@ -67,7 +71,7 @@ export class OptionalValidator<Type, Input, Output> extends BaseValidator<
           : this.Default?.value;
 
       if (this.Default?.validate)
-        return await this.Validator.validate(DefaultValue, ctx);
+        return await Validator.validate(DefaultValue, ctx);
 
       return DefaultValue;
     });

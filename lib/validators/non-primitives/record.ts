@@ -16,19 +16,21 @@ export interface IRecordValidatorOptions extends IBaseValidatorOptions {
   messages?: Partial<Record<"typeError", TErrorMessage>>;
 }
 
-export class RecordValidator<Type, Input, Output> extends BaseValidator<
-  Type,
+export class RecordValidator<
+  Type extends BaseValidator<any, any, any>,
   Input,
   Output
-> {
+> extends BaseValidator<Type, Input, Output> {
   protected Options: IRecordValidatorOptions;
-  protected Validator?: BaseValidator<any, any, any>;
+  protected Validator?: Type | (() => Type);
 
   protected _toJSON(_options?: IJSONSchemaOptions) {
+    const Validator = BaseValidator.resolveValidator(this.Validator);
+
     return {
       type: "object",
       description: this.Description,
-      additionalProperties: this.Validator?.["_toJSON"](),
+      additionalProperties: Validator["_toJSON"](),
     };
   }
 
@@ -36,14 +38,13 @@ export class RecordValidator<Type, Input, Output> extends BaseValidator<
     return this.Sample ?? ({} as Input);
   }
 
-  constructor(validator?: Type, options: IRecordValidatorOptions = {}) {
+  constructor(
+    validator?: Type | (() => Type),
+    options: IRecordValidatorOptions = {}
+  ) {
     super(ValidatorType.NON_PRIMITIVE, options);
 
-    if (validator)
-      if (!(validator instanceof BaseValidator))
-        throw new Error("Invalid validator instance has been provided!");
-      else this.Validator = validator;
-
+    this.Validator = validator;
     this.Options = options;
 
     this.custom(async (ctx) => {
@@ -66,10 +67,12 @@ export class RecordValidator<Type, Input, Output> extends BaseValidator<
 
       const Exception = new ValidationException();
 
-      if (this.Validator)
+      if (this.Validator) {
+        const Validator = BaseValidator.resolveValidator(this.Validator);
+
         for (const [Index, Input] of Object.entries(ctx.output))
           try {
-            ctx.output[Index] = await this.Validator.validate(Input, {
+            ctx.output[Index] = await Validator.validate(Input, {
               ...ctx,
               location: `${ctx.location}.${Index}`,
               index: Index,
@@ -79,16 +82,16 @@ export class RecordValidator<Type, Input, Output> extends BaseValidator<
 
             if (
               ctx.output[Index] === undefined &&
-              this.Validator instanceof OptionalValidator &&
-              (this.Validator["Options"].deletePropertyIfUndefined === true ||
-                (this.Validator["Options"].deletePropertyIfUndefined !==
-                  false &&
+              Validator instanceof OptionalValidator &&
+              (Validator["Options"].deletePropertyIfUndefined === true ||
+                (Validator["Options"].deletePropertyIfUndefined !== false &&
                   !(Index in ctx.input)))
             )
               delete ctx.output[Index];
           } catch (error) {
             Exception.pushIssues(error);
           }
+      }
 
       if (Exception.issues.length) throw Exception;
     });

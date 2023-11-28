@@ -58,7 +58,10 @@ Deno.test("Tuple Validator Tests", async (ctx) => {
   await ctx.step("Tuple of Object", async () => {
     const Target = [{ foo: "bar" }, { bar: "buzz" }];
     const Result = await e
-      .tuple([e.object({ foo: e.string() }), e.object({ bar: e.string() })])
+      .tuple([
+        () => e.object({ foo: e.string() }),
+        e.object({ bar: e.string() }),
+      ])
       .validate(Target);
     assertEquals(JSON.stringify(Result), JSON.stringify(Target));
   });
