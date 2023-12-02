@@ -723,6 +723,24 @@ const Validators = {
       throw Validators.error(error);
     }
   },
+
+  /**
+   * Check if the value passes the validation and returns a `boolean`
+   * @param validator Any validator can be passed
+   * @param value Target value to be validated
+   * @returns
+   */
+  is: (
+    validator:
+      | BaseValidator<any, any, any>
+      | (() => BaseValidator<any, any, any>),
+    value: unknown
+  ) => {
+    return BaseValidator.resolveValidator(validator)
+      .validate(value)
+      .then(() => true)
+      .catch(() => false);
+  },
 };
 
 export default Validators;
