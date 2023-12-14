@@ -88,7 +88,7 @@ export class InstanceOfValidator<Type, Input, Output> extends BaseValidator<
         } catch {
           throw await this._resolveErrorMessage(
             this.Options?.messages?.typeError,
-            `Value is not an instanceOf ${this.Constructor}!`
+            `Value is not an instanceOf ${this.Constructor.name}!`
           );
         }
     });

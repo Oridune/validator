@@ -111,6 +111,22 @@ Deno.test("Array Validator Tests", async (ctx) => {
     assertEquals(Result.length, 6);
   });
 
+  await ctx.step("Truthy Validation Case 9", async () => {
+    const Target = { 0: "foo", "2": "bar", 5: "baz", foo: "bar" };
+
+    const Result = await e
+      .array(e.record(e.string), {
+        cast: true,
+      })
+      .validate(Target)
+      .catch((error) => {
+        console.error(error);
+        throw error;
+      });
+
+    assertEquals(Result.length, 1);
+  });
+
   await ctx.step("Falsy Validation Case 1", async () => {
     try {
       await e.array().validate("hi");

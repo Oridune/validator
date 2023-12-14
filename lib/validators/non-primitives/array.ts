@@ -80,7 +80,7 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
     this.custom(async (ctx) => {
       ctx.output = ctx.input;
 
-      if (!(ctx.output instanceof Array)) {
+      cast: if (!(ctx.output instanceof Array)) {
         const Err = await this._resolveErrorMessage(
           this.Options?.messages?.typeError,
           "Invalid array has been provided!"
@@ -98,28 +98,37 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
                 .split(this.Options.splitter));
           }
 
+        if (ctx.output instanceof Array) break cast;
+
         if (
           typeof ctx.output === "object" &&
           ctx.output !== null &&
           ctx.output.constructor === Object
         )
-          return (ctx.output = Object.keys(ctx.output).reduce((array, key) => {
-            const Key = parseInt(key);
+          try {
+            return (ctx.output = Object.keys(ctx.output).reduce(
+              (array, key) => {
+                const Key = parseInt(key);
 
-            if (isNaN(Key)) {
-              if (this.Options.ignoreNanKeys) return array;
+                if (isNaN(Key)) {
+                  if (this.Options.ignoreNanKeys) return array;
 
-              throw Err;
-            }
+                  throw Err;
+                }
 
-            array[Key] = ctx.output[key];
+                array[Key] = ctx.output[key];
 
-            return array;
-          }, [] as any[]));
+                return array;
+              },
+              [] as any[]
+            ));
+          } catch {
+            // Do nothing...
+          }
 
         if (this.Options.noCastToArray) throw Err;
 
-        return (ctx.output = [ctx.output]);
+        ctx.output = [ctx.output];
       }
 
       ctx.output = [...ctx.output];
