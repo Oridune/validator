@@ -127,6 +127,23 @@ Deno.test("Array Validator Tests", async (ctx) => {
     assertEquals(Result.length, 1);
   });
 
+  await ctx.step("Truthy Validation Case 10", async () => {
+    const Target = { 0: "foo", "2": "bar", 5: "baz", foo: "bar" };
+
+    const Result = await e
+      .array(e.string, {
+        cast: true,
+        castObjectToArray: true,
+      })
+      .validate(Target)
+      .catch((error) => {
+        console.error(error);
+        throw error;
+      });
+
+    assertObjectMatch(Result, ["foo", "bar", "baz", "bar"] as any);
+  });
+
   await ctx.step("Falsy Validation Case 1", async () => {
     try {
       await e.array().validate("hi");
@@ -173,7 +190,7 @@ Deno.test("Array Validator Tests", async (ctx) => {
   await ctx.step("Falsy Validation Case 5", async () => {
     try {
       await e
-        .array(e.string(), { cast: true, noCastToArray: true })
+        .array(e.string(), { cast: true, noCastSingularToArray: true })
         .validate("string");
 
       throw new Error(`Validation Invalid!`);
@@ -186,7 +203,7 @@ Deno.test("Array Validator Tests", async (ctx) => {
   await ctx.step("Falsy Validation Case 6", async () => {
     try {
       await e
-        .array(e.string(), { cast: true, noCastToArray: true })
+        .array(e.string(), { cast: true, noCastSingularToArray: true })
         .validate("foo,bar");
 
       throw new Error(`Validation Invalid!`);

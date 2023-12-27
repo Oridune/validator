@@ -25,7 +25,12 @@ export interface IArrayValidatorOptions extends IBaseValidatorOptions {
   /**
    * Requires `cast` to be `true`
    */
-  noCastToArray?: boolean;
+  castObjectToArray?: boolean;
+
+  /**
+   * Requires `cast` to be `true`
+   */
+  noCastSingularToArray?: boolean;
   messages?: Partial<
     Record<"typeError" | "smallerLength" | "greaterLength", TErrorMessage>
   >;
@@ -104,7 +109,10 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
           typeof ctx.output === "object" &&
           ctx.output !== null &&
           ctx.output.constructor === Object
-        )
+        ) {
+          if (this.Options.castObjectToArray)
+            return (ctx.output = Object.values(ctx.output));
+
           try {
             return (ctx.output = Object.keys(ctx.output).reduce(
               (array, key) => {
@@ -125,8 +133,9 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
           } catch {
             // Do nothing...
           }
+        }
 
-        if (this.Options.noCastToArray) throw Err;
+        if (this.Options.noCastSingularToArray) throw Err;
 
         ctx.output = [ctx.output];
       }
