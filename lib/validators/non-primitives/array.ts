@@ -23,9 +23,9 @@ export interface IArrayValidatorOptions extends IBaseValidatorOptions {
   ignoreNanKeys?: boolean;
 
   /**
-   * Requires `cast` to be `true`
+   * Requires `cast` and `ignoreNanKeys` to be `true`
    */
-  castObjectToArray?: boolean;
+  pushNanKeys?: boolean;
 
   /**
    * Requires `cast` to be `true`
@@ -109,17 +109,18 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
           typeof ctx.output === "object" &&
           ctx.output !== null &&
           ctx.output.constructor === Object
-        ) {
-          if (this.Options.castObjectToArray)
-            return (ctx.output = Object.values(ctx.output));
-
+        )
           try {
             return (ctx.output = Object.keys(ctx.output).reduce(
               (array, key) => {
                 const Key = parseInt(key);
 
                 if (isNaN(Key)) {
-                  if (this.Options.ignoreNanKeys) return array;
+                  if (this.Options.ignoreNanKeys) {
+                    if (this.Options.pushNanKeys) array.push(ctx.output[key]);
+
+                    return array;
+                  }
 
                   throw Err;
                 }
@@ -133,7 +134,6 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
           } catch {
             // Do nothing...
           }
-        }
 
         if (this.Options.noCastSingularToArray) throw Err;
 

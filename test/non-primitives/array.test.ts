@@ -128,19 +128,17 @@ Deno.test("Array Validator Tests", async (ctx) => {
   });
 
   await ctx.step("Truthy Validation Case 10", async () => {
-    const Target = { 0: "foo", "2": "bar", 5: "baz", foo: "bar" };
+    const Target = { 0: "foo", "1": "bar", 2: "baz", foo: "bar" };
 
     const Result = await e
-      .array(e.string, {
-        cast: true,
-        castObjectToArray: true,
-      })
+      .array(e.string, { cast: true, ignoreNanKeys: true, pushNanKeys: true })
       .validate(Target)
       .catch((error) => {
         console.error(error);
         throw error;
       });
 
+    // deno-lint-ignore no-explicit-any
     assertObjectMatch(Result, ["foo", "bar", "baz", "bar"] as any);
   });
 

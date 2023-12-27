@@ -37,7 +37,6 @@ import {
   IIfValidatorOptions,
   InstanceOfValidator,
   IInstanceOfValidatorOptions,
-  ValidatorType,
   BaseValidator,
 } from "./validators/mod.ts";
 import { IValidationIssue, ValidationException } from "./exceptions.ts";
@@ -487,7 +486,14 @@ const Validators = {
    * @returns
    */
   deepCast: <Validator extends BaseValidator<any, any, any>>(
-    validator: Validator | (() => Validator)
+    validator: Validator | (() => Validator),
+    options?: {
+      eachValidatorOptions?:
+        | Record<string, any>
+        | ((
+            validator: BaseValidator<any, any, any>
+          ) => Record<string, any> | void);
+    }
   ) => {
     const TargetValidator = BaseValidator.resolveValidator(validator);
 
@@ -515,14 +521,17 @@ const Validators = {
 
       if (Validator instanceof ObjectValidator)
         Validator = castObjectValidator(Validator);
-      else if (
-        [ValidatorType.PRIMITIVE, ValidatorType.NON_PRIMITIVE].includes(
-          Validator["Type"]
-        )
-      ) {
-        Validator["Options"] ??= {};
-        Validator["Options"].cast = true;
-      }
+
+      Validator["Options"] ??= {};
+      Validator["Options"].cast = true;
+
+      if (options?.eachValidatorOptions)
+        Validator["Options"] = {
+          ...Validator["Options"],
+          ...(typeof options.eachValidatorOptions === "function"
+            ? options.eachValidatorOptions(Validator)
+            : options.eachValidatorOptions),
+        };
 
       Validator["DeepCasted"] = true;
 
@@ -530,17 +539,10 @@ const Validators = {
     };
 
     const castObjectValidator = (validator: ObjectValidator<any, any, any>) => {
-      if (validator["DeepCasted"]) return validator;
-
-      validator["Options"] ??= {};
-      validator["Options"].cast = true;
-
       const ValidatorShape = validator["Shape"];
 
       for (const Key in ValidatorShape)
         ValidatorShape[Key] = castValidator(ValidatorShape[Key]);
-
-      validator["DeepCasted"] = true;
 
       return validator;
     };
