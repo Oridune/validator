@@ -54,6 +54,10 @@ import {
   DeepPartial,
 } from "./types.ts";
 
+export type OverrideValidatorOptions =
+  | Record<string, any>
+  | ((validator: BaseValidator<any, any, any>) => Record<string, any> | void);
+
 const Validators = {
   /**
    * Validate an object's schema. {name: "john", "age": 25}
@@ -328,7 +332,10 @@ const Validators = {
     O = Validator extends ObjectValidator<any, any, infer R> ? R : never
   >(
     validator: Validator | (() => Validator),
-    options: { keys: Keys[] }
+    options: {
+      keys: Keys[];
+      validatorOptions?: OverrideValidatorOptions;
+    }
   ) => {
     const TargetValidator = BaseValidator.resolveValidator(validator);
 
@@ -342,6 +349,14 @@ const Validators = {
         options.keys.includes(key as Keys) ? shape : { ...shape, [key]: value },
       {}
     );
+
+    if (options?.validatorOptions)
+      ClonedValidator["Options"] = {
+        ...ClonedValidator["Options"],
+        ...(typeof options.validatorOptions === "function"
+          ? options.validatorOptions(ClonedValidator)
+          : options.validatorOptions),
+      };
 
     return ClonedValidator as ObjectValidator<
       T extends object ? T : never,
@@ -364,7 +379,10 @@ const Validators = {
     O = Validator extends ObjectValidator<any, any, infer R> ? R : never
   >(
     validator: Validator | (() => Validator),
-    options?: { ignore?: Ignore[] } & IOptionalValidatorOptions
+    options?: {
+      ignore?: Ignore[];
+      validatorOptions?: OverrideValidatorOptions;
+    } & IOptionalValidatorOptions
   ) => {
     const TargetValidator = BaseValidator.resolveValidator(validator);
 
@@ -382,6 +400,14 @@ const Validators = {
       }),
       {}
     );
+
+    if (options?.validatorOptions)
+      ClonedValidator["Options"] = {
+        ...ClonedValidator["Options"],
+        ...(typeof options.validatorOptions === "function"
+          ? options.validatorOptions(ClonedValidator)
+          : options.validatorOptions),
+      };
 
     return ClonedValidator as ObjectValidator<
       T extends object ? T : never,
@@ -408,6 +434,8 @@ const Validators = {
        * By default the optional validators already defined are overridden. Set this property to `false` in order to keep the original optional validator settings.
        */
       overrideOptionalValidator?: boolean;
+      validatorOptions?: OverrideValidatorOptions;
+      eachValidatorOptions?: OverrideValidatorOptions;
     }
   ) => {
     const TargetValidator = BaseValidator.resolveValidator(validator);
@@ -453,11 +481,20 @@ const Validators = {
 
       Validator["DeepPartialed"] = true;
 
+      if (options?.eachValidatorOptions)
+        Validator["Options"] = {
+          ...Validator["Options"],
+          ...(typeof options.eachValidatorOptions === "function"
+            ? options.eachValidatorOptions(Validator)
+            : options.eachValidatorOptions),
+        };
+
       return Validator;
     };
 
     const deepPartialObjectValidator = (
-      validator: ObjectValidator<any, any, any>
+      validator: ObjectValidator<any, any, any>,
+      start = false
     ) => {
       if (validator["DeepPartialed"]) return validator;
 
@@ -470,10 +507,18 @@ const Validators = {
 
       Validator["DeepPartialed"] = true;
 
+      if (start && options?.validatorOptions)
+        Validator["Options"] = {
+          ...Validator["Options"],
+          ...(typeof options.validatorOptions === "function"
+            ? options.validatorOptions(Validator)
+            : options.validatorOptions),
+        };
+
       return Validator;
     };
 
-    return deepPartialObjectValidator(TargetValidator) as ObjectValidator<
+    return deepPartialObjectValidator(TargetValidator, true) as ObjectValidator<
       T extends object ? T : never,
       DeepPartial<I>,
       DeepPartial<O>
@@ -488,16 +533,16 @@ const Validators = {
   deepCast: <Validator extends BaseValidator<any, any, any>>(
     validator: Validator | (() => Validator),
     options?: {
-      eachValidatorOptions?:
-        | Record<string, any>
-        | ((
-            validator: BaseValidator<any, any, any>
-          ) => Record<string, any> | void);
+      validatorOptions?: OverrideValidatorOptions;
+      eachValidatorOptions?: OverrideValidatorOptions;
     }
   ) => {
     const TargetValidator = BaseValidator.resolveValidator(validator);
 
-    const castValidator = (validator: BaseValidator<any, any, any>) => {
+    const castValidator = (
+      validator: BaseValidator<any, any, any>,
+      start = false
+    ) => {
       if (validator["DeepCasted"]) return validator;
 
       let Validator = validator;
@@ -525,6 +570,14 @@ const Validators = {
       Validator["Options"] ??= {};
       Validator["Options"].cast = true;
 
+      if (start && options?.validatorOptions)
+        Validator["Options"] = {
+          ...Validator["Options"],
+          ...(typeof options.validatorOptions === "function"
+            ? options.validatorOptions(Validator)
+            : options.validatorOptions),
+        };
+
       if (options?.eachValidatorOptions)
         Validator["Options"] = {
           ...Validator["Options"],
@@ -547,7 +600,7 @@ const Validators = {
       return validator;
     };
 
-    return castValidator(TargetValidator) as Validator;
+    return castValidator(TargetValidator, true) as Validator;
   },
 
   /**
@@ -564,7 +617,10 @@ const Validators = {
     O = Validator extends ObjectValidator<any, any, infer R> ? R : never
   >(
     validator: Validator | (() => Validator),
-    options?: { ignore?: Ignore[] }
+    options?: {
+      ignore?: Ignore[];
+      validatorOptions?: OverrideValidatorOptions;
+    }
   ) => {
     const TargetValidator = BaseValidator.resolveValidator(validator);
 
@@ -584,6 +640,14 @@ const Validators = {
       }),
       {}
     );
+
+    if (options?.validatorOptions)
+      ClonedValidator["Options"] = {
+        ...ClonedValidator["Options"],
+        ...(typeof options.validatorOptions === "function"
+          ? options.validatorOptions(ClonedValidator)
+          : options.validatorOptions),
+      };
 
     return ClonedValidator as ObjectValidator<
       T extends object ? T : never,
@@ -606,7 +670,10 @@ const Validators = {
     O = Validator extends ObjectValidator<any, any, infer R> ? R : never
   >(
     validator: Validator | (() => Validator),
-    options?: { keys?: Keys[] }
+    options?: {
+      keys?: Keys[];
+      validatorOptions?: OverrideValidatorOptions;
+    }
   ) => {
     const TargetValidator = BaseValidator.resolveValidator(validator);
 
@@ -622,6 +689,14 @@ const Validators = {
           : shape,
       {}
     );
+
+    if (options?.validatorOptions)
+      ClonedValidator["Options"] = {
+        ...ClonedValidator["Options"],
+        ...(typeof options.validatorOptions === "function"
+          ? options.validatorOptions(ClonedValidator)
+          : options.validatorOptions),
+      };
 
     return ClonedValidator as ObjectValidator<
       T extends object ? T : never,
