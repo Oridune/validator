@@ -430,6 +430,7 @@ const Validators = {
   >(
     validator: Validator | (() => Validator),
     options?: IOptionalValidatorOptions & {
+      ignoreKeys?: string[];
       /**
        * By default the optional validators already defined are overridden. Set this property to `false` in order to keep the original optional validator settings.
        */
@@ -438,12 +439,16 @@ const Validators = {
       eachValidatorOptions?: OverrideValidatorOptions;
     }
   ) => {
+    const IgnoreSet = new Set(options?.ignoreKeys);
     const TargetValidator = BaseValidator.resolveValidator(validator);
 
     if (!(TargetValidator instanceof ObjectValidator))
       throw new Error("Invalid object validator instance has been provided!");
 
-    const deepPartialValidator = (validator: BaseValidator<any, any, any>) => {
+    const deepPartialValidator = (
+      validator: BaseValidator<any, any, any>,
+      keyPrefix?: string
+    ) => {
       if (validator["DeepPartialed"]) return validator;
 
       let Validator = validator;
@@ -452,24 +457,28 @@ const Validators = {
         "Validator" in Validator &&
         Validator["Validator"] instanceof BaseValidator
       )
-        Validator["Validator"] = deepPartialValidator(Validator["Validator"]);
+        Validator["Validator"] = deepPartialValidator(
+          Validator["Validator"],
+          keyPrefix
+        );
 
       if (
         "RestValidator" in Validator &&
         Validator["RestValidator"] instanceof BaseValidator
       )
         Validator["RestValidator"] = deepPartialValidator(
-          Validator["RestValidator"]
+          Validator["RestValidator"],
+          keyPrefix
         );
 
       if ("Validators" in Validator && Validator["Validators"] instanceof Array)
         Validator["Validators"] = Validator["Validators"].map((validator) =>
-          deepPartialValidator(validator)
+          deepPartialValidator(validator, keyPrefix)
         );
 
       if (validator instanceof ObjectValidator)
         Validator = Validators.optional(
-          deepPartialObjectValidator(validator),
+          deepPartialObjectValidator(validator, false, keyPrefix),
           options
         );
       else if (validator instanceof OptionalValidator)
@@ -494,7 +503,8 @@ const Validators = {
 
     const deepPartialObjectValidator = (
       validator: ObjectValidator<any, any, any>,
-      start = false
+      start = false,
+      keyPrefix?: string
     ) => {
       if (validator["DeepPartialed"]) return validator;
 
@@ -502,8 +512,15 @@ const Validators = {
 
       const ValidatorShape = Validator["Shape"];
 
-      for (const Key in ValidatorShape)
-        ValidatorShape[Key] = deepPartialValidator(ValidatorShape[Key]);
+      for (const Key in ValidatorShape) {
+        const Index = [keyPrefix, Key].filter(Boolean).join(".");
+
+        if (!IgnoreSet.has(Index))
+          ValidatorShape[Key] = deepPartialValidator(
+            ValidatorShape[Key],
+            Index
+          );
+      }
 
       Validator["DeepPartialed"] = true;
 

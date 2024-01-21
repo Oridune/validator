@@ -74,7 +74,7 @@ Deno.test("Deep-Partial Validator Tests", async (ctx) => {
     });
   });
 
-  await ctx.step("Falsy Validation", async () => {
+  await ctx.step("Falsy Validation Case 1", async () => {
     try {
       const Schema = e.deepPartial(
         e.object({
@@ -95,6 +95,70 @@ Deno.test("Deep-Partial Validator Tests", async (ctx) => {
     } catch (e) {
       assertInstanceOf(e, ValidationException);
       assertEquals(e.issues.length, 1);
+    }
+  });
+
+  await ctx.step("Falsy Validation Case 2", async () => {
+    try {
+      const Schema = e.deepPartial(
+        e.object({
+          username: e.string(),
+          password: e.string(),
+          profile: e.object({
+            fullName: e.string(),
+            dob: e.date(),
+          }),
+        }),
+        { ignoreKeys: ["profile.dob"] }
+      );
+
+      const Data = { profile: {} };
+
+      await Schema.validate(Data).catch((error) => {
+        console.error(error);
+        throw error;
+      });
+
+      throw new Error(`Validation Invalid!`);
+    } catch (e) {
+      assertInstanceOf(e, ValidationException);
+      assertEquals(e.issues.length, 1);
+    }
+  });
+
+  await ctx.step("Falsy Validation Case 3", async () => {
+    try {
+      const Schema = e.deepPartial(
+        e.object({
+          username: e.string(),
+          password: e.string(),
+          profile: e.object({
+            fullName: e.string(),
+            dob: e.date(),
+          }),
+          timeline: e.array(
+            e.object({
+              event: e.string(),
+              metadata: e.object({
+                foo: e.string(),
+              }),
+            })
+          ),
+        }),
+        { ignoreKeys: ["profile.dob", "timeline.metadata"] }
+      );
+
+      const Data = { profile: {}, timeline: [{}] };
+
+      await Schema.validate(Data).catch((error) => {
+        console.error(error);
+        throw error;
+      });
+
+      throw new Error(`Validation Invalid!`);
+    } catch (e) {
+      assertInstanceOf(e, ValidationException);
+      assertEquals(e.issues.length, 2);
     }
   });
 });
