@@ -95,12 +95,13 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
 
         if (typeof ctx.output === "string")
           try {
-            return (ctx.output = JSON.parse(ctx.output));
+            ctx.output = JSON.parse(ctx.output);
+            break cast;
           } catch {
-            if (this.Options.splitter)
-              return (ctx.output = ctx.output
-                .toString()
-                .split(this.Options.splitter));
+            if (this.Options.splitter) {
+              ctx.output = ctx.output.toString().split(this.Options.splitter);
+              break cast;
+            }
           }
 
         if (ctx.output instanceof Array) break cast;
@@ -111,26 +112,25 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
           ctx.output.constructor === Object
         )
           try {
-            return (ctx.output = Object.keys(ctx.output).reduce(
-              (array, key) => {
-                const Key = parseInt(key);
+            ctx.output = Object.keys(ctx.output).reduce((array, key) => {
+              const Key = parseInt(key);
 
-                if (isNaN(Key)) {
-                  if (this.Options.ignoreNanKeys) {
-                    if (this.Options.pushNanKeys) array.push(ctx.output[key]);
+              if (isNaN(Key)) {
+                if (this.Options.ignoreNanKeys) {
+                  if (this.Options.pushNanKeys) array.push(ctx.output[key]);
 
-                    return array;
-                  }
-
-                  throw Err;
+                  return array;
                 }
 
-                array[Key] = ctx.output[key];
+                throw Err;
+              }
 
-                return array;
-              },
-              [] as any[]
-            ));
+              array[Key] = ctx.output[key];
+
+              return array;
+            }, [] as any[]);
+
+            break cast;
           } catch {
             // Do nothing...
           }

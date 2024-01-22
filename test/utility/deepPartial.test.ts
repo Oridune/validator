@@ -1,4 +1,4 @@
-import e, { ValidationException } from "../../mod.ts";
+import e, { ArrayValidator, ValidationException } from "../../mod.ts";
 import {
   assertEquals,
   assertInstanceOf,
@@ -154,6 +154,55 @@ Deno.test("Deep-Partial Validator Tests", async (ctx) => {
         console.error(error);
         throw error;
       });
+
+      throw new Error(`Validation Invalid!`);
+    } catch (e) {
+      assertInstanceOf(e, ValidationException);
+      assertEquals(e.issues.length, 2);
+    }
+  });
+
+  await ctx.step("Falsy Validation Case 4", async () => {
+    try {
+      const Schema = e.deepPartial(
+        e.object({
+          username: e.string(),
+          password: e.string(),
+          profile: e.object({
+            fullName: e.string(),
+            dob: e.date(),
+          }),
+          timeline: e.array(
+            e.object({
+              event: e.string(),
+              metadata: e.object({
+                foo: e.string(),
+              }),
+            }),
+            {
+              cast: true,
+              ignoreNanKeys: true,
+              pushNanKeys: true,
+            }
+          ),
+        }),
+        {
+          ignoreKeys: ["timeline"],
+        }
+      );
+
+      const Data = {
+        timeline: {
+          $: {},
+        },
+      };
+
+      await Schema.validate(Data)
+        .then(console.log)
+        .catch((error) => {
+          console.error(error);
+          throw error;
+        });
 
       throw new Error(`Validation Invalid!`);
     } catch (e) {
