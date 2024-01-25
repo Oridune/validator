@@ -381,6 +381,11 @@ const Validators = {
     validator: Validator | (() => Validator),
     options?: {
       ignore?: Ignore[];
+
+      /**
+       * By default the optional validators already defined are overridden. Set this property to `false` in order to keep the original optional validator settings.
+       */
+      overrideOptionalValidator?: boolean;
       validatorOptions?: OverrideValidatorOptions;
     } & IOptionalValidatorOptions
   ) => {
@@ -394,9 +399,12 @@ const Validators = {
     ClonedValidator["Shape"] = Object.entries(ClonedValidator["Shape"]).reduce(
       (shape, [key, value]) => ({
         ...shape,
-        [key]: options?.ignore?.includes(key as Ignore)
-          ? value
-          : Validators.optional(value as any, options),
+        [key]:
+          options?.ignore?.includes(key as Ignore) ||
+          (options?.overrideOptionalValidator === false &&
+            value instanceof OptionalValidator)
+            ? value
+            : Validators.optional(value as any, options),
       }),
       {}
     );
@@ -431,6 +439,7 @@ const Validators = {
     validator: Validator | (() => Validator),
     options?: IOptionalValidatorOptions & {
       ignoreKeys?: string[];
+
       /**
        * By default the optional validators already defined are overridden. Set this property to `false` in order to keep the original optional validator settings.
        */

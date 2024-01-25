@@ -17,7 +17,7 @@ Deno.test("Partial Validator Tests", async (ctx) => {
     const Data = {};
     const Result = await Schema.validate(Data);
 
-    assertObjectMatch(Data, Result);
+    assertObjectMatch(Result, Data);
   });
 
   await ctx.step("Truthy Validation Case 2", async () => {
@@ -31,7 +31,36 @@ Deno.test("Partial Validator Tests", async (ctx) => {
     const Data = { username: "john", password: "wick" };
     const Result = await Schema.validate(Data);
 
-    assertObjectMatch(Data, Result);
+    assertObjectMatch(Result, Data);
+  });
+
+  await ctx.step("Truthy Validation Case 3", async () => {
+    const Schema = e.partial(() =>
+      e.object({
+        username: e.string(),
+        password: e.optional(e.string()).default("secret"),
+      })
+    );
+
+    const Data = { username: "john" };
+    const Result = await Schema.validate(Data);
+
+    assertObjectMatch(Result, Data);
+  });
+
+  await ctx.step("Truthy Validation Case 4", async () => {
+    const Schema = e.partial(
+      e.object({
+        username: e.string(),
+        password: e.optional(e.string()).default("secret"),
+      }),
+      { overrideOptionalValidator: false }
+    );
+
+    const Data = { username: "john" };
+    const Result = await Schema.validate(Data);
+
+    assertObjectMatch(Result, { ...Data, password: "secret" });
   });
 
   await ctx.step("Falsy Validation", async () => {

@@ -1,4 +1,4 @@
-import e, { ArrayValidator, ValidationException } from "../../mod.ts";
+import e, { ValidationException } from "../../mod.ts";
 import {
   assertEquals,
   assertInstanceOf,
