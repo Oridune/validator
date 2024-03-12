@@ -5,7 +5,7 @@ import { TErrorMessage } from "../types.ts";
 export interface IValidatorContext<Input = any, Output = any>
   extends IValidationOptions {
   readonly input: Input;
-  output?: Output;
+  output: Output;
   throwsFatal: () => void;
 }
 
@@ -193,6 +193,7 @@ export class BaseValidator<Type, Input, Output> {
   ): Promise<Output> {
     const Context: IValidatorContext = {
       input,
+      output: input,
       name: options?.name,
       location: options?.location ?? options?.name ?? "input",
       index: options?.index,

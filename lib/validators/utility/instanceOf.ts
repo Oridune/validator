@@ -62,8 +62,6 @@ export class InstanceOfValidator<Type, Input, Output> extends BaseValidator<
     super(ValidatorType.UTILITY, Options);
 
     this._custom(async (ctx) => {
-      ctx.output = ctx.input;
-
       if (!(ctx.output instanceof this.Constructor)) {
         try {
           if (

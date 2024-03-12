@@ -37,8 +37,6 @@ export class IfValidator<Type, Input, Output> extends BaseValidator<
     super(ValidatorType.UTILITY, Options);
 
     this._custom(async (ctx) => {
-      ctx.output = ctx.input;
-
       if (
         !(typeof this.Predicate === "function"
           ? await this.Predicate(ctx.input, ctx)

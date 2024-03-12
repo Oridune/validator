@@ -35,8 +35,6 @@ export class UndefinedValidator<Type, Input, Output> extends BaseValidator<
     this.Options = options;
 
     this._custom(async (ctx) => {
-      ctx.output = ctx.input;
-
       if (ctx.output !== undefined) {
         throw await this._resolveErrorMessage(
           this.Options?.messages?.typeError,

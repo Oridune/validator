@@ -55,8 +55,6 @@ export class StringValidator<Type, Input, Output> extends BaseValidator<
     this.Options = options;
 
     this._custom(async (ctx) => {
-      ctx.output = ctx.input;
-
       if (this.Options.cast && typeof ctx.output !== "string") {
         ctx.output = `${ctx.output ?? ""}`;
       }

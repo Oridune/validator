@@ -51,8 +51,6 @@ export class OptionalValidator<
     this.Validator = validator;
 
     this._custom(async (ctx) => {
-      ctx.output = ctx.input;
-
       const Validator = BaseValidator.resolveValidator(this.Validator);
 
       if (

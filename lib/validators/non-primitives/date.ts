@@ -38,8 +38,6 @@ export class DateValidator<Type, Input, Output> extends BaseValidator<
     this.Options = options;
 
     this._custom(async (ctx) => {
-      ctx.output = ctx.input;
-
       const Output = new Date(ctx.output);
 
       if (

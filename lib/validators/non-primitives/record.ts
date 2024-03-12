@@ -2,11 +2,11 @@
 import { ValidationException } from "../../exceptions.ts";
 import { TErrorMessage } from "../../types.ts";
 import {
-  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
   ISampleDataOptions,
+  ValidatorType,
 } from "../base.ts";
 import { OptionalValidator } from "../utility/optional.ts";
 
@@ -19,14 +19,14 @@ export interface IRecordValidatorOptions extends IBaseValidatorOptions {
 export class RecordValidator<
   Type extends BaseValidator<any, any, any>,
   Input,
-  Output
+  Output,
 > extends BaseValidator<Type, Input, Output> {
   protected Options: IRecordValidatorOptions;
   protected Validator?: Type | (() => Type);
 
   protected _toJSON(_options?: IJSONSchemaOptions) {
-    const Validator =
-      this.Validator && BaseValidator.resolveValidator(this.Validator);
+    const Validator = this.Validator &&
+      BaseValidator.resolveValidator(this.Validator);
 
     return {
       type: "object",
@@ -41,7 +41,7 @@ export class RecordValidator<
 
   constructor(
     validator?: Type | (() => Type),
-    options: IRecordValidatorOptions = {}
+    options: IRecordValidatorOptions = {},
   ) {
     super(ValidatorType.NON_PRIMITIVE, options);
 
@@ -49,20 +49,20 @@ export class RecordValidator<
     this.Options = options;
 
     this._custom(async (ctx) => {
-      ctx.output = ctx.input;
-
-      if (this.Options.cast && typeof ctx.output === "string")
+      if (this.Options.cast && typeof ctx.output === "string") {
         try {
           ctx.output = JSON.parse(ctx.output);
         } catch {
           // Do nothing...
         }
+      }
 
-      if (typeof ctx.output !== "object" || ctx.output === null)
+      if (typeof ctx.output !== "object" || ctx.output === null) {
         throw await this._resolveErrorMessage(
           this.Options.messages?.typeError,
-          "Invalid object has been provided!"
+          "Invalid object has been provided!",
         );
+      }
 
       ctx.output = { ...ctx.output };
 
@@ -71,7 +71,7 @@ export class RecordValidator<
       if (this.Validator) {
         const Validator = BaseValidator.resolveValidator(this.Validator);
 
-        for (const [Index, Input] of Object.entries(ctx.output))
+        for (const [Index, Input] of Object.entries(ctx.output)) {
           try {
             ctx.output[Index] = await Validator.validate(Input, {
               ...ctx,
@@ -87,11 +87,13 @@ export class RecordValidator<
               (Validator["Options"].deletePropertyIfUndefined === true ||
                 (Validator["Options"].deletePropertyIfUndefined !== false &&
                   !(Index in ctx.input)))
-            )
+            ) {
               delete ctx.output[Index];
+            }
           } catch (error) {
             Exception.pushIssues(error);
           }
+        }
       }
 
       if (Exception.issues.length) throw Exception;

@@ -88,8 +88,6 @@ export class ObjectValidator<
     this.Options = options;
 
     this._custom(async (ctx) => {
-      ctx.output = ctx.input;
-
       if (this.Options.cast && typeof ctx.output === "string") {
         try {
           ctx.output = JSON.parse(ctx.output);

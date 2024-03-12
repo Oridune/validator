@@ -51,8 +51,6 @@ export class AndValidator<
     this.Options = options;
 
     this._custom(async (ctx) => {
-      ctx.output = ctx.input;
-
       for (const Validator of this.Validators) {
         ctx.output = await BaseValidator.resolveValidator(Validator).validate(
           ctx.output,

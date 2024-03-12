@@ -55,8 +55,6 @@ export class OrValidator<
     this.Validators = validators;
 
     this._custom(async (ctx) => {
-      ctx.output = ctx.input;
-
       const Exception = new ValidationException();
 
       for (const Validator of this.Validators) {

@@ -84,8 +84,6 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
     this.Options = options;
 
     this._custom(async (ctx) => {
-      ctx.output = ctx.input;
-
       cast: if (!(ctx.output instanceof Array)) {
         const Err = await this._resolveErrorMessage(
           this.Options?.messages?.typeError,

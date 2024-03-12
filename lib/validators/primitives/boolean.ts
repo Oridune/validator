@@ -1,10 +1,10 @@
 import { TErrorMessage } from "../../types.ts";
 import {
-  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
   ISampleDataOptions,
+  ValidatorType,
 } from "../base.ts";
 
 export interface IBooleanValidatorOptions extends IBaseValidatorOptions {
@@ -33,7 +33,7 @@ export class BooleanValidator<Type, Input, Output> extends BaseValidator<
   protected _toSample(_options?: ISampleDataOptions) {
     return (
       this.Sample ??
-      ([true, false][Math.floor(Math.random() * (1 - 0 + 1) + 0)] as Input)
+        ([true, false][Math.floor(Math.random() * (1 - 0 + 1) + 0)] as Input)
     );
   }
 
@@ -43,30 +43,31 @@ export class BooleanValidator<Type, Input, Output> extends BaseValidator<
     this.Options = options;
 
     this._custom(async (ctx) => {
-      ctx.output = ctx.input;
-
-      if (this.Options.cast && typeof ctx.output !== "boolean")
+      if (this.Options.cast && typeof ctx.output !== "boolean") {
         ctx.output = ["true", "1"].includes(`${ctx.output}`.toLowerCase());
+      }
 
-      if (typeof ctx.output !== "boolean")
+      if (typeof ctx.output !== "boolean") {
         throw await this._resolveErrorMessage(
           this.Options?.messages?.typeError,
-          "Invalid boolean has been provided!"
+          "Invalid boolean has been provided!",
         );
+      }
 
       if (
         typeof this.Options.expected === "boolean" &&
         this.Options.expected !== ctx.output
-      )
+      ) {
         throw this.Options.expected
           ? await this._resolveErrorMessage(
-              this.Options.messages?.notTrue,
-              "Value should be true!"
-            )
+            this.Options.messages?.notTrue,
+            "Value should be true!",
+          )
           : await this._resolveErrorMessage(
-              this.Options.messages?.notFalse,
-              "Value should be false!"
-            );
+            this.Options.messages?.notFalse,
+            "Value should be false!",
+          );
+      }
     });
   }
 }

@@ -1,10 +1,10 @@
 import { TErrorMessage } from "../../types.ts";
 import {
-  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
   ISampleDataOptions,
+  ValidatorType,
 } from "../base.ts";
 
 export interface INullValidatorOptions extends IBaseValidatorOptions {
@@ -35,13 +35,12 @@ export class NullValidator<Type, Input, Output> extends BaseValidator<
     this.Options = options;
 
     this._custom(async (ctx) => {
-      ctx.output = ctx.input;
-
-      if (ctx.output !== null)
+      if (ctx.output !== null) {
         throw await this._resolveErrorMessage(
           this.Options?.messages?.typeError,
-          "Value should be null!"
+          "Value should be null!",
         );
+      }
     });
   }
 }
