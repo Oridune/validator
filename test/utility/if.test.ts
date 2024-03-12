@@ -17,6 +17,12 @@ Deno.test("If Validator Tests", async (ctx) => {
     assertEquals(Result, Target);
   });
 
+  await ctx.step("Truthy Validation Case 3", async () => {
+    const Result = await e.if((v) => Promise.resolve<boolean>(!isNaN(v)))
+      .validate(Target);
+    assertEquals(Result, Target);
+  });
+
   await ctx.step("Falsy Validation Case 1", async () => {
     try {
       await e.if(false).validate(Target);

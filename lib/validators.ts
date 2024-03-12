@@ -762,7 +762,9 @@ const Validators = {
    * @returns
    */
   if: <T = any>(
-    predicate: boolean | ((value: T, ...arg: any[]) => boolean),
+    predicate:
+      | boolean
+      | ((value: T, ...arg: any[]) => boolean | Promise<boolean>),
     options?: IIfValidatorOptions,
   ) => new IfValidator<unknown, T, T>(predicate, options),
 

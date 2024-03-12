@@ -1,11 +1,11 @@
 import { TErrorMessage } from "../../types.ts";
 import {
-  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
   ISampleDataOptions,
   IValidatorContext,
+  ValidatorType,
 } from "../base.ts";
 
 export interface IIfValidatorOptions extends IBaseValidatorOptions {
@@ -31,8 +31,8 @@ export class IfValidator<Type, Input, Output> extends BaseValidator<
   constructor(
     protected Predicate:
       | boolean
-      | ((value: Input, ctx: IValidatorContext) => boolean),
-    protected Options: IIfValidatorOptions = {}
+      | ((value: Input, ctx: IValidatorContext) => boolean | Promise<boolean>),
+    protected Options: IIfValidatorOptions = {},
   ) {
     super(ValidatorType.UTILITY, Options);
 
@@ -41,13 +41,14 @@ export class IfValidator<Type, Input, Output> extends BaseValidator<
 
       if (
         !(typeof this.Predicate === "function"
-          ? this.Predicate(ctx.input, ctx)
+          ? await this.Predicate(ctx.input, ctx)
           : this.Predicate)
-      )
+      ) {
         throw await this._resolveErrorMessage(
           this.Options?.messages?.typeError,
-          "Value does not match the expectation!"
+          "Value does not match the expectation!",
         );
+      }
     });
   }
 }
