@@ -32,6 +32,7 @@ import {
   NullValidator,
   NumberValidator,
   ObjectValidator,
+  ObjectValidatorShape,
   OptionalValidator,
   OrValidator,
   RecordValidator,
@@ -70,7 +71,7 @@ const Validators = {
     options?: IObjectValidatorOptions,
   ) =>
     new ObjectValidator<
-      ObjectConstructor,
+      ObjectValidatorShape,
       inferObjectInput<Shape>,
       inferObjectOutput<Shape>
     >(shape || ({} as any), options),
@@ -325,11 +326,11 @@ const Validators = {
    * @returns
    */
   omit: <
-    Validator extends ObjectValidator<any, any, any>,
+    Validator extends BaseValidator<ObjectValidatorShape, any, any>,
     Keys extends string,
-    T = Validator extends ObjectValidator<infer R, any, any> ? R : never,
-    I = Validator extends ObjectValidator<any, infer R, any> ? R : never,
-    O = Validator extends ObjectValidator<any, any, infer R> ? R : never,
+    T = Validator extends BaseValidator<infer R, any, any> ? R : never,
+    I = Validator extends BaseValidator<any, infer R, any> ? R : never,
+    O = Validator extends BaseValidator<any, any, infer R> ? R : never,
   >(
     validator: Validator | (() => Validator),
     options: {
@@ -361,7 +362,7 @@ const Validators = {
     }
 
     return ClonedValidator as ObjectValidator<
-      T extends object ? T : never,
+      T extends ObjectValidatorShape ? T : never,
       OmitAdvance<I, Keys extends keyof I ? Keys : never>,
       OmitAdvance<O, Keys extends keyof O ? Keys : never>
     >;
@@ -374,11 +375,11 @@ const Validators = {
    * @returns
    */
   partial: <
-    Validator extends ObjectValidator<any, any, any>,
+    Validator extends BaseValidator<ObjectValidatorShape, any, any>,
     Ignore extends string,
-    T = Validator extends ObjectValidator<infer R, any, any> ? R : never,
-    I = Validator extends ObjectValidator<any, infer R, any> ? R : never,
-    O = Validator extends ObjectValidator<any, any, infer R> ? R : never,
+    T = Validator extends BaseValidator<infer R, any, any> ? R : never,
+    I = Validator extends BaseValidator<any, infer R, any> ? R : never,
+    O = Validator extends BaseValidator<any, any, infer R> ? R : never,
   >(
     validator: Validator | (() => Validator),
     options?: {
@@ -421,7 +422,7 @@ const Validators = {
     }
 
     return ClonedValidator as ObjectValidator<
-      T extends object ? T : never,
+      T extends ObjectValidatorShape ? T : never,
       PartialAdvance<I, Ignore extends keyof I ? Ignore : never>,
       PartialAdvance<O, Ignore extends keyof O ? Ignore : never>
     >;
@@ -434,10 +435,10 @@ const Validators = {
    * @returns
    */
   deepPartial: <
-    Validator extends ObjectValidator<any, any, any>,
-    T = Validator extends ObjectValidator<infer R, any, any> ? R : never,
-    I = Validator extends ObjectValidator<any, infer R, any> ? R : never,
-    O = Validator extends ObjectValidator<any, any, infer R> ? R : never,
+    Validator extends BaseValidator<ObjectValidatorShape, any, any>,
+    T = Validator extends BaseValidator<infer R, any, any> ? R : never,
+    I = Validator extends BaseValidator<any, infer R, any> ? R : never,
+    O = Validator extends BaseValidator<any, any, infer R> ? R : never,
   >(
     validator: Validator | (() => Validator),
     options?: IOptionalValidatorOptions & {
@@ -556,7 +557,7 @@ const Validators = {
     };
 
     return deepPartialObjectValidator(TargetValidator, true) as ObjectValidator<
-      T extends object ? T : never,
+      T extends ObjectValidatorShape ? T : never,
       DeepPartial<I>,
       DeepPartial<O>
     >;
@@ -656,11 +657,11 @@ const Validators = {
    * @returns
    */
   required: <
-    Validator extends ObjectValidator<any, any, any>,
+    Validator extends BaseValidator<ObjectValidatorShape, any, any>,
     Ignore extends string,
-    T = Validator extends ObjectValidator<infer R, any, any> ? R : never,
-    I = Validator extends ObjectValidator<any, infer R, any> ? R : never,
-    O = Validator extends ObjectValidator<any, any, infer R> ? R : never,
+    T = Validator extends BaseValidator<infer R, any, any> ? R : never,
+    I = Validator extends BaseValidator<any, infer R, any> ? R : never,
+    O = Validator extends BaseValidator<any, any, infer R> ? R : never,
   >(
     validator: Validator | (() => Validator),
     options?: {
@@ -698,7 +699,7 @@ const Validators = {
     }
 
     return ClonedValidator as ObjectValidator<
-      T extends object ? T : never,
+      T extends ObjectValidatorShape ? T : never,
       RequiredAdvance<I, Ignore extends keyof I ? Ignore : never>,
       RequiredAdvance<O, Ignore extends keyof O ? Ignore : never>
     >;
@@ -711,11 +712,11 @@ const Validators = {
    * @returns
    */
   pick: <
-    Validator extends ObjectValidator<any, any, any>,
+    Validator extends BaseValidator<ObjectValidatorShape, any, any>,
     Keys extends string,
-    T = Validator extends ObjectValidator<infer R, any, any> ? R : never,
-    I = Validator extends ObjectValidator<any, infer R, any> ? R : never,
-    O = Validator extends ObjectValidator<any, any, infer R> ? R : never,
+    T = Validator extends BaseValidator<infer R, any, any> ? R : never,
+    I = Validator extends BaseValidator<any, infer R, any> ? R : never,
+    O = Validator extends BaseValidator<any, any, infer R> ? R : never,
   >(
     validator: Validator | (() => Validator),
     options?: {
@@ -749,7 +750,7 @@ const Validators = {
     }
 
     return ClonedValidator as ObjectValidator<
-      T extends object ? T : never,
+      T extends ObjectValidatorShape ? T : never,
       PickAdvance<I, Keys extends keyof I ? Keys : never>,
       PickAdvance<O, Keys extends keyof O ? Keys : never>
     >;

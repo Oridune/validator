@@ -2,11 +2,11 @@
 import { ValidationException } from "../../exceptions.ts";
 import { inferInput, inferOutput } from "../../types.ts";
 import {
-  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
   ISampleDataOptions,
+  ValidatorType,
 } from "../base.ts";
 
 export interface IOrValidatorOptions extends IBaseValidatorOptions {}
@@ -16,7 +16,7 @@ export class OrValidator<
     | BaseValidator<any, any, any>
     | (() => BaseValidator<any, any, any>),
   Input,
-  Output
+  Output,
 > extends BaseValidator<Type, Input, Output> {
   protected Options: IOrValidatorOptions;
   protected Validators: (
@@ -37,9 +37,9 @@ export class OrValidator<
   protected _toSample(options?: ISampleDataOptions) {
     return (
       this.Sample ??
-      BaseValidator.resolveValidator(
-        this.Validators[Math.floor(Math.random() * this.Validators.length)]
-      )["_toSample"](options)
+        BaseValidator.resolveValidator(
+          this.Validators[Math.floor(Math.random() * this.Validators.length)],
+        )["_toSample"](options)
     );
   }
 
@@ -48,36 +48,39 @@ export class OrValidator<
 
     this.Options = options;
 
-    if (!(validators instanceof Array))
+    if (!(validators instanceof Array)) {
       throw new Error("Invalid validators list has been provided!");
+    }
 
     this.Validators = validators;
 
-    this.custom(async (ctx) => {
+    this._custom(async (ctx) => {
       ctx.output = ctx.input;
 
       const Exception = new ValidationException();
 
-      for (const Validator of this.Validators)
+      for (const Validator of this.Validators) {
         try {
           await BaseValidator.resolveValidator(Validator).validate(
             ctx.output,
-            ctx
+            ctx,
           );
           return;
         } catch (error) {
           Exception.pushIssues(error);
         }
+      }
 
       throw Exception;
     });
   }
 
   public or<V extends BaseValidator<any, any, any>>(
-    validator: V | (() => V)
+    validator: V | (() => V),
   ): OrValidator<Type | V, Input | inferInput<V>, Output | inferOutput<V>> {
-    if (!(validator instanceof BaseValidator))
+    if (!(validator instanceof BaseValidator)) {
       throw new Error("Invalid validator instance has been provided!");
+    }
 
     this.Validators.push(validator);
 

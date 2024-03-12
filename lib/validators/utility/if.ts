@@ -36,7 +36,7 @@ export class IfValidator<Type, Input, Output> extends BaseValidator<
   ) {
     super(ValidatorType.UTILITY, Options);
 
-    this.custom(async (ctx) => {
+    this._custom(async (ctx) => {
       ctx.output = ctx.input;
 
       if (

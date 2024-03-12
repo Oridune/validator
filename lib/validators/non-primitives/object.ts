@@ -1,12 +1,12 @@
 // deno-lint-ignore-file no-explicit-any
 import { ValidationException } from "../../exceptions.ts";
-import { TErrorMessage, inferInput, inferOutput } from "../../types.ts";
+import { inferInput, inferOutput, TErrorMessage } from "../../types.ts";
 import {
-  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
   ISampleDataOptions,
+  ValidatorType,
 } from "../base.ts";
 import { OptionalValidator } from "../utility/optional.ts";
 
@@ -16,10 +16,14 @@ export interface IObjectValidatorOptions extends IBaseValidatorOptions {
   messages?: Partial<Record<"typeError" | "unexpectedProperty", TErrorMessage>>;
 }
 
+export interface ObjectValidatorShape {
+  [K: string]: BaseValidator<any, any, any>;
+}
+
 export class ObjectValidator<
-  Type extends object,
+  Type extends ObjectValidatorShape,
   Input,
-  Output
+  Output,
 > extends BaseValidator<Type, Input, Output> {
   //! If any new class properties are created, remember to add them to the .clone() method!
   protected Shape: Type;
@@ -36,8 +40,8 @@ export class ObjectValidator<
 
     const RequiredProps = new Set(Properties);
 
-    const RestValidator =
-      this.RestValidator && BaseValidator.resolveValidator(this.RestValidator);
+    const RestValidator = this.RestValidator &&
+      BaseValidator.resolveValidator(this.RestValidator);
 
     return {
       type: "object",
@@ -65,10 +69,10 @@ export class ObjectValidator<
 
     return (
       this.Sample ??
-      (Properties.reduce((obj, key) => {
-        const Validator = BaseValidator.resolveValidator(this.Shape[key]);
-        return { ...obj, [key]: Validator["_toSample"]() };
-      }, {}) as Input)
+        (Properties.reduce((obj, key) => {
+          const Validator = BaseValidator.resolveValidator(this.Shape[key]);
+          return { ...obj, [key]: Validator["_toSample"]() };
+        }, {}) as Input)
     );
   }
 
@@ -76,27 +80,30 @@ export class ObjectValidator<
   constructor(shape: Type, options: IObjectValidatorOptions = {}) {
     super(ValidatorType.NON_PRIMITIVE, options);
 
-    if (typeof shape !== "object" || shape === null)
+    if (typeof shape !== "object" || shape === null) {
       throw new Error("Invalid object shape has been provided!");
+    }
 
     this.Shape = shape;
     this.Options = options;
 
-    this.custom(async (ctx) => {
+    this._custom(async (ctx) => {
       ctx.output = ctx.input;
 
-      if (this.Options.cast && typeof ctx.output === "string")
+      if (this.Options.cast && typeof ctx.output === "string") {
         try {
           ctx.output = JSON.parse(ctx.output);
         } catch {
           // Do nothing...
         }
+      }
 
-      if (typeof ctx.output !== "object" || ctx.output === null)
+      if (typeof ctx.output !== "object" || ctx.output === null) {
         throw await this._resolveErrorMessage(
           this.Options.messages?.typeError,
-          "Invalid object has been provided!"
+          "Invalid object has been provided!",
         );
+      }
 
       // De-referencing
       ctx.output = { ...ctx.output };
@@ -112,7 +119,7 @@ export class ObjectValidator<
           !Properties.includes(key as any) &&
           (this.Options.allowUnexpectedProps instanceof Array
             ? !this.Options.allowUnexpectedProps.includes(key)
-            : !this.Options.allowUnexpectedProps)
+            : !this.Options.allowUnexpectedProps),
       );
 
       if (
@@ -123,7 +130,7 @@ export class ObjectValidator<
         ctx.location = `${ctx.location}.${UnexpectedProperties[0]}`;
         throw await this._resolveErrorMessage(
           this.Options.messages?.unexpectedProperty,
-          "Unexpected property has been encountered!"
+          "Unexpected property has been encountered!",
         );
       }
 
@@ -141,7 +148,7 @@ export class ObjectValidator<
               index: Property,
               property: Property,
               parent: ctx,
-            }
+            },
           );
 
           if (
@@ -150,8 +157,9 @@ export class ObjectValidator<
             (Validator["Options"].deletePropertyIfUndefined === true ||
               (Validator["Options"].deletePropertyIfUndefined !== false &&
                 !(Property in ctx.input)))
-          )
+          ) {
             delete ctx.output[Property];
+          }
         } catch (error) {
           Exception.pushIssues(error);
         }
@@ -159,10 +167,10 @@ export class ObjectValidator<
 
       if (this.RestValidator) {
         const RestValidator = BaseValidator.resolveValidator(
-          this.RestValidator
+          this.RestValidator,
         );
 
-        for (const Property of UnexpectedProperties)
+        for (const Property of UnexpectedProperties) {
           try {
             ctx.output[Property] =
               (await RestValidator.validate(ctx.output[Property], {
@@ -179,11 +187,13 @@ export class ObjectValidator<
               (RestValidator["Options"].deletePropertyIfUndefined === true ||
                 (RestValidator["Options"].deletePropertyIfUndefined !== false &&
                   !(Property in ctx.input)))
-            )
+            ) {
               delete ctx.output[Property];
+            }
           } catch (error) {
             Exception.pushIssues(error);
           }
+        }
       }
 
       if (Exception.issues.length) throw Exception;
@@ -191,11 +201,13 @@ export class ObjectValidator<
   }
 
   public extends<
-    V extends ObjectValidator<any, any, any>,
-    I = V extends ObjectValidator<any, infer R, any> ? R : never,
-    O = V extends ObjectValidator<any, any, infer R> ? R : never
+    V extends BaseValidator<ObjectValidatorShape, any, any>,
+    I = V extends BaseValidator<ObjectValidatorShape, infer R, any> ? R
+      : never,
+    O = V extends BaseValidator<ObjectValidatorShape, any, infer R> ? R
+      : never,
   >(
-    validator: V | (() => V)
+    validator: V | (() => V),
   ): ObjectValidator<
     Type,
     Omit<Input, keyof I> & I,
@@ -205,8 +217,9 @@ export class ObjectValidator<
 
     const ExtendingValidator = BaseValidator.resolveValidator(validator);
 
-    if (!(ExtendingValidator instanceof ObjectValidator))
+    if (!(ExtendingValidator instanceof ObjectValidator)) {
       throw new Error("Invalid object validator provided!");
+    }
 
     Validator["Shape"] = { ...this.Shape, ...ExtendingValidator["Shape"] };
 
@@ -216,9 +229,9 @@ export class ObjectValidator<
   public rest<
     V extends BaseValidator<any, any, any>,
     I = inferInput<V>,
-    O = inferOutput<V>
+    O = inferOutput<V>,
   >(
-    validator: V | (() => V)
+    validator: V | (() => V),
   ): ObjectValidator<
     Type,
     Input & Partial<{ [K: string]: I }>,
@@ -232,24 +245,27 @@ export class ObjectValidator<
   public clone() {
     const Validator = new ObjectValidator<Type, Input, Output>(
       { ...this.Shape },
-      this.Options
+      this.Options,
     );
 
     Validator["Type"] = this.Type;
     Validator["DeepPartialed"] = this.DeepPartialed;
     Validator["DeepCasted"] = this.DeepCasted;
 
-    if (this.RestValidator !== undefined)
+    if (this.RestValidator !== undefined) {
       Validator["RestValidator"] = this.RestValidator;
+    }
 
-    if (this.Description !== undefined)
+    if (this.Description !== undefined) {
       Validator["Description"] = this.Description;
+    }
 
     if (this.Sample !== undefined) Validator["Sample"] = this.Sample;
 
     // Starting index is 1 because first validator need to be skipped.
-    for (let i = 1; i < this.CustomValidators.length; i++)
+    for (let i = 1; i < this.CustomValidators.length; i++) {
       Validator["CustomValidators"].push(this.CustomValidators[i]);
+    }
 
     return Validator;
   }

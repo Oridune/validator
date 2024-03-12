@@ -68,7 +68,7 @@ export class EnumValidator<Type, Input, Output> extends BaseValidator<
     this.Options = options;
     this.Choices = choices;
 
-    this.custom(async (ctx) => {
+    this._custom(async (ctx) => {
       ctx.output = ctx.input;
 
       if (

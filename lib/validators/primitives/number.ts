@@ -1,11 +1,11 @@
 // deno-lint-ignore-file no-explicit-any
 import { TErrorMessage } from "../../types.ts";
 import {
-  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
   ISampleDataOptions,
+  ValidatorType,
 } from "../base.ts";
 
 export interface INumberValidatorOptions extends IBaseValidatorOptions {
@@ -54,20 +54,20 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
   protected _toSample(_options?: ISampleDataOptions) {
     return (
       this.Sample ??
-      (() => {
-        const Min = this.MinAmount ?? 1;
-        const Max = this.MaxAmount ?? 2;
-        const Num = Math.floor(Math.random() * (Max - Min + 1) + Min);
-        const Nums: number[] = new Array(this.MinLength ?? 1).fill(0);
+        (() => {
+          const Min = this.MinAmount ?? 1;
+          const Max = this.MaxAmount ?? 2;
+          const Num = Math.floor(Math.random() * (Max - Min + 1) + Min);
+          const Nums: number[] = new Array(this.MinLength ?? 1).fill(0);
 
-        Nums[0] = Num;
+          Nums[0] = Num;
 
-        return parseInt(
-          typeof this.MaxLength === "number"
-            ? Nums.join("").slice(0, this.MaxLength)
-            : Nums.join("")
-        ) as Input;
-      })()
+          return parseInt(
+            typeof this.MaxLength === "number"
+              ? Nums.join("").slice(0, this.MaxLength)
+              : Nums.join(""),
+          ) as Input;
+        })()
     );
   }
 
@@ -76,40 +76,45 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
 
     this.Options = options;
 
-    this.custom(async (ctx) => {
+    this._custom(async (ctx) => {
       ctx.output = ctx.input;
 
-      if (this.Options.cast && typeof ctx.output !== "number")
+      if (this.Options.cast && typeof ctx.output !== "number") {
         ctx.output = parseFloat(ctx.output);
+      }
 
-      if (typeof ctx.output !== "number" || isNaN(ctx.output))
+      if (typeof ctx.output !== "number" || isNaN(ctx.output)) {
         throw await this._resolveErrorMessage(
           this.Options?.messages?.typeError,
-          "Invalid number has been provided!"
+          "Invalid number has been provided!",
         );
+      }
     });
   }
 
   public length(options: { min?: number; max?: number } | number) {
-    const Options =
-      typeof options === "object" ? options : { min: options, max: options };
+    const Options = typeof options === "object"
+      ? options
+      : { min: options, max: options };
     this.MinLength = Options.min;
     this.MaxLength = Options.max;
 
-    const Validator = this.custom(async (ctx) => {
+    const Validator = this._custom(async (ctx) => {
       const Input = `${ctx.output}`;
 
-      if (Input.length < (Options.min ?? 0))
+      if (Input.length < (Options.min ?? 0)) {
         throw await this._resolveErrorMessage(
           this.Options?.messages?.smallerLength,
-          "Number is smaller than minimum length!"
+          "Number is smaller than minimum length!",
         );
+      }
 
-      if (Input.length > (Options.max ?? Infinity))
+      if (Input.length > (Options.max ?? Infinity)) {
         throw await this._resolveErrorMessage(
           this.Options?.messages?.greaterLength,
-          "Number is greater than maximum length!"
+          "Number is greater than maximum length!",
         );
+      }
     });
 
     return Validator as NumberValidator<
@@ -124,19 +129,20 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
     this.MinAmount = Options.min;
     this.MaxAmount = Options.max;
 
-    const Validator = this.custom(async (ctx) => {
+    const Validator = this._custom(async (ctx) => {
       if (ctx.output < (Options.min ?? -Infinity)) {
         throw await this._resolveErrorMessage(
           this.Options?.messages?.smallerAmount,
-          "Number is smaller than minimum amount!"
+          "Number is smaller than minimum amount!",
         );
       }
 
-      if (ctx.output > (Options.max ?? Infinity))
+      if (ctx.output > (Options.max ?? Infinity)) {
         throw await this._resolveErrorMessage(
           this.Options?.messages?.greaterAmount,
-          "Number is greater than maximum amount!"
+          "Number is greater than maximum amount!",
         );
+      }
     });
 
     return Validator as NumberValidator<
@@ -157,12 +163,13 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
   public int() {
     this.IsInt = true;
 
-    const Validator = this.custom(async (ctx) => {
-      if (isNaN(ctx.output) || ctx.output % 1 !== 0)
+    const Validator = this._custom(async (ctx) => {
+      if (isNaN(ctx.output) || ctx.output % 1 !== 0) {
         throw await this._resolveErrorMessage(
           this.Options?.messages?.notInt,
-          "Number should be an integer!"
+          "Number should be an integer!",
         );
+      }
     });
 
     return Validator as NumberValidator<
@@ -175,12 +182,13 @@ export class NumberValidator<Type, Input, Output> extends BaseValidator<
   public float() {
     this.IsFloat = true;
 
-    const Validator = this.custom(async (ctx) => {
-      if (isNaN(ctx.output) || ctx.output % 1 === 0)
+    const Validator = this._custom(async (ctx) => {
+      if (isNaN(ctx.output) || ctx.output % 1 === 0) {
         throw await this._resolveErrorMessage(
           this.Options?.messages?.notFloat,
-          "Number should be a float!"
+          "Number should be a float!",
         );
+      }
     });
 
     return Validator as NumberValidator<

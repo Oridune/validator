@@ -1,11 +1,11 @@
 // deno-lint-ignore-file no-empty-interface no-explicit-any
 import { inferInput, inferOutput } from "../../types.ts";
 import {
-  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
   ISampleDataOptions,
+  ValidatorType,
 } from "../base.ts";
 
 export interface IAndValidatorOptions extends IBaseValidatorOptions {}
@@ -15,7 +15,7 @@ export class AndValidator<
     | BaseValidator<any, any, any>
     | (() => BaseValidator<any, any, any>),
   Input,
-  Output
+  Output,
 > extends BaseValidator<Type, Input, Output> {
   protected Options: IAndValidatorOptions;
   protected Validators: (
@@ -36,32 +36,34 @@ export class AndValidator<
   protected _toSample(options?: ISampleDataOptions) {
     return (
       this.Sample ??
-      BaseValidator.resolveValidator(this.Validators[0])["_toSample"](options)
+        BaseValidator.resolveValidator(this.Validators[0])["_toSample"](options)
     );
   }
 
   constructor(validators: Type[], options: IAndValidatorOptions = {}) {
     super(ValidatorType.UTILITY, options);
 
-    if (!(validators instanceof Array))
+    if (!(validators instanceof Array)) {
       throw new Error("Invalid validators list has been provided!");
+    }
 
     this.Validators = validators;
     this.Options = options;
 
-    this.custom(async (ctx) => {
+    this._custom(async (ctx) => {
       ctx.output = ctx.input;
 
-      for (const Validator of this.Validators)
+      for (const Validator of this.Validators) {
         ctx.output = await BaseValidator.resolveValidator(Validator).validate(
           ctx.output,
-          ctx
+          ctx,
         );
+      }
     });
   }
 
   public and<V extends BaseValidator<any, any, any>>(
-    validator: V | (() => V)
+    validator: V | (() => V),
   ): AndValidator<Type | V, Input & inferInput<V>, Output & inferOutput<V>> {
     this.Validators.push(validator);
     return this as any;

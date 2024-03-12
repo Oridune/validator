@@ -74,7 +74,7 @@ export class TupleValidator<
     this.MinLength = this.MaxLength = validators.length;
     this.Options = options;
 
-    this.custom(async (ctx) => {
+    this._custom(async (ctx) => {
       ctx.output = ctx.input;
 
       if (this.Options?.cast && typeof ctx.output === "string")
@@ -172,7 +172,7 @@ export class TupleValidator<
     this.MinLength = Options.min ?? this.MinLength;
     this.MaxLength = Options.max ?? this.MaxLength;
 
-    const Validator = this.custom(async (ctx) => {
+    const Validator = this._custom(async (ctx) => {
       if (ctx.output?.length < (Options.min ?? 0))
         throw await this._resolveErrorMessage(
           this.Options?.messages?.smallerLength,

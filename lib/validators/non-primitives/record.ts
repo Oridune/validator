@@ -48,7 +48,7 @@ export class RecordValidator<
     this.Validator = validator;
     this.Options = options;
 
-    this.custom(async (ctx) => {
+    this._custom(async (ctx) => {
       ctx.output = ctx.input;
 
       if (this.Options.cast && typeof ctx.output === "string")

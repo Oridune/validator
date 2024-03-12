@@ -1,11 +1,11 @@
 // deno-lint-ignore-file no-explicit-any
 import { TErrorMessage } from "../../types.ts";
 import {
-  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
   ISampleDataOptions,
+  ValidatorType,
 } from "../base.ts";
 
 export interface IDateValidatorOptions extends IBaseValidatorOptions {
@@ -37,7 +37,7 @@ export class DateValidator<Type, Input, Output> extends BaseValidator<
 
     this.Options = options;
 
-    this.custom(async (ctx) => {
+    this._custom(async (ctx) => {
       ctx.output = ctx.input;
 
       const Output = new Date(ctx.output);
@@ -46,31 +46,34 @@ export class DateValidator<Type, Input, Output> extends BaseValidator<
         !ctx.output ||
         Output.toString() === "Invalid Date" ||
         isNaN(Output as any)
-      )
+      ) {
         throw await this._resolveErrorMessage(
           this.Options?.messages?.typeError,
-          "Value is not a valid date!"
+          "Value is not a valid date!",
         );
+      }
 
       return Output;
     });
   }
 
   public between(options: { start?: Date | number; end?: Date | number }) {
-    const Validator = this.custom(async (ctx) => {
+    const Validator = this._custom(async (ctx) => {
       const Input = Number(ctx.output);
 
-      if (Input < Number(options.start ?? 0))
+      if (Input < Number(options.start ?? 0)) {
         throw await this._resolveErrorMessage(
           this.Options?.messages?.smaller,
-          "Date is smaller than minimum!"
+          "Date is smaller than minimum!",
         );
+      }
 
-      if (Input > Number(options.end ?? Infinity))
+      if (Input > Number(options.end ?? Infinity)) {
         throw await this._resolveErrorMessage(
           this.Options?.messages?.greater,
-          "Date is greater than maximum!"
+          "Date is greater than maximum!",
         );
+      }
     });
 
     return Validator as DateValidator<

@@ -32,7 +32,7 @@ export class AnyValidator<Type, Input, Output> extends BaseValidator<
 
     this.Options = options;
 
-    this.custom((ctx) => {
+    this._custom((ctx) => {
       ctx.output = ctx.input;
     });
   }

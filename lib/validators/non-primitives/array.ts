@@ -2,11 +2,11 @@
 import { ValidationException } from "../../exceptions.ts";
 import { TErrorMessage } from "../../types.ts";
 import {
-  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
   ISampleDataOptions,
+  ValidatorType,
 } from "../base.ts";
 
 export interface IArrayValidatorOptions extends IBaseValidatorOptions {
@@ -48,8 +48,8 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
   protected MaxLength?: number;
 
   protected _toJSON(_options?: IJSONSchemaOptions) {
-    const Validator =
-      this.Validator && BaseValidator.resolveValidator(this.Validator);
+    const Validator = this.Validator &&
+      BaseValidator.resolveValidator(this.Validator);
 
     return {
       type: "array",
@@ -66,8 +66,9 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
     if (this.Validator) {
       const Validator = BaseValidator.resolveValidator(this.Validator);
 
-      for (let i = 0; i < (this.MinLength ?? 1); i++)
+      for (let i = 0; i < (this.MinLength ?? 1); i++) {
         Output.push(Validator["_toSample"](options));
+      }
     }
 
     return this.Sample ?? Output;
@@ -75,25 +76,25 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
 
   constructor(
     validator?: Type | (() => Type),
-    options: IArrayValidatorOptions = {}
+    options: IArrayValidatorOptions = {},
   ) {
     super(ValidatorType.NON_PRIMITIVE, options);
 
     this.Validator = validator;
     this.Options = options;
 
-    this.custom(async (ctx) => {
+    this._custom(async (ctx) => {
       ctx.output = ctx.input;
 
       cast: if (!(ctx.output instanceof Array)) {
         const Err = await this._resolveErrorMessage(
           this.Options?.messages?.typeError,
-          "Invalid array has been provided!"
+          "Invalid array has been provided!",
         );
 
         if (!this.Options?.cast) throw Err;
 
-        if (typeof ctx.output === "string")
+        if (typeof ctx.output === "string") {
           try {
             ctx.output = JSON.parse(ctx.output);
             break cast;
@@ -103,6 +104,7 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
               break cast;
             }
           }
+        }
 
         if (ctx.output instanceof Array) break cast;
 
@@ -110,7 +112,7 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
           typeof ctx.output === "object" &&
           ctx.output !== null &&
           ctx.output.constructor === Object
-        )
+        ) {
           try {
             ctx.output = Object.keys(ctx.output).reduce((array, key) => {
               const Key = parseInt(key);
@@ -134,6 +136,7 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
           } catch {
             // Do nothing...
           }
+        }
 
         if (this.Options.noCastSingularToArray) throw Err;
 
@@ -147,7 +150,7 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
       if (this.Validator) {
         const Validator = BaseValidator.resolveValidator(this.Validator);
 
-        for (const [Index, Input] of Object.entries(ctx.output))
+        for (const [Index, Input] of Object.entries(ctx.output)) {
           try {
             const Key = parseInt(Index);
 
@@ -161,6 +164,7 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
           } catch (error) {
             Exception.pushIssues(error);
           }
+        }
       }
 
       if (Exception.issues.length) throw Exception;
@@ -168,23 +172,26 @@ export class ArrayValidator<Type, Input, Output> extends BaseValidator<
   }
 
   public length(options: { min?: number; max?: number } | number) {
-    const Options =
-      typeof options === "object" ? options : { min: options, max: options };
+    const Options = typeof options === "object"
+      ? options
+      : { min: options, max: options };
     this.MinLength = Options.min;
     this.MaxLength = Options.max;
 
-    const Validator = this.custom(async (ctx) => {
-      if (ctx.output?.length < (Options.min ?? 0))
+    const Validator = this._custom(async (ctx) => {
+      if (ctx.output?.length < (Options.min ?? 0)) {
         throw await this._resolveErrorMessage(
           this.Options.messages?.smallerLength,
-          "Array is smaller than minimum length!"
+          "Array is smaller than minimum length!",
         );
+      }
 
-      if (ctx.output?.length > (Options.max ?? Infinity))
+      if (ctx.output?.length > (Options.max ?? Infinity)) {
         throw await this._resolveErrorMessage(
           this.Options.messages?.greaterLength,
-          "Array is greater than maximum length!"
+          "Array is greater than maximum length!",
         );
+      }
     });
 
     return Validator as ArrayValidator<

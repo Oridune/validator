@@ -1,18 +1,18 @@
 // deno-lint-ignore-file no-explicit-any
 import { TErrorMessage } from "../../types.ts";
 import {
-  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
   ISampleDataOptions,
+  ValidatorType,
 } from "../base.ts";
 
 export interface IInstanceOfValidatorOptions<
   AllowUndefined extends boolean,
   Input,
   RestArgs extends Array<any>,
-  Args = [Input, ...RestArgs][number]
+  Args = [Input, ...RestArgs][number],
 > extends IBaseValidatorOptions {
   messages?: Partial<Record<"typeError", TErrorMessage>>;
 
@@ -57,40 +57,41 @@ export class InstanceOfValidator<Type, Input, Output> extends BaseValidator<
 
   constructor(
     protected Constructor: any,
-    protected Options: IInstanceOfValidatorOptions<boolean, any, any> = {}
+    protected Options: IInstanceOfValidatorOptions<boolean, any, any> = {},
   ) {
     super(ValidatorType.UTILITY, Options);
 
-    this.custom(async (ctx) => {
+    this._custom(async (ctx) => {
       ctx.output = ctx.input;
 
-      if (!(ctx.output instanceof this.Constructor))
+      if (!(ctx.output instanceof this.Constructor)) {
         try {
           if (
             !this.Options.instantiate ||
             (!this.Options.allowUndefined && ctx.output === undefined)
-          )
+          ) {
             throw "";
+          }
 
-          const Args =
-            typeof this.Options.instantiationArgs === "function"
-              ? await this.Options.instantiationArgs(ctx.output)
-              : this.Options.instantiationArgs instanceof Array
-              ? this.Options.instantiationArgs
-              : [
-                  ctx.output,
-                  ...(typeof this.Options.instantiationRestArgs === "function"
-                    ? await this.Options.instantiationRestArgs(ctx.output)
-                    : this.Options.instantiationRestArgs ?? []),
-                ];
+          const Args = typeof this.Options.instantiationArgs === "function"
+            ? await this.Options.instantiationArgs(ctx.output)
+            : this.Options.instantiationArgs instanceof Array
+            ? this.Options.instantiationArgs
+            : [
+              ctx.output,
+              ...(typeof this.Options.instantiationRestArgs === "function"
+                ? await this.Options.instantiationRestArgs(ctx.output)
+                : this.Options.instantiationRestArgs ?? []),
+            ];
 
           return new this.Constructor(...Args);
         } catch {
           throw await this._resolveErrorMessage(
             this.Options?.messages?.typeError,
-            `Value is not an instanceOf ${this.Constructor.name}!`
+            `Value is not an instanceOf ${this.Constructor.name}!`,
           );
         }
+      }
     });
   }
 }

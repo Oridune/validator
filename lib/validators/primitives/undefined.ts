@@ -1,10 +1,10 @@
 import { TErrorMessage } from "../../types.ts";
 import {
-  ValidatorType,
   BaseValidator,
   IBaseValidatorOptions,
   IJSONSchemaOptions,
   ISampleDataOptions,
+  ValidatorType,
 } from "../base.ts";
 
 export interface IUndefinedValidatorOptions extends IBaseValidatorOptions {
@@ -34,14 +34,15 @@ export class UndefinedValidator<Type, Input, Output> extends BaseValidator<
 
     this.Options = options;
 
-    this.custom(async (ctx) => {
+    this._custom(async (ctx) => {
       ctx.output = ctx.input;
 
-      if (ctx.output !== undefined)
+      if (ctx.output !== undefined) {
         throw await this._resolveErrorMessage(
           this.Options?.messages?.typeError,
-          "Value should be undefined!"
+          "Value should be undefined!",
         );
+      }
     });
   }
 }

@@ -1,10 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
 import {
-  ValidatorType,
   BaseValidator,
   IJSONSchemaOptions,
   ISampleDataOptions,
   IValidatorContext,
+  ValidatorType,
 } from "../base.ts";
 import { AnyValidator } from "./any.ts";
 
@@ -14,11 +14,9 @@ export interface IOptionalValidatorOptions {
 }
 
 export type IDefaultValueType<D> = D extends (
-  ctx: IValidatorContext
-) => Promise<infer T>
-  ? T
-  : D extends (ctx: IValidatorContext) => infer T
-  ? T
+  ctx: IValidatorContext,
+) => Promise<infer T> ? T
+  : D extends (ctx: IValidatorContext) => infer T ? T
   : D;
 
 export class OptionalValidator<
@@ -26,7 +24,7 @@ export class OptionalValidator<
     | BaseValidator<any, any, any>
     | (() => BaseValidator<any, any, any>),
   Input,
-  Output
+  Output,
 > extends BaseValidator<Type, Input, Output> {
   protected Options: IOptionalValidatorOptions;
   protected Validator: Type;
@@ -42,7 +40,7 @@ export class OptionalValidator<
   protected _toSample(options?: ISampleDataOptions) {
     return (
       this.Sample ??
-      BaseValidator.resolveValidator(this.Validator)["_toSample"](options)
+        BaseValidator.resolveValidator(this.Validator)["_toSample"](options)
     );
   }
 
@@ -52,7 +50,7 @@ export class OptionalValidator<
     this.Options = options;
     this.Validator = validator;
 
-    this.custom(async (ctx) => {
+    this._custom(async (ctx) => {
       ctx.output = ctx.input;
 
       const Validator = BaseValidator.resolveValidator(this.Validator);
@@ -62,16 +60,17 @@ export class OptionalValidator<
         (ctx.output !== undefined &&
           (this.Options.nullish !== true ||
             (this.Options.nullish && !!ctx.output)))
-      )
+      ) {
         return await Validator.validate(ctx.output, ctx);
+      }
 
-      const DefaultValue =
-        typeof this.Default?.value === "function"
-          ? await this.Default?.value(ctx)
-          : this.Default?.value;
+      const DefaultValue = typeof this.Default?.value === "function"
+        ? await this.Default?.value(ctx)
+        : this.Default?.value;
 
-      if (this.Default?.validate)
+      if (this.Default?.validate) {
         return await Validator.validate(DefaultValue, ctx);
+      }
 
       return DefaultValue;
     });
@@ -79,45 +78,43 @@ export class OptionalValidator<
 
   public default<
     DefaultInput extends (ctx: IValidatorContext) => any,
-    Validate extends boolean = false
+    Validate extends boolean = false,
   >(
     value: DefaultInput,
     options?: {
       validate?: Validate;
-    }
+    },
   ): OptionalValidator<
     Type,
     Input,
-    Validate extends true
-      ? Exclude<Output, undefined>
+    Validate extends true ? Exclude<Output, undefined>
       : IDefaultValueType<DefaultInput> | Exclude<Output, undefined>
   >;
   public default<DefaultInput, Validate extends boolean = false>(
     value: DefaultInput,
     options?: {
       validate?: Validate;
-    }
+    },
   ): OptionalValidator<
     Type,
     Input,
-    Validate extends true
-      ? Exclude<Output, undefined>
+    Validate extends true ? Exclude<Output, undefined>
       : DefaultInput | Exclude<Output, undefined>
   >;
   public default<DefaultInput, Validate extends boolean = false>(
     value: DefaultInput,
     options?: {
       validate?: Validate;
-    }
+    },
   ): OptionalValidator<
     Type,
     Input,
-    Validate extends true
-      ? Exclude<Output, undefined>
+    Validate extends true ? Exclude<Output, undefined>
       : DefaultInput | Exclude<Output, undefined>
   > {
-    if (typeof this.Default === "object")
+    if (typeof this.Default === "object") {
       throw new Error(`Cannot call a default method multiple times!`);
+    }
 
     this.Default = {
       value,

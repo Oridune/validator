@@ -2,9 +2,10 @@
 import { ValidationException } from "../exceptions.ts";
 import { TErrorMessage } from "../types.ts";
 
-export interface IValidatorContext extends IValidationOptions {
-  readonly input: any;
-  output?: any;
+export interface IValidatorContext<Input = any, Output = any>
+  extends IValidationOptions {
+  readonly input: Input;
+  output?: Output;
   throwsFatal: () => void;
 }
 
@@ -17,14 +18,13 @@ export interface IValidationOptions {
   context?: any;
 }
 
-export type TCustomValidator<_Input, Return> = (
-  ctx: IValidatorContext
+export type TCustomValidator<Input, Output, Return> = (
+  ctx: IValidatorContext<Input, Output>,
 ) => Return;
 
 export type TCustomValidatorReturn<Return, Default> = Return extends void
   ? Default
-  : Return extends Promise<infer R>
-  ? TCustomValidatorReturn<R, Default>
+  : Return extends Promise<infer R> ? TCustomValidatorReturn<R, Default>
   : Return;
 
 export interface IValidatorJSONSchema {
@@ -69,12 +69,13 @@ export enum ValidatorType {
 
 export class BaseValidator<Type, Input, Output> {
   static resolveValidator<V extends BaseValidator<any, any, any>>(
-    validator: any
+    validator: any,
   ): V {
     const Validator = typeof validator === "function" ? validator() : validator;
 
-    if (!(Validator instanceof BaseValidator))
+    if (!(Validator instanceof BaseValidator)) {
       throw new Error(`Invalid validator provided!`);
+    }
 
     return Validator as V;
   }
@@ -86,14 +87,14 @@ export class BaseValidator<Type, Input, Output> {
   protected Description?: string;
   protected Options?: any;
   protected Sample?: any;
-  protected CustomValidators: TCustomValidator<any, any>[] = [];
+  protected CustomValidators: TCustomValidator<any, any, any>[] = [];
 
   protected DeepPartialed = false;
   protected DeepCasted = false;
 
   protected async _resolveErrorMessage(
     message: TErrorMessage | undefined,
-    defaultMessage: string
+    defaultMessage: string,
   ) {
     return typeof message === "function"
       ? await message()
@@ -110,26 +111,35 @@ export class BaseValidator<Type, Input, Output> {
     throw new Error(`_toSample implementation is required!`);
   }
 
+  protected _custom<Return>(
+    validator: TCustomValidator<any, any, Return>,
+  ): BaseValidator<Type, Input, TCustomValidatorReturn<Return, Output>> {
+    if (typeof validator !== "function") {
+      throw new Error(`Invalid validator function has been provided!`);
+    }
+
+    this.CustomValidators.push(validator);
+    return this as any;
+  }
+
   protected async _validate(
-    ctx: IValidatorContext
+    ctx: IValidatorContext,
   ): Promise<IValidatorContext> {
-    for (const Validator of this.CustomValidators)
+    for (const Validator of this.CustomValidators) {
       try {
         ctx.output = (await Validator(ctx)) ?? ctx.output;
       } catch (error) {
-        const ResolvedError =
-          error instanceof ValidationException
-            ? error
-            : {
-                message: error.message ?? error,
-                name: ctx.name,
-                location: ctx.location,
-                input: ctx.input,
-                output: ctx.output,
-              };
+        const ResolvedError = error instanceof ValidationException ? error : {
+          message: error.message ?? error,
+          name: ctx.name,
+          location: ctx.location,
+          input: ctx.input,
+          output: ctx.output,
+        };
 
         this.Exception.pushIssues(ResolvedError);
       }
+    }
 
     if (this.Exception.issues.length) throw this.Exception;
 
@@ -145,7 +155,6 @@ export class BaseValidator<Type, Input, Output> {
 
   /**
    * Adds a stop point to the validation if there was an error occured on the current validator.
-   *
    */
   public throwsFatal() {
     this.Exception.throwsFatal();
@@ -154,7 +163,6 @@ export class BaseValidator<Type, Input, Output> {
 
   /**
    * Adds a stop point to the validation if there was an error occured on the current validator.
-   *
    */
   public checkpoint() {
     return this.throwsFatal();
@@ -166,13 +174,9 @@ export class BaseValidator<Type, Input, Output> {
    * @returns
    */
   public custom<Return>(
-    validator: TCustomValidator<Output, Return>
+    validator: TCustomValidator<Input, Output, Return>,
   ): BaseValidator<Type, Input, TCustomValidatorReturn<Return, Output>> {
-    if (typeof validator !== "function")
-      throw new Error(`Invalid validator function has been provided!`);
-
-    this.CustomValidators.push(validator);
-    return this as any;
+    return this._custom(validator);
   }
 
   /**
@@ -185,7 +189,7 @@ export class BaseValidator<Type, Input, Output> {
    */
   public async validate(
     input?: any,
-    options?: IValidationOptions
+    options?: IValidationOptions,
   ): Promise<Output> {
     const Context: IValidatorContext = {
       input,
@@ -247,10 +251,9 @@ export class BaseValidator<Type, Input, Output> {
   public toSample(options?: ISampleDataOptions) {
     return {
       data: this._toSample(options),
-      schema:
-        options?.schema !== false
-          ? this._toJSON(options?.schemaOptions)
-          : undefined,
+      schema: options?.schema !== false
+        ? this._toJSON(options?.schemaOptions)
+        : undefined,
     };
   }
 
