@@ -11,6 +11,7 @@ import {
 import { OptionalValidator } from "../utility/optional.ts";
 
 export interface IRecordValidatorOptions extends IBaseValidatorOptions {
+  key?: BaseValidator<any, any, any>;
   cast?: boolean;
   splitter?: string | RegExp;
   messages?: Partial<Record<"typeError", TErrorMessage>>;
@@ -41,12 +42,16 @@ export class RecordValidator<
 
   constructor(
     validator?: Type | (() => Type),
-    options: IRecordValidatorOptions = {},
+    options: IRecordValidatorOptions | BaseValidator<any, any, any> = {},
   ) {
-    super(ValidatorType.NON_PRIMITIVE, options);
+    const Options = options instanceof BaseValidator
+      ? { key: options }
+      : options;
+
+    super(ValidatorType.NON_PRIMITIVE, Options);
 
     this.Validator = validator;
-    this.Options = options;
+    this.Options = Options;
 
     this._custom(async (ctx) => {
       if (this.Options.cast && typeof ctx.output === "string") {
@@ -69,26 +74,34 @@ export class RecordValidator<
       const Exception = new ValidationException();
 
       if (this.Validator) {
+        const KeyValidator = this.Options.key &&
+          BaseValidator.resolveValidator(this.Options.key);
         const Validator = BaseValidator.resolveValidator(this.Validator);
 
         for (const [Index, Input] of Object.entries(ctx.output)) {
           try {
-            ctx.output[Index] = await Validator.validate(Input, {
+            let Key = Index;
+
+            if (KeyValidator) {
+              Key = await KeyValidator.validate(Key);
+            }
+
+            ctx.output[Key] = await Validator.validate(Input, {
               ...ctx,
-              location: `${ctx.location}.${Index}`,
-              index: Index,
-              property: Index,
+              location: `${ctx.location}.${Key}`,
+              index: Key,
+              property: Key,
               parent: ctx,
             });
 
             if (
-              ctx.output[Index] === undefined &&
+              ctx.output[Key] === undefined &&
               Validator instanceof OptionalValidator &&
               (Validator["Options"].deletePropertyIfUndefined === true ||
                 (Validator["Options"].deletePropertyIfUndefined !== false &&
-                  !(Index in ctx.input)))
+                  !(Key in ctx.input)))
             ) {
-              delete ctx.output[Index];
+              delete ctx.output[Key];
             }
           } catch (error) {
             Exception.pushIssues(error);
