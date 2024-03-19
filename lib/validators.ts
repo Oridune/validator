@@ -87,7 +87,7 @@ const Validators = {
     Index extends string | number | symbol = string,
   >(
     validator?: Validator | (() => Validator),
-    options?: IRecordValidatorOptions,
+    options?: IRecordValidatorOptions | BaseValidator<any, any, any>,
   ) =>
     new RecordValidator<
       Validator,
