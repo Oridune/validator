@@ -59,11 +59,10 @@ export class OrValidator<
 
       for (const Validator of this.Validators) {
         try {
-          await BaseValidator.resolveValidator(Validator).validate(
+          return await BaseValidator.resolveValidator(Validator).validate(
             ctx.output,
             ctx,
           );
-          return;
         } catch (error) {
           Exception.pushIssues(error);
         }

@@ -9,8 +9,8 @@ import e, { inferInput, inferOutput } from "./mod.ts";
 
 // console.log(await RequiredSchema.validate({}));
 
-const S = () =>
-  e.optional(e.string().sample("Saif Ali Khan")).default("something");
+// const S = () =>
+//   e.optional(e.string().sample("Saif Ali Khan")).default("something");
 
 enum Role {
   ADMIN = "admin",
@@ -23,39 +23,46 @@ enum Role {
 
 // console.log(User.toSample());
 
-const SubSchema = () =>
-  e.required(
+// const SubSchema = () =>
+//   e.required(
+//     e.object({
+//       tags: e.optional(e.record(e.string())),
+//       metadata: e.optional(e.any().sample({})),
+//       note: e.optional(e.string()),
+//     }),
+//   ).custom((ctx) => {
+//   });
+
+// const Schema = () =>
+//   e
+//     .object({
+//       name: S,
+//       contact: e.optional(e.optional(e.number().length({ min: 11 }))),
+//       role: e.optional(e.enum(Object.values(Role))),
+//       active: () => e.optional(e.boolean().custom(() => "active")),
+//       priority: e.optional(e.number().amount({ min: 0, max: 10 })),
+//       profile: e.optional(
+//         e.object({
+//           fullName: e.string(),
+//           dob: e.date(),
+//         }),
+//       ),
+//       tags: e.optional(e.array(e.string())),
+//     })
+//     .extends(
+//       SubSchema,
+//     );
+
+// const R = await Schema().validate();
+
+console.log(
+  await e.array(e.or([
+    e.string(),
     e.object({
-      tags: e.optional(e.record(e.string())),
-      metadata: e.optional(e.any().sample({})),
-      note: e.optional(e.string()),
+      role: e.optional(e.in(Object.values(Role))).default(Role.USER),
     }),
-  ).custom((ctx) => {
-  });
-
-const Schema = () =>
-  e
-    .object({
-      name: S,
-      contact: e.optional(e.optional(e.number().length({ min: 11 }))),
-      role: e.optional(e.enum(Object.values(Role))),
-      active: () => e.optional(e.boolean().custom(() => "active")),
-      priority: e.optional(e.number().amount({ min: 0, max: 10 })),
-      profile: e.optional(
-        e.object({
-          fullName: e.string(),
-          dob: e.date(),
-        }),
-      ),
-      tags: e.optional(e.array(e.string())),
-    })
-    .extends(
-      SubSchema,
-    );
-
-const R = await Schema().validate();
-
-
+  ])).validate([{}]).catch(console.error),
+);
 
 // for (let i = 0; i < 1000; i++) {
 //   console.log(i);
