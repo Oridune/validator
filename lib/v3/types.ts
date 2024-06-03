@@ -1,5 +1,13 @@
 // deno-lint-ignore-file no-explicit-any
 import type { BaseValidator } from "./validators/base.ts";
+import type { CastValidator } from "./validators/utility/cast.ts";
+import type { DeepPartialValidator } from "./validators/utility/deepPartial.ts";
+import type { DeepRequiredValidator } from "./validators/utility/deepRequired.ts";
+import type { OmitValidator } from "./validators/utility/omit.ts";
+import type { OptionalValidator } from "./validators/utility/optional.ts";
+import type { PartialValidator } from "./validators/utility/partial.ts";
+import type { PickValidator } from "./validators/utility/pick.ts";
+import type { RequiredValidator } from "./validators/utility/required.ts";
 
 export * from "../sharedTypes.ts";
 
@@ -42,3 +50,13 @@ export type inferEachOutput<
 > = {
   [K in keyof T]: inferOutput<T[K]>;
 };
+
+export type TModifierValidators =
+  | PickValidator<any, any, any>
+  | OmitValidator<any, any, any>
+  | CastValidator<any, any, any>
+  | OptionalValidator<any, any, any>
+  | PartialValidator<any, any, any>
+  | RequiredValidator<any, any, any>
+  | DeepPartialValidator<any, any, any>
+  | DeepRequiredValidator<any, any, any>;

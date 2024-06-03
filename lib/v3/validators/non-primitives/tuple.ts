@@ -127,7 +127,7 @@ export class TupleValidator<
   }
 
   constructor(validators: [...Shape], options?: ITupleValidatorOptions) {
-    super(ValidatorType.NON_PRIMITIVE, options);
+    super(ValidatorType.NON_PRIMITIVE, "tuple", options);
 
     if (!(validators instanceof Array)) {
       throw new Error("Invalid validators list has been provided!");

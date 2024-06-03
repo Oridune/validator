@@ -1,5 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
-import type { inferInput, inferOutput, PartialAdvance } from "../../types.ts";
+import type {
+  inferInput,
+  inferOutput,
+  PartialAdvance,
+  TModifierValidators,
+} from "../../types.ts";
 import {
   BaseValidator,
   type IJSONSchemaContext,
@@ -12,8 +17,6 @@ import type { ArrayValidator } from "../non-primitives/array.ts";
 import type { ObjectValidator } from "../non-primitives/object.ts";
 import type { RecordValidator } from "../non-primitives/record.ts";
 import type { TupleValidator } from "../non-primitives/tuple.ts";
-import type { OmitValidator } from "./omit.ts";
-import type { PickValidator } from "./pick.ts";
 
 export interface IPartialValidatorOptions
   extends Omit<TBaseValidatorOptions, "cast" | "optional"> {
@@ -24,8 +27,7 @@ type TAllowedValidators =
   | RecordValidator<any, any, any>
   | ArrayValidator<any, any, any>
   | TupleValidator<any, any, any>
-  | PickValidator<any, any, any>
-  | OmitValidator<any, any, any>;
+  | TModifierValidators;
 
 export class PartialValidator<
   Shape extends TAllowedValidators,
@@ -39,7 +41,10 @@ export class PartialValidator<
   protected overrideContext(ctx: any) {
     return {
       ...ctx,
-      options: { ...ctx.validatorOptions, partial: true },
+      options: {
+        ...ctx.validatorOptions,
+        partial: true,
+      },
     };
   }
 
@@ -67,7 +72,7 @@ export class PartialValidator<
     validator: Shape | (() => Shape),
     options?: IPartialValidatorOptions,
   ) {
-    super(ValidatorType.UTILITY, options);
+    super(ValidatorType.UTILITY, "partial", options);
 
     this.Validator = validator;
 

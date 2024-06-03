@@ -40,7 +40,7 @@ export class BigIntValidator<
   }
 
   constructor(options?: IBigIntValidatorOptions) {
-    super(ValidatorType.PRIMITIVE, options);
+    super(ValidatorType.PRIMITIVE, "bigint", options);
 
     this._custom(async (ctx) => {
       if (typeof ctx.output !== "bigint") {

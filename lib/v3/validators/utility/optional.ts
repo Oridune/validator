@@ -63,7 +63,7 @@ export class OptionalValidator<
     validator: Shape | (() => Shape),
     options?: IOptionalValidatorOptions,
   ) {
-    super(ValidatorType.UTILITY, options);
+    super(ValidatorType.UTILITY, "optional", options);
 
     this.Validator = validator;
 

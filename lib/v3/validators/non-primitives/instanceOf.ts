@@ -93,7 +93,7 @@ export class InstanceOfValidator<
     protected Constructor: any,
     options?: IInstanceOfValidatorOptions<any, any, any>,
   ) {
-    super(ValidatorType.NON_PRIMITIVE, options);
+    super(ValidatorType.NON_PRIMITIVE, "instanceOf", options);
 
     this._custom(async (ctx) => {
       if (!(ctx.output instanceof this.Constructor)) {

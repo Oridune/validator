@@ -165,7 +165,7 @@ export class ArrayValidator<
     validator?: Shape | (() => Shape),
     options?: IArrayValidatorOptions,
   ) {
-    super(ValidatorType.NON_PRIMITIVE, options);
+    super(ValidatorType.NON_PRIMITIVE, "array", options);
 
     this.Validator = validator;
 

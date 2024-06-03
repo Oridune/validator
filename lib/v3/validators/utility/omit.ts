@@ -1,5 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
-import type { inferInput, inferOutput, OmitAdvance } from "../../types.ts";
+import type {
+  inferInput,
+  inferOutput,
+  OmitAdvance,
+  TModifierValidators,
+} from "../../types.ts";
 import {
   BaseValidator,
   type IJSONSchemaContext,
@@ -14,7 +19,9 @@ export interface IOmitValidatorOptions
   extends Omit<TBaseValidatorOptions, "cast" | "optional"> {
 }
 
-type TAllowedValidators = ObjectValidator<any, any, any>;
+type TAllowedValidators =
+  | ObjectValidator<any, any, any>
+  | TModifierValidators;
 
 export class OmitValidator<
   Shape extends TAllowedValidators,
@@ -73,7 +80,7 @@ export class OmitValidator<
     protected Keys: string[],
     options?: IOmitValidatorOptions,
   ) {
-    super(ValidatorType.UTILITY, options);
+    super(ValidatorType.UTILITY, "omit", options);
 
     this.Validator = validator;
 

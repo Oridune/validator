@@ -130,8 +130,6 @@ export class BaseValidator<
   Input = any,
   Output = any,
 > {
-  static DebugMode = false;
-
   static createFactory<T, A extends unknown[]>(
     cls: new (...args: A) => T,
   ): (...args: A) => T {
@@ -192,13 +190,14 @@ export class BaseValidator<
   protected _custom<Return>(
     validator: TCustomValidator<any, any, Return>,
   ) {
-    if (this.Type === ValidatorType.UTILITY) {
+    if (
+      this.Type === ValidatorType.UTILITY &&
+      !["and", "or", "if"].includes(this.ID)
+    ) {
       this.CustomValidators.push(validator);
     } else {
       this.CustomValidators.push(
         async (ctx: IValidatorContext<any, any>) => {
-          if (ctx.validatorOptions?.cast) await this._cast(ctx);
-
           optional: if (ctx.validatorOptions?.optional ?? false) {
             const OptionalOptions = ctx.validatorOptions?.optionalOptions;
 
@@ -216,6 +215,8 @@ export class BaseValidator<
 
             if (OptionalOptions?.validate !== true) return ctx.output;
           }
+
+          if (ctx.validatorOptions?.cast) await this._cast(ctx);
 
           return await validator(ctx);
         },
@@ -262,6 +263,7 @@ export class BaseValidator<
 
   constructor(
     public Type: ValidatorType,
+    public ID: string,
     private ValidatorOptions: TBaseValidatorOptions = {},
   ) {
     this.Description = ValidatorOptions.description;
@@ -348,7 +350,7 @@ export class BaseValidator<
       deepOptions: ctx?.deepOptions,
     };
 
-    if (BaseValidator.DebugMode) {
+    if (ValidationDebugger.enabled) {
       Context.debugger = ctx?.debugger ??
         new ValidationDebugger(ctx?.name);
 

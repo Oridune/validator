@@ -77,7 +77,7 @@ export class StringValidator<
   }
 
   constructor(options?: IStringValidatorOptions) {
-    super(ValidatorType.PRIMITIVE, options);
+    super(ValidatorType.PRIMITIVE, "string", options);
 
     this._custom(async (ctx) => {
       if (typeof ctx.output !== "string") {

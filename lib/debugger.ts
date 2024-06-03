@@ -1,7 +1,7 @@
 import { blue, dim, gray, green, red, yellow } from "@std/fmt/colors";
 import { ValidationException } from "./exceptions.ts";
 
-export type DebuggerDetails = {
+export type TDebuggerDetails = {
   label: string;
   tags?: string[];
   config?: object;
@@ -9,28 +9,46 @@ export type DebuggerDetails = {
   thrown?: unknown;
 };
 
-export class ValidationDebugger {
-  protected Tabs = 0;
-  protected Logs: Array<[number, boolean, DebuggerDetails]> = [];
+export type TLogFilters = {
+  label?: string | string[];
+};
 
-  protected stringify(obj: unknown, space?: number) {
+export class ValidationDebugger {
+  static enabled = false;
+  static logFilters: TLogFilters = {};
+
+  protected Tabs = 0;
+  protected Logs: Array<[number, boolean, TDebuggerDetails]> = [];
+
+  constructor(protected Label = "Validation Debugger") {}
+
+  public stringify(obj: unknown, space?: number) {
+    const seen = new WeakSet();
+
     return JSON.stringify(
       obj,
-      (_, value) => typeof value === "bigint" ? `${value}n` : value,
+      (_, value) => {
+        if (typeof value === "bigint") return `${value}n`;
+        if (typeof value === "object" && value !== null) {
+          if (seen.has(value)) return "[Circular]";
+
+          seen.add(value);
+        }
+
+        return value;
+      },
       space,
     );
   }
 
-  constructor(protected Label = "Validation Debugger") {}
-
-  public entry(details: DebuggerDetails) {
+  public entry(details: TDebuggerDetails) {
     this.Logs.push([this.Tabs, true, details]);
     this.Tabs++;
 
     return this;
   }
 
-  public exit(details: DebuggerDetails) {
+  public exit(details: TDebuggerDetails) {
     this.Tabs--;
     this.Logs.push([this.Tabs, false, details]);
 
@@ -50,6 +68,11 @@ export class ValidationDebugger {
       console.log();
 
       for (const [tab, isEntry, details] of this.Logs) {
+        if (
+          ValidationDebugger.logFilters.label &&
+          details.label !== ValidationDebugger.logFilters.label
+        ) continue;
+
         const Space = new Array(tab).fill("    ").join("");
 
         const ErrorMsg = details.thrown instanceof ValidationException
@@ -70,7 +93,7 @@ export class ValidationDebugger {
         if (details.config) {
           for (const [key, value] of Object.entries(details.config)) {
             console.log(
-              Space + "\t",
+              Space + "    ",
               dim(
                 `${key} => ${this.stringify(value)}`,
               ),
@@ -80,7 +103,7 @@ export class ValidationDebugger {
 
         if (details.output !== undefined) {
           console.log(
-            Space + "\t",
+            Space + "    ",
             yellow(
               `Output: ${this.stringify(details.output)}`,
             ),

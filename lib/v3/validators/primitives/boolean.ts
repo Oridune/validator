@@ -67,7 +67,7 @@ export class BooleanValidator<
   }
 
   constructor(options?: IBooleanValidatorOptions) {
-    super(ValidatorType.PRIMITIVE, options);
+    super(ValidatorType.PRIMITIVE, "boolean", options);
 
     this._custom(async (ctx) => {
       if (typeof ctx.output !== "boolean") {

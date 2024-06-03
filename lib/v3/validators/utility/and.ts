@@ -77,7 +77,7 @@ export class AndValidator<
     validators: [...Shape],
     options?: IAndValidatorOptions,
   ) {
-    super(ValidatorType.UTILITY, options);
+    super(ValidatorType.UTILITY, "and", options);
 
     if (!(validators instanceof Array)) {
       throw new Error("Invalid validators list has been provided!");

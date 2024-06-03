@@ -32,7 +32,12 @@ export class CastValidator<
     return {
       ...ctx,
       ...(ctx.validatorOptions?.deepCast
-        ? { deepOptions: { cast: ctx.validatorOptions?.cast ?? true } }
+        ? {
+          deepOptions: {
+            ...ctx.deepOptions,
+            cast: ctx.validatorOptions?.cast ?? true,
+          },
+        }
         : {}),
       options: {
         ...ctx.validatorOptions,
@@ -65,7 +70,7 @@ export class CastValidator<
     validator: Shape | (() => Shape),
     options?: ICastValidatorOptions,
   ) {
-    super(ValidatorType.UTILITY, options);
+    super(ValidatorType.UTILITY, "cast", options);
 
     this.Validator = validator;
 

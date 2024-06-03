@@ -89,7 +89,7 @@ export class NumberValidator<
   }
 
   constructor(options?: INumberValidatorOptions) {
-    super(ValidatorType.PRIMITIVE, options);
+    super(ValidatorType.PRIMITIVE, "number", options);
 
     this._custom(async (ctx) => {
       if (typeof ctx.output !== "number" || isNaN(ctx.output)) {

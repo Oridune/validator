@@ -165,7 +165,7 @@ export class ObjectValidator<
 
   //! If any new class properties are created, remember to add them to the .clone() method!
   constructor(shape: Shape = {} as Shape, options?: IObjectValidatorOptions) {
-    super(ValidatorType.NON_PRIMITIVE, options);
+    super(ValidatorType.NON_PRIMITIVE, "object", options);
 
     if (typeof shape !== "object" || shape === null) {
       throw new Error("Invalid object shape has been provided!");

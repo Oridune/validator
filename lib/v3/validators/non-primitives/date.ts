@@ -47,7 +47,7 @@ export class DateValidator<
   }
 
   constructor(options?: IDateValidatorOptions) {
-    super(ValidatorType.NON_PRIMITIVE, options);
+    super(ValidatorType.NON_PRIMITIVE, "date", options);
 
     this._custom(async (ctx) => {
       const Output = new Date(ctx.output);

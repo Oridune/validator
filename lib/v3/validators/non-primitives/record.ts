@@ -91,7 +91,7 @@ export class RecordValidator<
       ? { key: options }
       : options;
 
-    super(ValidatorType.NON_PRIMITIVE, Options);
+    super(ValidatorType.NON_PRIMITIVE, "record", Options);
 
     this.Validator = validator;
 

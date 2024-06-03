@@ -1,5 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
-import type { DeepRequired, inferInput, inferOutput } from "../../types.ts";
+import type {
+  DeepRequired,
+  inferInput,
+  inferOutput,
+  TModifierValidators,
+} from "../../types.ts";
 import {
   BaseValidator,
   type IJSONSchemaContext,
@@ -17,12 +22,15 @@ export interface IDeepRequiredValidatorOptions
   extends Omit<TBaseValidatorOptions, "cast" | "optional"> {
 }
 
+type TAllowedValidators =
+  | ObjectValidator<any, any, any>
+  | RecordValidator<any, any, any>
+  | ArrayValidator<any, any, any>
+  | TupleValidator<any, any, any>
+  | TModifierValidators;
+
 export class DeepRequiredValidator<
-  Shape extends
-    | ObjectValidator<any, any, any>
-    | RecordValidator<any, any, any>
-    | ArrayValidator<any, any, any>
-    | TupleValidator<any, any, any>,
+  Shape extends TAllowedValidators,
   Input = DeepRequired<inferInput<Shape>>,
   Output = DeepRequired<inferOutput<Shape>>,
 > extends BaseValidator<Shape, Input, Output> {
@@ -33,8 +41,14 @@ export class DeepRequiredValidator<
   protected overrideContext(ctx: any) {
     return {
       ...ctx,
-      deepOptions: { required: true },
-      options: { ...ctx.validatorOptions, required: true },
+      deepOptions: {
+        ...ctx.deepOptions,
+        required: true,
+      },
+      options: {
+        ...ctx.validatorOptions,
+        required: true,
+      },
     };
   }
 
@@ -62,7 +76,7 @@ export class DeepRequiredValidator<
     validator: Shape | (() => Shape),
     options?: IDeepRequiredValidatorOptions,
   ) {
-    super(ValidatorType.UTILITY, options);
+    super(ValidatorType.UTILITY, "deepRequired", options);
 
     this.Validator = validator;
 

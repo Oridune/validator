@@ -49,7 +49,7 @@ export class IfValidator<
     protected Predicate: Shape,
     options?: IIfValidatorOptions,
   ) {
-    super(ValidatorType.UTILITY, options);
+    super(ValidatorType.UTILITY, "if", options);
 
     this._custom(async (ctx) => {
       if (

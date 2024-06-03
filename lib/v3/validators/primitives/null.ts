@@ -40,7 +40,7 @@ export class NullValidator<
   }
 
   constructor(options?: INullValidatorOptions) {
-    super(ValidatorType.PRIMITIVE, options);
+    super(ValidatorType.PRIMITIVE, "null", options);
 
     this._custom(async (ctx) => {
       if (ctx.output !== null) {

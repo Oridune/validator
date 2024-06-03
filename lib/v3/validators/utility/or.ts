@@ -71,7 +71,7 @@ export class OrValidator<
   }
 
   constructor(validators: Shape[], options?: IOrValidatorOptions) {
-    super(ValidatorType.UTILITY, options);
+    super(ValidatorType.UTILITY, "or", options);
 
     if (!(validators instanceof Array)) {
       throw new Error("Invalid validators list has been provided!");

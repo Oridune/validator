@@ -34,6 +34,6 @@ export class AnyValidator<
   }
 
   constructor(options?: IAnyValidatorOptions) {
-    super(ValidatorType.UTILITY, options);
+    super(ValidatorType.UTILITY, "any", options);
   }
 }

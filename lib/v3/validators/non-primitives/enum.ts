@@ -69,7 +69,7 @@ export class EnumValidator<
     choices: Input[] | ((ctx: IValidatorContext) => Input[] | Promise<Input[]>),
     options?: IEnumValidatorOptions,
   ) {
-    super(ValidatorType.NON_PRIMITIVE, options);
+    super(ValidatorType.NON_PRIMITIVE, "enum", options);
 
     if (!(choices instanceof Array) && typeof choices !== "function") {
       throw new Error("Invalid choice list has been provided!");

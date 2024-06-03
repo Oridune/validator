@@ -1,5 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
-import type { inferInput, inferOutput, PickAdvance } from "../../types.ts";
+import type {
+  inferInput,
+  inferOutput,
+  PickAdvance,
+  TModifierValidators,
+} from "../../types.ts";
 import {
   BaseValidator,
   type IJSONSchemaContext,
@@ -14,7 +19,9 @@ export interface IPickValidatorOptions
   extends Omit<TBaseValidatorOptions, "cast" | "optional"> {
 }
 
-type TAllowedValidators = ObjectValidator<any, any, any>;
+type TAllowedValidators =
+  | ObjectValidator<any, any, any>
+  | TModifierValidators;
 
 export class PickValidator<
   Shape extends TAllowedValidators,
@@ -41,7 +48,10 @@ export class PickValidator<
   protected overrideContext(ctx: any) {
     return {
       ...ctx,
-      options: { ...ctx.validatorOptions, pickKeys: this.Keys },
+      options: {
+        ...ctx.validatorOptions,
+        pickKeys: this.Keys,
+      },
     };
   }
 
@@ -70,7 +80,7 @@ export class PickValidator<
     protected Keys: string[],
     options?: IPickValidatorOptions,
   ) {
-    super(ValidatorType.UTILITY, options);
+    super(ValidatorType.UTILITY, "pick", options);
 
     this.Validator = validator;
 

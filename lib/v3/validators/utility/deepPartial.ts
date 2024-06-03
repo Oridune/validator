@@ -1,5 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
-import type { DeepPartial, inferInput, inferOutput } from "../../types.ts";
+import type {
+  DeepPartial,
+  inferInput,
+  inferOutput,
+  TModifierValidators,
+} from "../../types.ts";
 import {
   BaseValidator,
   type IJSONSchemaContext,
@@ -17,12 +22,15 @@ export interface IDeepPartialValidatorOptions
   extends Omit<TBaseValidatorOptions, "cast" | "optional"> {
 }
 
+type TAllowedValidators =
+  | ObjectValidator<any, any, any>
+  | RecordValidator<any, any, any>
+  | ArrayValidator<any, any, any>
+  | TupleValidator<any, any, any>
+  | TModifierValidators;
+
 export class DeepPartialValidator<
-  Shape extends
-    | ObjectValidator<any, any, any>
-    | RecordValidator<any, any, any>
-    | ArrayValidator<any, any, any>
-    | TupleValidator<any, any, any>,
+  Shape extends TAllowedValidators,
   Input = DeepPartial<inferInput<Shape>>,
   Output = DeepPartial<inferOutput<Shape>>,
 > extends BaseValidator<Shape, Input, Output> {
@@ -33,8 +41,14 @@ export class DeepPartialValidator<
   protected overrideContext(ctx: any) {
     return {
       ...ctx,
-      deepOptions: { partial: true },
-      options: { ...ctx.validatorOptions, partial: true },
+      deepOptions: {
+        ...ctx.deepOptions,
+        partial: true,
+      },
+      options: {
+        ...ctx.validatorOptions,
+        partial: true,
+      },
     };
   }
 
@@ -62,7 +76,7 @@ export class DeepPartialValidator<
     validator: Shape | (() => Shape),
     options?: IDeepPartialValidatorOptions,
   ) {
-    super(ValidatorType.UTILITY, options);
+    super(ValidatorType.UTILITY, "deepPartial", options);
 
     this.Validator = validator;
 

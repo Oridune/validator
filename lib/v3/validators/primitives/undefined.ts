@@ -40,7 +40,7 @@ export class UndefinedValidator<
   }
 
   constructor(options?: IUndefinedValidatorOptions) {
-    super(ValidatorType.PRIMITIVE, options);
+    super(ValidatorType.PRIMITIVE, "undefined", options);
 
     this._custom(async (ctx) => {
       if (ctx.output !== undefined) {
