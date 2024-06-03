@@ -1,7 +1,3 @@
-export * from "./lib/validators/mod.ts";
-export * from "./lib/types.ts";
-export * from "./lib/exceptions.ts";
-
-import _ from "./lib/validators.ts";
-
+export * from "./v3.ts";
+import _ from "./v3.ts";
 export default _;

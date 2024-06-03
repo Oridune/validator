@@ -1,148 +1,19 @@
-import e, { inferInput, inferOutput } from "./mod.ts";
+import e, { BaseValidator } from "./v3.ts";
 
-// const Schema = e.object({
-//   username: e.optional(e.string()),
-//   password: e.optional(e.string()),
-// });
+BaseValidator.DebugMode = true;
 
-// const RequiredSchema = e.required(Schema);
+const Schema1 = e.object({
+  foo: e.string(),
+  bar: e.string(),
+  baz: e.number(),
+  hel: e.number(),
+});
 
-// console.log(await RequiredSchema.validate({}));
+const Schema2 = e.partial(e.pick(Schema1, ["foo", "bar"]));
 
-// const S = () =>
-//   e.optional(e.string().sample("Saif Ali Khan")).default("something");
+const Schema3 = e.omit(Schema1, ["foo", "bar"]);
 
-enum Role {
-  ADMIN = "admin",
-  USER = "user",
-}
+const Schema4 = e.object().extends(Schema2)
+  .extends(Schema3);
 
-// const User = e.object({
-//   oauthAppId: e.string(),
-// });
-
-// console.log(User.toSample());
-
-// const SubSchema = () =>
-//   e.required(
-//     e.object({
-//       tags: e.optional(e.record(e.string())),
-//       metadata: e.optional(e.any().sample({})),
-//       note: e.optional(e.string()),
-//     }),
-//   ).custom((ctx) => {
-//   });
-
-// const Schema = () =>
-//   e
-//     .object({
-//       name: S,
-//       contact: e.optional(e.optional(e.number().length({ min: 11 }))),
-//       role: e.optional(e.enum(Object.values(Role))),
-//       active: () => e.optional(e.boolean().custom(() => "active")),
-//       priority: e.optional(e.number().amount({ min: 0, max: 10 })),
-//       profile: e.optional(
-//         e.object({
-//           fullName: e.string(),
-//           dob: e.date(),
-//         }),
-//       ),
-//       tags: e.optional(e.array(e.string())),
-//     })
-//     .extends(
-//       SubSchema,
-//     );
-
-// const R = await Schema().validate();
-
-console.log(
-  await e.array(e.or([
-    e.string(),
-    e.object({
-      role: e.optional(e.in(Object.values(Role))).default(Role.USER),
-    }),
-  ])).validate([{}]).catch(console.error),
-);
-
-// for (let i = 0; i < 1000; i++) {
-//   console.log(i);
-//   e.deepCast(e.deepPartial(SubSchema, { overrideOptionalValidator: false }));
-// }
-// .rest(e.string());
-
-// console.log(
-//   await e
-//     .optional(e.record(e.number({ cast: true }).max(1).min(0), { cast: true }))
-//     .validate({ collaborates: -10 })
-//     .catch((error) => {
-//       console.error(error);
-//       throw error;
-//     })
-// );
-
-// const User = await Schema.validate({
-//   contact: 12345678909876,
-//   role: "admin",
-//   active: true,
-//   priority: 1,
-//   tags: {},
-//   metadata: {},
-//   something: "nothing",
-// });
-
-// console.log(User);
-
-// console.log(Schema.toSample().data);
-
-// class User {
-//   static isValid(user: User | string) {
-//     return user instanceof User;
-//   }
-// }
-
-// const UserSchema = e.object({
-//   username: e.string().custom((ctx) => {
-//     ctx.output = undefined;
-//   }),
-//   password: e.optional(e.string()),
-//   profile: e.object({
-//     name: e.string(),
-//     dob: e.date(),
-//   }),
-//   user: e.optional(e.instanceOf(User)),
-//   isUser: e.optional(e.if(User.isValid)),
-// });
-
-// const PostSchema = e.object({
-//   title: e.string(),
-//   description: e.string(),
-//   drafted: e.optional(e.boolean()).default(true),
-//   createdAt: e.optional(e.date()).default(() => new Date()),
-//   updatedAt: e.optional(e.date()).default(() => new Date()),
-// });
-
-// try {
-//   console.log(
-//     await UserSchema.validate({
-//       username: "saffellikhan",
-//       password: undefined,
-//       profile: {
-//         name: "Saif Ali Khan",
-//         dob: new Date(),
-//       },
-//       user: new User(),
-//       isUser: new User(),
-//     }),
-//     await UserSchema.validate({
-//       username: "saffellikhan",
-//       profile: {
-//         name: "Saif Ali Khan",
-//         dob: new Date(),
-//       },
-//       user: new User(),
-//       isUser: new User(),
-//     })
-//   );
-// } catch (error) {
-//   console.log(error);
-// }
+await Schema4.validate({}).catch(console.error);
