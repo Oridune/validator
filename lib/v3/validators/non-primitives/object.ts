@@ -299,6 +299,21 @@ export class ObjectValidator<
     });
   }
 
+  public rest<
+    V extends BaseValidator<any, any, any>,
+    I = inferInput<V>,
+    O = inferOutput<V>,
+  >(
+    validator: V | (() => V),
+  ) {
+    this.RestValidator = validator;
+    return this as unknown as ObjectValidator<
+      Shape,
+      Input & Partial<{ [K: string]: I }>,
+      Output & Partial<{ [K: string]: O }>
+    >;
+  }
+
   public extends<
     V extends BaseValidator,
     S = V extends BaseValidator<infer S, any, any> ? S : never,
@@ -322,21 +337,6 @@ export class ObjectValidator<
       Omit<Shape, keyof S> & S,
       Omit<Input, keyof I> & I,
       Omit<Output, keyof O> & O
-    >;
-  }
-
-  public rest<
-    V extends BaseValidator<any, any, any>,
-    I = inferInput<V>,
-    O = inferOutput<V>,
-  >(
-    validator: V | (() => V),
-  ) {
-    this.RestValidator = validator;
-    return this as unknown as ObjectValidator<
-      Shape,
-      Input & Partial<{ [K: string]: I }>,
-      Output & Partial<{ [K: string]: O }>
     >;
   }
 
