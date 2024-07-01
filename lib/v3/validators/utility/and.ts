@@ -41,22 +41,26 @@ export class AndValidator<
   }
 
   protected _toJSON(ctx?: IJSONSchemaContext<IAndValidatorOptions>) {
+    const Context = this.overrideContext(ctx);
+
     return {
       type: "and",
       description: this.Description,
       allOf: this.Validators.map((validator) =>
         BaseValidator.resolveValidator(validator).toJSON(
-          this.overrideContext(ctx),
+          Context,
         ).schema
       ),
     } satisfies IValidatorJSONSchema;
   }
 
   protected _toSample(ctx?: ISampleDataContext<IAndValidatorOptions>) {
+    const Context = this.overrideContext(ctx);
+
     return (
       this.Sample ??
         BaseValidator.resolveValidator(this.Validators[0]).toSample(
-          this.overrideContext(ctx),
+          Context,
         ).data
     );
   }
@@ -64,10 +68,12 @@ export class AndValidator<
   protected _toStatic(
     ctx?: IStaticContext<IAndValidatorOptions>,
   ): AndValidator<Shape, Input, Output> {
+    const Context = this.overrideContext(ctx);
+
     return AndValidator.and(
       this.Validators.map((validator) => {
         const Validator = BaseValidator.resolveValidator(validator);
-        return Validator.toStatic(this.overrideContext(ctx));
+        return Validator.toStatic(Context);
       }),
       ctx?.validatorOptions,
     );
@@ -86,10 +92,12 @@ export class AndValidator<
     this.Validators = validators;
 
     this._custom(async (ctx) => {
+      const Context = this.overrideContext(ctx);
+
       for (const Validator of this.Validators) {
         ctx.output = await BaseValidator.resolveValidator(Validator).validate(
           ctx.output,
-          this.overrideContext(ctx),
+          Context,
         );
       }
     });

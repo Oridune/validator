@@ -65,6 +65,19 @@ export class ObjectValidator<
     return this.Shape;
   }
 
+  protected resolvedShapeWithKeys(opts?: {
+    omitKeys?: string[];
+    pickKeys?: string[];
+  }) {
+    const Shape = this.resolvedShape(opts);
+    const Properties = Object.keys(Shape) as Exclude<
+      keyof Shape,
+      symbol | number
+    >[];
+
+    return [Shape, Properties] as const;
+  }
+
   protected overrideContext(ctx: any) {
     return {
       ...ctx,
@@ -77,13 +90,12 @@ export class ObjectValidator<
   }
 
   protected _toJSON(ctx?: IJSONSchemaContext<IObjectValidatorOptions>) {
-    const Shape = this.resolvedShape(ctx?.validatorOptions);
+    const [Shape, Properties] = this._memo(
+      "shape&Keys",
+      () => this.resolvedShapeWithKeys(ctx?.validatorOptions),
+    );
 
-    const Properties = Object.keys(Shape) as Exclude<
-      keyof Shape,
-      symbol | number
-    >[];
-
+    const Context = this.overrideContext(ctx);
     const RequiredProps = new Set(Properties);
 
     const RestValidator = this.RestValidator &&
@@ -99,30 +111,30 @@ export class ObjectValidator<
 
         if (Validator instanceof OptionalValidator) RequiredProps.delete(key);
 
-        obj[key] = Validator.toJSON(this.overrideContext(ctx)).schema;
+        obj[key] = Validator.toJSON(Context).schema;
 
         return obj;
       }, {}),
-      additionalProperties: RestValidator?.toJSON(this.overrideContext(ctx))
+      additionalProperties: RestValidator?.toJSON(Context)
         .schema,
       requiredProperties: Array.from(RequiredProps),
     } satisfies IValidatorJSONSchema;
   }
 
   protected _toSample(ctx?: ISampleDataContext<IObjectValidatorOptions>) {
-    const Shape = this.resolvedShape(ctx?.validatorOptions);
+    const [Shape, Properties] = this._memo(
+      "shape&Keys",
+      () => this.resolvedShapeWithKeys(ctx?.validatorOptions),
+    );
 
-    const Properties = Object.keys(Shape) as Exclude<
-      keyof Shape,
-      symbol | number
-    >[];
+    const Context = this.overrideContext(ctx);
 
     return (
       this.Sample ??
         (Properties.reduce<any>((obj, key) => {
           const Validator = BaseValidator.resolveValidator(Shape[key]);
 
-          obj[key] = Validator.toSample(this.overrideContext(ctx)).data;
+          obj[key] = Validator.toSample(Context).data;
 
           return obj;
         }, {}) as Input)
@@ -132,22 +144,29 @@ export class ObjectValidator<
   protected _toStatic(
     ctx?: IStaticContext<IObjectValidatorOptions>,
   ): ObjectValidator<Shape, Input, Output> {
-    const Shape = this.resolvedShape(ctx?.validatorOptions);
+    const [Shape, Properties] = this._memo(
+      "shape&Keys",
+      () => this.resolvedShapeWithKeys(ctx?.validatorOptions),
+    );
+
+    const Context = this.overrideContext(ctx);
+    const NewShape: Record<string, any> = {};
+
+    for (const Key of Properties) {
+      NewShape[Key] = BaseValidator.resolveValidator(Shape[Key]).toStatic(
+        Context,
+      );
+    }
 
     const Validator = ObjectValidator.object(
-      Object.fromEntries(
-        Object.entries(Shape).map(([key, value]) => {
-          const Validator = BaseValidator.resolveValidator(value);
-
-          return [key, Validator.toStatic(this.overrideContext(ctx))];
-        }),
-      ) as Shape,
+      NewShape,
       ctx?.validatorOptions,
     );
 
     if (this.RestValidator) {
-      const RestValidator = BaseValidator.resolveValidator(this.RestValidator);
-      Validator.rest(RestValidator.toStatic(this.overrideContext(ctx)));
+      Validator.rest(
+        BaseValidator.resolveValidator(this.RestValidator).toStatic(Context),
+      );
     }
 
     return Validator as any;
@@ -184,14 +203,15 @@ export class ObjectValidator<
       // De-referencing
       ctx.output = { ...ctx.output };
 
-      const Shape = this.resolvedShape(
-        ctx?.validatorOptions as IObjectValidatorOptions,
+      const [Shape, Properties] = this._memo(
+        "shape&Keys",
+        () =>
+          this.resolvedShapeWithKeys(
+            ctx?.validatorOptions as IObjectValidatorOptions,
+          ),
       );
 
-      const Properties = Object.keys(Shape) as Exclude<
-        keyof Shape,
-        symbol | number
-      >[];
+      const Context = this.overrideContext(ctx);
 
       const UnexpectedProperties = Object.keys(ctx.output).filter(
         (key) =>
@@ -225,7 +245,7 @@ export class ObjectValidator<
           ctx.output[Property] = await Validator.validate(
             ctx.output[Property],
             {
-              ...this.overrideContext(ctx),
+              ...Context,
               location: Location,
               index: Property,
               property: Property,
@@ -255,7 +275,7 @@ export class ObjectValidator<
 
             ctx.output[Property] =
               (await RestValidator.validate(ctx.output[Property], {
-                ...this.overrideContext(ctx),
+                ...Context,
                 location: Location,
                 index: Property,
                 property: Property,
@@ -326,8 +346,6 @@ export class ObjectValidator<
       { ...this.Shape },
       this.getOptions(),
     );
-
-    Validator["Type"] = this.Type;
 
     if (this.RestValidator !== undefined) {
       Validator["RestValidator"] = this.RestValidator;

@@ -57,6 +57,7 @@ export class TupleValidator<
   protected _toJSON(ctx?: IJSONSchemaContext<ITupleValidatorOptions>) {
     const RestValidator = this.RestValidator &&
       BaseValidator.resolveValidator(this.RestValidator);
+    const Context = this.overrideContext(ctx);
 
     return {
       type: "array",
@@ -67,15 +68,16 @@ export class TupleValidator<
       maxLength: ctx?.validatorOptions?.maxLength,
       tuple: this.Validators.map((validator) =>
         BaseValidator.resolveValidator(validator).toJSON(
-          this.overrideContext(ctx),
+          Context,
         ).schema
       ).filter(Boolean),
-      items: RestValidator?.toJSON(this.overrideContext(ctx)).schema,
+      items: RestValidator?.toJSON(Context).schema,
     } satisfies IValidatorJSONSchema;
   }
 
   protected _toSample(ctx?: ISampleDataContext<ITupleValidatorOptions>) {
     const Output = ([] as any[]) as Input;
+    const Context = this.overrideContext(ctx);
 
     for (let i = 0; i < (ctx?.validatorOptions?.minLength ?? 1); i++) {
       const Validator = BaseValidator.resolveValidator(this.Validators[i]);
@@ -83,7 +85,7 @@ export class TupleValidator<
         BaseValidator.resolveValidator(this.RestValidator);
 
       Output.push(
-        (Validator ?? RestValidator)?.toSample(this.overrideContext(ctx)).data,
+        (Validator ?? RestValidator)?.toSample(Context).data,
       );
     }
 
@@ -93,9 +95,10 @@ export class TupleValidator<
   protected _toStatic(
     ctx?: IStaticContext<ITupleValidatorOptions>,
   ): TupleValidator<Shape, Input, Output> {
+    const Context = this.overrideContext(ctx);
     const Validators = this.Validators.map((validator) =>
       BaseValidator.resolveValidator(validator).toStatic(
-        this.overrideContext(ctx),
+        Context,
       )
     );
 
@@ -106,7 +109,7 @@ export class TupleValidator<
 
     if (this.RestValidator) {
       const RestValidator = BaseValidator.resolveValidator(this.RestValidator);
-      Validator.rest(RestValidator.toStatic(this.overrideContext(ctx)));
+      Validator.rest(RestValidator.toStatic(Context));
     }
 
     return Validator as any;
@@ -170,6 +173,8 @@ export class TupleValidator<
 
       const Exception = new ValidationException();
 
+      const Context = this.overrideContext(ctx);
+
       for (const [Key, Value] of Object.entries(ctx.output)) {
         const Index = parseInt(Key);
         const Validator = BaseValidator.resolveValidator(
@@ -180,7 +185,7 @@ export class TupleValidator<
 
         try {
           ctx.output[Index] = await Validator.validate(Value, {
-            ...this.overrideContext(ctx),
+            ...Context,
             location: Location,
             index: Index,
             property: Key,

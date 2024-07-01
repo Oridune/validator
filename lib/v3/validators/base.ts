@@ -160,6 +160,17 @@ export class BaseValidator<
     unknown
   >[] = [];
 
+  protected _memory?: Record<string, any>;
+
+  protected _memo<T>(keys: string | string[], callback: () => T): T {
+    const Key = typeof keys === "string" ? keys : keys.join(":");
+    const Cached = this._memory?.[Key];
+
+    if (Cached !== undefined) return Cached;
+
+    return (this._memory ??= {})[Key] = callback();
+  }
+
   protected async _resolveErrorMessage(
     message: TErrorMessage | undefined,
     defaultMessage: string,

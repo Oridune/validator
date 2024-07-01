@@ -65,6 +65,7 @@ export class ArrayValidator<
   protected _toJSON(ctx?: IJSONSchemaContext<IArrayValidatorOptions>) {
     const Validator = this.Validator &&
       BaseValidator.resolveValidator(this.Validator);
+    const Context = this.overrideContext(ctx);
 
     return {
       type: "array",
@@ -73,7 +74,7 @@ export class ArrayValidator<
       cast: !!ctx?.validatorOptions?.cast,
       minLength: ctx?.validatorOptions?.minLength,
       maxLength: ctx?.validatorOptions?.maxLength,
-      items: Validator?.toJSON(this.overrideContext(ctx)).schema,
+      items: Validator?.toJSON(Context).schema,
     } satisfies IValidatorJSONSchema;
   }
 
@@ -82,9 +83,10 @@ export class ArrayValidator<
 
     if (this.Validator) {
       const Validator = BaseValidator.resolveValidator(this.Validator);
+      const Context = this.overrideContext(ctx);
 
       for (let i = 0; i < (ctx?.validatorOptions?.maxLength ?? 1); i++) {
-        Output.push(Validator.toSample(this.overrideContext(ctx)).data);
+        Output.push(Validator.toSample(Context).data);
       }
     }
 
@@ -95,9 +97,10 @@ export class ArrayValidator<
     ctx?: IStaticContext<IArrayValidatorOptions>,
   ): ArrayValidator<Shape, Input, Output> {
     const Validator = BaseValidator.resolveValidator(this.Validator);
+    const Context = this.overrideContext(ctx);
 
     return ArrayValidator.array(
-      Validator.toStatic(this.overrideContext(ctx)) as Shape,
+      Validator.toStatic(Context) as Shape,
       ctx?.validatorOptions,
     );
   }
@@ -201,6 +204,7 @@ export class ArrayValidator<
 
       if (this.Validator) {
         const Validator = BaseValidator.resolveValidator(this.Validator);
+        const Context = this.overrideContext(ctx);
 
         for (const [Index, Input] of Object.entries(ctx.output)) {
           try {
@@ -209,7 +213,7 @@ export class ArrayValidator<
             const Key = parseInt(Index);
 
             ctx.output[Key] = await Validator.validate(Input, {
-              ...this.overrideContext(ctx),
+              ...Context,
               location: Location,
               index: Key,
               property: Index,

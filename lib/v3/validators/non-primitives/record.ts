@@ -48,13 +48,14 @@ export class RecordValidator<
   protected _toJSON(ctx?: IJSONSchemaContext<IRecordValidatorOptions>) {
     const Validator = this.Validator &&
       BaseValidator.resolveValidator(this.Validator);
+    const Context = this.overrideContext(ctx);
 
     return {
       type: "object",
       description: this.Description,
       optional: !!ctx?.validatorOptions?.optional,
       cast: !!ctx?.validatorOptions?.cast,
-      additionalProperties: Validator?.toJSON(this.overrideContext(ctx)).schema,
+      additionalProperties: Validator?.toJSON(Context).schema,
     } satisfies IValidatorJSONSchema;
   }
 
@@ -76,9 +77,10 @@ export class RecordValidator<
     ctx?: IStaticContext<IRecordValidatorOptions>,
   ): RecordValidator<Shape, Input, Output> {
     const Validator = BaseValidator.resolveValidator(this.Validator);
+    const Context = this.overrideContext(ctx);
 
     return RecordValidator.record(
-      Validator.toStatic(this.overrideContext(ctx)) as Shape,
+      Validator.toStatic(Context) as Shape,
       ctx?.validatorOptions,
     );
   }
@@ -112,6 +114,7 @@ export class RecordValidator<
         const KeyValidator = ctx.validatorOptions?.key &&
           BaseValidator.resolveValidator(ctx.validatorOptions.key);
         const Validator = BaseValidator.resolveValidator(this.Validator);
+        const Context = this.overrideContext(ctx);
 
         for (const [Index, Input] of Object.entries(ctx.output)) {
           try {
@@ -122,7 +125,7 @@ export class RecordValidator<
             const Location = `${ctx.location}.${Key}`;
 
             ctx.output[Key] = await Validator.validate(Input, {
-              ...this.overrideContext(ctx),
+              ...Context,
               location: Location,
               index: Key,
               property: Key,

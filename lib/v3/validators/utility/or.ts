@@ -38,12 +38,14 @@ export class OrValidator<
   }
 
   protected _toJSON(ctx?: IJSONSchemaContext<IOrValidatorOptions>) {
+    const Context = this.overrideContext(ctx);
+
     return {
       type: "or",
       description: this.Description,
       anyOf: this.Validators.map((validator) =>
         BaseValidator.resolveValidator(validator).toJSON(
-          this.overrideContext(ctx),
+          Context,
         ).schema
       ),
     } satisfies IValidatorJSONSchema;
@@ -61,11 +63,12 @@ export class OrValidator<
   protected _toStatic(
     ctx?: IStaticContext<IOrValidatorOptions>,
   ): OrValidator<Shape, Input, Output> {
+    const Context = this.overrideContext(ctx);
+
     return OrValidator.or(
-      this.Validators.map((validator) => {
-        const Validator = BaseValidator.resolveValidator(validator);
-        return Validator.toStatic(this.overrideContext(ctx));
-      }),
+      this.Validators.map((validator) =>
+        BaseValidator.resolveValidator(validator).toStatic(Context)
+      ),
       ctx?.validatorOptions,
     );
   }
@@ -100,12 +103,14 @@ export class OrValidator<
         });
       }
 
+      const Context = this.overrideContext(ctx);
+
       for (const Validator of Validators) {
         try {
           return ctx.output = await Validator
             .validate(
               ctx.output,
-              this.overrideContext(ctx),
+              Context,
             );
         } catch (error) {
           Exception = new ValidationException().pushIssues(error);
