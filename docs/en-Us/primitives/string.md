@@ -16,7 +16,7 @@ e.string(
 );
 ```
 
-#### Options
+### Options
 
 Following are the available options for this validator
 
@@ -59,11 +59,11 @@ Following are the available options for this validator
 }
 </code></pre>
 
-#### Examples
+### Examples
 
 Read the examples below to understand different use cases
 
-**Case 1 (Using validator options)**
+#### Case 1 (Using validator options)
 
 ```typescript
 // Cast number to string
@@ -73,7 +73,7 @@ await e.string({ cast: true }).validate(1) // returns "1"
 await e.cast(e.string()).validate(1) // returns "1"
 ```
 
-**Case 2 (Using validator methods)**
+#### Case 2 (Using validator methods)
 
 ```typescript
 // Validate Email
@@ -86,7 +86,7 @@ await e.string({
       .validate("test@mail.com") // returns "test@mail.com"
 ```
 
-**Case 3**
+#### Case 3
 
 ```typescript
 // Validate string with particular length
