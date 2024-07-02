@@ -59,6 +59,42 @@ Following are the available options for this validator
 }
 </code></pre>
 
+### Methods
+
+```typescript
+.length(options: { min?: number; max?: number } | number)
+```
+
+```typescript
+.min(length: number)
+```
+
+```typescript
+.max(length: number)
+```
+
+```typescript
+.matches(options: { regex: RegExp | RegExp[] } | RegExp | RegExp[])
+```
+
+```typescript
+.in<C extends string>(choices: C[])
+```
+
+```typescript
+.isNaN()
+```
+
+```typescript
+.notIsNaN()
+```
+
+```typescript
+.isURL<URLInstance extends boolean = false>(
+    returnURLInstance?: URLInstance
+)
+```
+
 ### Examples
 
 Read the examples below to understand different use cases
