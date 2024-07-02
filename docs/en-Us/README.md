@@ -6,7 +6,7 @@ description: Install the validator on your project.
 
 ## Introduction
 
-Oridune validator is a TypeScript-first schema declaration and validation library like Zod.
+Oridune validator is a TypeScript-first schema declaration and validation library like [Zod](https://zod.dev/).
 
 Validator is designed to be as developer-friendly as possible. The goal is to eliminate duplicative type declarations. With Validator, you declare a validator schema once and it will automatically infer the static TypeScript type. It's easy to compose simpler types into complex data structures.
 
