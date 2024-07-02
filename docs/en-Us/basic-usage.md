@@ -6,7 +6,7 @@ description: Let's see how the validator works!
 
 As mentioned in the [getting started page](./) Oridune validator is mostly similar to Zod. You compose smaller chunks of validators into a validations schema. See the following example:
 
-#### Create a simple validator
+### Create a simple validator
 
 ```typescript
 import e from "validator"; // validator maps to https://jsr.io/@oridune/validator
@@ -28,7 +28,7 @@ await Str.test(123); // returns false
 
 ```
 
-#### Create an object Schema
+### Create an object Schema
 
 ```typescript
 import e, {inferOutput} from "validator";
@@ -46,3 +46,30 @@ type User = inferOutput<typeof Obj>; // { username: string }
 
 ```
 
+### Transform using a Custom validator
+
+```typescript
+import e from "validator";
+
+// Convert a string to int
+await e.string().custom(ctx => parseInt(ctx.output)).validate("1.02"); // returns 1
+
+// Encrypt the password
+await e.object({
+    username: e.string(),
+    password: e.string().custom(ctx => {
+        // Concat username with password and encrypt
+        return encrypt(ctx.parent.output.username + ctx.output);
+    }),
+});
+
+// Check if the password matches the confirmPassword
+await e.object({
+    username: e.string(),
+    password: e.string(),
+    confirmPassword: e.string(),
+}).custom(ctx => {
+    if(ctx.output.password !== ctx.output.confirmPassword)
+        throw new Error("Password does not match!");
+});
+```

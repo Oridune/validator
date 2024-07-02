@@ -2,7 +2,7 @@
 description: Learn about the available options, methods and use cases.
 ---
 
-# String
+# string
 
 ## Usage
 
@@ -20,7 +20,7 @@ e.string(
 
 Following are the available options for this validator
 
-<pre class="language-typescript"><code class="lang-typescript"><strong>export interface IStringValidatorOptions extends TBaseValidatorOptions {
+<pre class="language-typescript"><code class="lang-typescript"><strong>interface IStringValidatorOptions extends TBaseValidatorOptions {
 </strong>  // Pass custom messages for the errors
   messages?: Partial&#x3C;
     Record&#x3C;

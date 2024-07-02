@@ -5,4 +5,5 @@
 
 ## Primitives
 
-* [String](primitives/string.md)
+* [string](primitives/string.md)
+* [number](primitives/number.md)
