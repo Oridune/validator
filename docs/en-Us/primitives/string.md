@@ -20,10 +20,11 @@ e.string(
 
 Following are the available options for this validator
 
-<pre class="language-typescript"><code class="lang-typescript"><strong>interface IStringValidatorOptions extends TBaseValidatorOptions {
-</strong>  // Pass custom messages for the errors
-  messages?: Partial&#x3C;
-    Record&#x3C;
+```typescript
+interface IStringValidatorOptions extends TBaseValidatorOptions {
+  /** Pass custom messages for the errors */
+  messages?: Partial<
+    Record<
       | "typeError"
       | "smallerLength"
       | "greaterLength"
@@ -35,29 +36,29 @@ Following are the available options for this validator
       TErrorMessage
     >
   >;
-  
-  // Validate string as URL
+
+  /** Validate string as URL */
   isUrl?: boolean;
-  
-  // Transform string to URL object. (isUrl option is required)
+
+  /** Transform string to URL object. (isUrl option is required) */
   returnURLInstance?: boolean;
-  
-  // Validate string minimum length
+
+  /** Validate string minimum length */
   minLength?: number;
-  
-  // Validate string maximum length
+
+  /** Validate string maximum length */
   maxLength?: number;
-  
-  // Pass a string enum
+
+  /** Pass a string enum */
   choices?: string[];
-  
-  // Pass a list of acceptable regular expressions
+
+  /** Pass a list of acceptable regular expressions */
   patterns?: RegExp[];
-  
-  // Validate if string isNaN
+
+  /** Validate if string isNaN */
   isNaN?: boolean;
 }
-</code></pre>
+```
 
 ### Methods
 

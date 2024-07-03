@@ -21,8 +21,8 @@ e.number(
 Following are the available options for this validator
 
 ```typescript
-interface INumberValidatorOptions extends TBaseValidatorOptions {
-  // Pass custom messages for the errors
+export interface INumberValidatorOptions extends TBaseValidatorOptions {
+  /** Pass custom messages for the errors */
   messages?: Partial<
     Record<
       | "typeError"
@@ -36,22 +36,22 @@ interface INumberValidatorOptions extends TBaseValidatorOptions {
     >
   >;
 
-  // Validate number is int
+  /** Validate number is int */
   isInt?: boolean;
-  
-  // Validate number is float
+
+  /** Validate number is float */
   isFloat?: boolean;
-  
-  // Validate number minimum length
+
+  /** Validate number minimum length */
   minLength?: number;
-  
-  // Validate number maximum length
+
+  /** Validate number maximum length */
   maxLength?: number;
 
-  // Validate number minimum length
+  /** Validate number minimum length */
   minAmount?: number;
 
-  // Validate number maximum length
+  /** Validate number maximum length */
   maxAmount?: number;
 }
 ```
