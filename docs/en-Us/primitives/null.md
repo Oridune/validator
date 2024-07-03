@@ -8,20 +8,21 @@ description: Learn about the available options, methods and use cases.
 
 Following is the simple usage of this validator
 
-```typescript
-import e from "validator";
+<pre class="language-typescript"><code class="lang-typescript">import e from "validator";
 
-e.null(
-    {} // Optionally pass options
-);
-```
+<strong>await e.null(
+</strong>    {} // Optionally pass options
+)
+.validate(null) // returns null
+</code></pre>
 
 ### Options
 
 Following are the available options for this validator
 
 ```typescript
-interface INullValidatorOptions extends TBaseValidatorOptions {
+interface INullValidatorOptions
+  extends Omit<TBaseValidatorOptions, "cast" | "castOptions"> {
   /** Pass custom messages for the errors */
   messages?: Partial<Record<"typeError", TErrorMessage>>;
 }

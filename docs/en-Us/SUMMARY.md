@@ -10,3 +10,4 @@
 * [boolean](primitives/boolean.md)
 * [bigint](primitives/bigint.md)
 * [null](primitives/null.md)
+* [undefined](primitives/undefined.md)

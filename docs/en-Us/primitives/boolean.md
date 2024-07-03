@@ -11,9 +11,10 @@ Following is the simple usage of this validator
 ```typescript
 import e from "validator";
 
-e.boolean(
+await e.boolean(
     {} // Optionally pass options
-);
+)
+.validate(true) // returns true
 
 // Alternatives
 e.true();

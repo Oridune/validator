@@ -11,9 +11,10 @@ Following is the simple usage of this validator
 ```typescript
 import e from "validator";
 
-e.string(
+await e.string(
     {} // Optionally pass options
-);
+)
+.validate("foo") // returns "foo"
 ```
 
 ### Options

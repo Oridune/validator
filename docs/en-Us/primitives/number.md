@@ -11,9 +11,10 @@ Following is the simple usage of this validator
 ```typescript
 import e from "validator";
 
-e.number(
+await e.number(
     {} // Optionally pass options
-);
+)
+.validate(10) // returns 10
 ```
 
 ### Options
