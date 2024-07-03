@@ -9,3 +9,4 @@
 * [number](primitives/number.md)
 * [boolean](primitives/boolean.md)
 * [bigint](primitives/bigint.md)
+* [null](primitives/null.md)
