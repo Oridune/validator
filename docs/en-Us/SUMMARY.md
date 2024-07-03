@@ -8,3 +8,4 @@
 * [string](primitives/string.md)
 * [number](primitives/number.md)
 * [boolean](primitives/boolean.md)
+* [bigint](primitives/bigint.md)

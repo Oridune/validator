@@ -43,7 +43,7 @@ Read the examples below to understand different use cases
 #### Case 1 (Using validator options)
 
 ```typescript
-// Cast string to number
+// Cast string to boolean
 await e.boolean({ cast: true }).validate("1") // returns true
 
 // Alternatively you can do this (Using a utility validator)
