@@ -28,7 +28,7 @@ interface IObjectValidatorOptions extends TBaseValidatorOptions {
   messages?: Partial<Record<"typeError" | "unexpectedProperty", TErrorMessage>>;
 
   /**
-   * Partialize the object validator (undefined props will be acceptable)
+   * Partialize the object validator (makes undefined values in the props acceptable)
    *
    * Use e.partial() instead, if working with typescript
    */
@@ -67,9 +67,10 @@ interface IObjectValidatorOptions extends TBaseValidatorOptions {
 
 Following are the available methods on this validator
 
-<pre class="language-typescript"><code class="lang-typescript"><strong>// Pass a rest validator that validates unexpected props
-</strong><strong>.rest(validator: BaseValidator&#x3C;any, any, any>)
-</strong></code></pre>
+```typescript
+// Pass a rest validator that validates unexpected props
+.rest(validator: BaseValidator<any, any, any>)
+```
 
 ```typescript
 // Extend an object validator

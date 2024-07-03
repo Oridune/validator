@@ -1,7 +1,7 @@
 # Table of contents
 
 * [Getting started](README.md)
-* [Basic Usage](basic-usage.md)
+* [Basic usage](basic-usage.md)
 
 ## Primitives
 
@@ -15,3 +15,4 @@
 ## NON-PRIMITIVES
 
 * [object](non-primitives/object.md)
+* [array](non-primitives/array.md)
