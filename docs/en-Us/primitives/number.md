@@ -59,6 +59,8 @@ export interface INumberValidatorOptions extends TBaseValidatorOptions {
 
 ### Methods
 
+Following are the available methods on this validator
+
 ```typescript
 .length(options: { min?: number; max?: number } | number)
 ```
