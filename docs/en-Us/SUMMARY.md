@@ -17,3 +17,4 @@
 * [object](non-primitives/object.md)
 * [array](non-primitives/array.md)
 * [record](non-primitives/record.md)
+* [tuple](non-primitives/tuple.md)

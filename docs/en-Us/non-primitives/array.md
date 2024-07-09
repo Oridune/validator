@@ -26,7 +26,10 @@ Following are the available options for this validator
 interface IArrayValidatorOptions extends TBaseValidatorOptions {
   /** Pass custom messages for the errors */
   messages?: Partial<
-    Record<"typeError" | "smallerLength" | "greaterLength", TErrorMessage>
+    Record<
+      "typeError" | "nanKey" | "smallerLength" | "greaterLength",
+      TErrorMessage
+    >
   >;
 
   /** Validate array minimum length */
@@ -51,21 +54,40 @@ interface IArrayValidatorOptions extends TBaseValidatorOptions {
 
   /**
    * (Casting Option) Requires `cast` to be `true`
+   *
+   * Set a splitter that will be used to split elements in the string and convert it into array during the cast.
    */
   splitter?: string | RegExp;
 
   /**
    * (Casting Option) Requires `cast` to be `true`
+   *
+   * Normally this validator will allow you to validate an object (like an array) if the cast is `true` and
+   * properties of this object are number like.
+   * But if the validator detects a NaN property on the object, it will throw a nanKey error!
+   *
+   * If you want to avoid nanKey error by ignoring any NaN keys in the object then pass `true` here.
    */
   ignoreNanKeys?: boolean;
 
   /**
-   * (Casting Option) Requires `cast` and `ignoreNanKeys` to be `true`
+   * (Casting Option) Requires `cast` to be `true`
+   *
+   * Normally this validator will allow you to validate an object (like an array) if the cast is `true` and
+   * properties of this object are number like.
+   * But if the validator detects a NaN property on the object, it will throw a nanKey error!
+   *
+   * If you want to avoid nanKey error by pushing the value of a NaN key into the resulting array then pass `true` here.
    */
   pushNanKeys?: boolean;
 
   /**
    * (Casting Option) Requires `cast` to be `true`
+   *
+   * If `cast` is `true`, the validator will try to convert a non-splitable/non-object item into an array.
+   * If you pass boolean (true) into the array validator, it will cast it to [true], an array of boolean.
+   *
+   * If you want to disable this behavior, pass `true` here.
    */
   noCastSingularToArray?: boolean;
 }
