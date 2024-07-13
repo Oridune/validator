@@ -20,3 +20,4 @@
 * [tuple](non-primitives/tuple.md)
 * [instanceOf](non-primitives/instanceof.md)
 * [enum](non-primitives/enum.md)
+* [date](non-primitives/date.md)
