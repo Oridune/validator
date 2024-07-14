@@ -26,3 +26,7 @@
 
 * [and](utility/and.md)
 * [or](utility/or.md)
+* [any](utility/any.md)
+* [cast](utility/cast.md)
+* [partial](utility/partial.md)
+* [required](utility/required.md)

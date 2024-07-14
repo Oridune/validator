@@ -24,7 +24,9 @@ await e.and([
 Following are the available options for this validator
 
 ```typescript
-interface IAndValidatorOptions extends TBaseValidatorOptions {}
+interface IAndValidatorOptions extends TBaseValidatorOptions {
+    // No specific options...
+}
 ```
 
 ### Methods
