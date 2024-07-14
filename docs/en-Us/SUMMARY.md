@@ -21,3 +21,8 @@
 * [instanceOf](non-primitives/instanceof.md)
 * [enum](non-primitives/enum.md)
 * [date](non-primitives/date.md)
+
+## Utility
+
+* [and](utility/and.md)
+* [or](utility/or.md)
