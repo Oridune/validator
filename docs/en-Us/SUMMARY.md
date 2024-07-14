@@ -24,9 +24,13 @@
 
 ## Utility
 
+* [optional](utility/optional.md)
 * [and](utility/and.md)
 * [or](utility/or.md)
-* [any](utility/any.md)
-* [cast](utility/cast.md)
 * [partial](utility/partial.md)
 * [required](utility/required.md)
+* [omit](utility/omit.md)
+* [pick](utility/pick.md)
+* [if](utility/if.md)
+* [cast](utility/cast.md)
+* [any](utility/any.md)
