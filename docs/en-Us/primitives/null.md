@@ -8,7 +8,7 @@ description: Learn about the available options, methods and use cases.
 
 Following is the simple usage of this validator
 
-<pre class="language-typescript"><code class="lang-typescript">import e from "validator";
+<pre class="language-typescript" data-line-numbers><code class="lang-typescript">import e from "validator";
 
 <strong>await e.null(
 </strong>    {} // Optionally pass options
@@ -20,6 +20,7 @@ Following is the simple usage of this validator
 
 Following are the available options for this validator
 
+{% code lineNumbers="true" %}
 ```typescript
 interface INullValidatorOptions
   extends Omit<TBaseValidatorOptions, "cast" | "castOptions"> {
@@ -27,6 +28,7 @@ interface INullValidatorOptions
   messages?: Partial<Record<"typeError", TErrorMessage>>;
 }
 ```
+{% endcode %}
 
 ### Examples
 
@@ -34,13 +36,16 @@ Read the examples below to understand different use cases
 
 #### Case 1 (Basic usage)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate null
 await e.null().validate(null) // returns null
 ```
+{% endcode %}
 
 #### Case 2 (Passing options)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate null
 await e.null({
@@ -49,3 +54,4 @@ await e.null({
     }
 }).validate(1) // throws ValidationException
 ```
+{% endcode %}

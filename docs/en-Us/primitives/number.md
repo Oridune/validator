@@ -8,6 +8,7 @@ description: Learn about the available options, methods and use cases.
 
 Following is the simple usage of this validator
 
+{% code lineNumbers="true" %}
 ```typescript
 import e from "validator";
 
@@ -16,11 +17,13 @@ await e.number(
 )
 .validate(10) // returns 10
 ```
+{% endcode %}
 
 ### Options
 
 Following are the available options for this validator
 
+{% code lineNumbers="true" %}
 ```typescript
 export interface INumberValidatorOptions extends TBaseValidatorOptions {
   /** Pass custom messages for the errors */
@@ -56,6 +59,7 @@ export interface INumberValidatorOptions extends TBaseValidatorOptions {
   maxAmount?: number;
 }
 ```
+{% endcode %}
 
 ### Methods
 
@@ -90,6 +94,7 @@ Read the examples below to understand different use cases
 
 #### Case 1 (Using validator options)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Cast string to number
 await e.number({ cast: true }).validate("1") // returns 1
@@ -97,9 +102,11 @@ await e.number({ cast: true }).validate("1") // returns 1
 // Alternatively you can do this (Using a utility validator)
 await e.cast(e.number()).validate("1") // returns 1
 ```
+{% endcode %}
 
 #### Case 2 (Using validator methods)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate Float
 await e.number({
@@ -110,3 +117,4 @@ await e.number({
       .float()
       .validate(1.02) // returns 1.02
 ```
+{% endcode %}

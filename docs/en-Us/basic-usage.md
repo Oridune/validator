@@ -2,12 +2,13 @@
 description: Let's see how the validator works!
 ---
 
-# Basic Usage
+# Basic usage
 
 As mentioned in the [getting started page](./) Oridune validator is mostly similar to Zod. You compose smaller chunks of validators into a validations schema. See the following example:
 
 ### Create a simple validator
 
+{% code lineNumbers="true" fullWidth="false" %}
 ```typescript
 import e from "validator"; // validator maps to https://jsr.io/@oridune/validator
 
@@ -27,9 +28,11 @@ await Str.test("foo"); // returns true
 await Str.test(123); // returns false
 
 ```
+{% endcode %}
 
 ### Create an object Schema
 
+{% code lineNumbers="true" %}
 ```typescript
 import e, {inferOutput} from "validator";
 
@@ -45,9 +48,11 @@ await Obj.validate({ username: "Saif Ali Khan" }); // returns { username: "Saif 
 type User = inferOutput<typeof Obj>; // { username: string }
 
 ```
+{% endcode %}
 
 ### Transform using a Custom validator
 
+{% code lineNumbers="true" %}
 ```typescript
 import e from "validator";
 
@@ -73,3 +78,4 @@ await e.object({
         throw new Error("Password does not match!");
 });
 ```
+{% endcode %}

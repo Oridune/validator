@@ -8,6 +8,7 @@ description: Learn about the available options, methods and use cases.
 
 Following is the simple usage of this validator
 
+{% code lineNumbers="true" %}
 ```typescript
 import e from "validator";
 
@@ -16,11 +17,13 @@ await e.date(
 )
 .validate(new Date()) // returns new Date()
 ```
+{% endcode %}
 
 ### Options
 
 Following are the available options for this validator
 
+{% code lineNumbers="true" %}
 ```typescript
 interface IDateValidatorOptions extends TBaseValidatorOptions {
   /** Pass custom messages for the errors */
@@ -39,6 +42,7 @@ interface IDateValidatorOptions extends TBaseValidatorOptions {
   endsAt?: Date | number;
 }
 ```
+{% endcode %}
 
 ### Methods
 
@@ -65,13 +69,16 @@ Read the examples below to understand different use cases
 
 #### Case 1 (Basic usage)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate date
 await e.date().validate(new Date) // returns new Date()
 ```
+{% endcode %}
 
 #### Case 2 (Date in range)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate a date that lies in a specified range
 const start = new Date("01-01-2024");
@@ -90,3 +97,4 @@ await e.date().end(end)
 await e.date().between({ start, end })
 .validate(new Date("15-01-2024"));
 ```
+{% endcode %}

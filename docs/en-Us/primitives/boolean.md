@@ -8,6 +8,7 @@ description: Learn about the available options, methods and use cases.
 
 Following is the simple usage of this validator
 
+{% code lineNumbers="true" %}
 ```typescript
 import e from "validator";
 
@@ -20,11 +21,13 @@ await e.boolean(
 e.true();
 e.false();
 ```
+{% endcode %}
 
 ### Options
 
 Following are the available options for this validator
 
+{% code lineNumbers="true" %}
 ```typescript
 interface IBooleanValidatorOptions extends TBaseValidatorOptions {
   /** Pass custom messages for the errors */
@@ -36,6 +39,7 @@ interface IBooleanValidatorOptions extends TBaseValidatorOptions {
   expected?: boolean;
 }
 ```
+{% endcode %}
 
 ### Examples
 
@@ -43,6 +47,7 @@ Read the examples below to understand different use cases
 
 #### Case 1 (Using validator options)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Cast string to boolean
 await e.boolean({ cast: true }).validate("1") // returns true
@@ -52,9 +57,11 @@ await e.cast(e.boolean()).validate("0") // returns false
 await e.cast(e.boolean()).validate(1) // returns true
 await e.cast(e.boolean()).validate("true") // returns true
 ```
+{% endcode %}
 
 #### Case 2 (Alternative methods)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate True
 await e.true({
@@ -72,3 +79,4 @@ await e.false({
       })
       .validate(true) // throws ValidationException
 ```
+{% endcode %}

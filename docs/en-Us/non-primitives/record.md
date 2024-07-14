@@ -8,6 +8,7 @@ description: Learn about the available options, methods and use cases.
 
 Following is the simple usage of this validator
 
+{% code lineNumbers="true" %}
 ```typescript
 import e from "validator";
 
@@ -17,11 +18,13 @@ await e.record(
 )
 .validate({}) // returns {}
 ```
+{% endcode %}
 
 ### Options
 
 Following are the available options for this validator
 
+{% code lineNumbers="true" %}
 ```typescript
 interface IRecordValidatorOptions extends TBaseValidatorOptions {
   /** Pass custom messages for the errors */
@@ -50,6 +53,7 @@ interface IRecordValidatorOptions extends TBaseValidatorOptions {
   deletePropertyIfUndefined?: boolean;
 }
 ```
+{% endcode %}
 
 ### Examples
 
@@ -57,6 +61,7 @@ Read the examples below to understand different use cases
 
 #### Case 1 (Basic usage)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate a record or string
 await e.record(e.string())
@@ -70,9 +75,11 @@ await e.record(e.boolean())
 await e.record(e.object({ bar: e.string() }))
 .validate({ foo: { bar: "baz" } }); // returns { foo: { bar: "baz" } }
 ```
+{% endcode %}
 
 #### Case 3 (With casting)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate a JSON string
 await e.cast(
@@ -82,3 +89,4 @@ await e.cast(
 )
 .validate('{ "foo": "bar" }'); // returns { foo: "bar" }
 ```
+{% endcode %}

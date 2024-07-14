@@ -8,6 +8,7 @@ description: Learn about the available options, methods and use cases.
 
 Following is the simple usage of this validator
 
+{% code lineNumbers="true" %}
 ```typescript
 import e from "validator";
 
@@ -17,11 +18,13 @@ await e.array(
 )
 .validate([]) // returns []
 ```
+{% endcode %}
 
 ### Options
 
 Following are the available options for this validator
 
+{% code lineNumbers="true" %}
 ```typescript
 interface IArrayValidatorOptions extends TBaseValidatorOptions {
   /** Pass custom messages for the errors */
@@ -92,6 +95,7 @@ interface IArrayValidatorOptions extends TBaseValidatorOptions {
   noCastSingularToArray?: boolean;
 }
 ```
+{% endcode %}
 
 ### Methods
 
@@ -115,13 +119,16 @@ Read the examples below to understand different use cases
 
 #### Case 1 (Basic usage)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate an array
 await e.array().validate([]); // returns []
 ```
+{% endcode %}
 
 #### Case 2 (Usage with other validators)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate an array of string
 await e.array(e.string()).validate(["foo", "bar"]); // returns ["foo", "bar"]
@@ -129,9 +136,11 @@ await e.array(e.string()).validate(["foo", "bar"]); // returns ["foo", "bar"]
 // Validate an array of object
 await e.array(e.object({ foo: e.string() })).validate([{ foo: "bar" }]); // returns [{ foo: "bar" }]
 ```
+{% endcode %}
 
 #### Case 3 (With casting)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate a JSON string
 await e.cast(
@@ -141,3 +150,4 @@ await e.cast(
 )
 .validate('["foo", "bar"]'); // returns ["foo", "bar"]
 ```
+{% endcode %}

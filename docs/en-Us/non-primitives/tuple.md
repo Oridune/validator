@@ -8,6 +8,7 @@ description: Learn about the available options, methods and use cases.
 
 Following is the simple usage of this validator
 
+{% code lineNumbers="true" %}
 ```typescript
 import e from "validator";
 
@@ -17,11 +18,13 @@ await e.tuple(
 )
 .validate(["foo", true]) // returns ["foo", true]
 ```
+{% endcode %}
 
 ### Options
 
 Following are the available options for this validator
 
+{% code lineNumbers="true" %}
 ```typescript
 interface ITupleValidatorOptions extends TBaseValidatorOptions {
   /** Pass custom messages for the errors */
@@ -57,6 +60,7 @@ interface ITupleValidatorOptions extends TBaseValidatorOptions {
   splitter?: string | RegExp;
 }
 ```
+{% endcode %}
 
 ### Methods
 
@@ -85,13 +89,16 @@ Read the examples below to understand different use cases
 
 #### Case 1 (Basic usage)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate a tuple
 await e.tuple([e.string(), e.number()]).validate(["foo", 1]); // returns ["foo", 1]
 ```
+{% endcode %}
 
 #### Case 2 (Usage with rest validator)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate a tuple with string as rest of the items
 await e.tuple([
@@ -101,9 +108,11 @@ await e.tuple([
 .rest(e.string()) // type [string, number, ...string[]]
 .validate(["foo", 1, "a", "b", "c"]); // returns ["foo", 1, "a", "b", "c"]
 ```
+{% endcode %}
 
 #### Case 3 (With casting)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate a JSON string
 await e.cast(
@@ -115,3 +124,4 @@ await e.cast(
 ) // type [string, number, boolean]
 .validate('["foo", 1, true]'); // returns ["foo", 1, true]
 ```
+{% endcode %}

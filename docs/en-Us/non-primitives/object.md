@@ -8,6 +8,7 @@ description: Learn about the available options, methods and use cases.
 
 Following is the simple usage of this validator
 
+{% code lineNumbers="true" %}
 ```typescript
 import e from "validator";
 
@@ -17,11 +18,13 @@ await e.object(
 )
 .validate({}) // returns {}
 ```
+{% endcode %}
 
 ### Options
 
 Following are the available options for this validator
 
+{% code lineNumbers="true" %}
 ```typescript
 interface IObjectValidatorOptions extends TBaseValidatorOptions {
   /** Pass custom messages for the errors */
@@ -62,6 +65,7 @@ interface IObjectValidatorOptions extends TBaseValidatorOptions {
   deletePropertyIfUndefined?: boolean;
 }
 ```
+{% endcode %}
 
 ### Methods
 
@@ -88,6 +92,7 @@ Read the examples below to understand different use cases
 
 #### Case 1 (Basic usage)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate a user schema
 const User = {
@@ -106,9 +111,11 @@ const UserSchema = e.object({
 
 await UserSchema.validate(User) // returns User
 ```
+{% endcode %}
 
 #### Case 2 (Unexpected props)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate a user schema
 const User = {
@@ -144,9 +151,11 @@ const UserSchema = e.object({
 await UserSchemaStrict.validate(User) // throws ValidationException
 await UserSchema.validate(User) // returns User
 ```
+{% endcode %}
 
 #### Case 3 (With rest validator)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate a user schema
 const User = {
@@ -166,9 +175,11 @@ const UserSchema = e.object({
 
 await UserSchema.validate(User) // returns User
 ```
+{% endcode %}
 
 #### Case 4 (Extend another object validator)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate a user schema
 const User = {
@@ -195,9 +206,11 @@ const UserSchema = e.object({
 
 await UserSchema.validate(User) // returns User
 ```
+{% endcode %}
 
 #### Case 5 (With casting)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate a JSON string
 const Data = '{ "foo": "bar" }';
@@ -209,3 +222,4 @@ const DataSchema = e.object({
 await e.cast(DataSchema)
     .validate(Data) // returns { foo: "bar" }
 ```
+{% endcode %}

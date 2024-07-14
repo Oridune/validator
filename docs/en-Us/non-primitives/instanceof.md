@@ -8,6 +8,7 @@ description: Learn about the available options, methods and use cases.
 
 Following is the simple usage of this validator
 
+{% code lineNumbers="true" %}
 ```typescript
 import e from "validator";
 
@@ -17,11 +18,13 @@ await e.instanceOf(
 )
 .validate(new Date()) // returns new Date()
 ```
+{% endcode %}
 
 ### Options
 
 Following are the available options for this validator
 
+{% code lineNumbers="true" %}
 ```typescript
 interface IInstanceOfValidatorOptions<
   AllowUndefined extends boolean,
@@ -55,6 +58,7 @@ interface IInstanceOfValidatorOptions<
     | ((value: Input) => RestArgs | Promise<RestArgs>);
 }
 ```
+{% endcode %}
 
 ### Examples
 
@@ -62,20 +66,25 @@ Read the examples below to understand different use cases
 
 #### Case 1 (Basic usage)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate an instance of the Date constructor
 await e.instanceOf(Date).validate(new Date); // returns new Date()
 ```
+{% endcode %}
 
 #### Case 2 (Usage with allowUndefined)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate an instance of the Date constructor or instantiate if it is undefined
 await e.instanceOf(Date, { allowUndefined: true }).validate(); // returns new Date()
 ```
+{% endcode %}
 
 #### Case 3 (With instantiate)
 
+{% code lineNumbers="true" %}
 ```typescript
 // Validate an instance of the Date constructor or instantiate using the value
 // Without/Incorrect value
@@ -105,3 +114,4 @@ await e.instanceOf(Date, {
     instantiationRestArgs: [20, 30]
 }).validate(10); // returns new ArrayBuffer(10, 20, 30)
 ```
+{% endcode %}
