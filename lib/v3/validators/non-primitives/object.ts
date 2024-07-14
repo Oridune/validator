@@ -20,14 +20,41 @@ import {
 import { OptionalValidator } from "../utility/optional.ts";
 
 export interface IObjectValidatorOptions extends TBaseValidatorOptions {
+  /** Pass custom messages for the errors */
+  messages?: Partial<Record<"typeError" | "unexpectedProperty", TErrorMessage>>;
+
+  /**
+   * Partialize the object validator (makes undefined values in the props acceptable)
+   *
+   * Use e.partial() instead, if working with typescript
+   */
   partial?: boolean;
+
+  /**
+   * Converts any partialized/optional props to required
+   *
+   * Use e.required() instead, if working with typescript
+   */
   required?: boolean;
 
+  /**
+   * Ignore keys to be validated
+   *
+   * Use e.omit() instead, if working with typescript
+   */
   omitKeys?: string[];
+
+  /**
+   * Select keys to be validated
+   *
+   * Use e.pick() instead, if working with typescript
+   */
   pickKeys?: string[];
 
-  messages?: Partial<Record<"typeError" | "unexpectedProperty", TErrorMessage>>;
+  /** Accept any unexpected props */
   allowUnexpectedProps?: string[] | boolean;
+
+  /** Delete any undefined props */
   deletePropertyIfUndefined?: boolean;
 }
 
@@ -44,10 +71,7 @@ export class ObjectValidator<
     | BaseValidator<any, any, any>
     | (() => BaseValidator<any, any, any>);
 
-  protected resolvedShape(opts?: {
-    omitKeys?: string[];
-    pickKeys?: string[];
-  }) {
+  protected resolvedShape(opts?: { omitKeys?: string[]; pickKeys?: string[] }) {
     if (opts?.omitKeys || opts?.pickKeys) {
       let Shape = Object.entries(this.Shape);
 
@@ -79,11 +103,13 @@ export class ObjectValidator<
   }
 
   protected overrideContext(ctx: any) {
+    if (!ctx.validatorOptions) return ctx;
+
     return {
       ...ctx,
-      ...(ctx.validatorOptions?.partial
+      ...(ctx.validatorOptions.partial
         ? { options: { optional: true } }
-        : ctx.validatorOptions?.required
+        : ctx.validatorOptions.required
         ? { options: { optional: false } }
         : {}),
     };
@@ -115,8 +141,7 @@ export class ObjectValidator<
 
         return obj;
       }, {}),
-      additionalProperties: RestValidator?.toJSON(Context)
-        .schema,
+      additionalProperties: RestValidator?.toJSON(Context).schema,
       requiredProperties: Array.from(RequiredProps),
     } satisfies IValidatorJSONSchema;
   }
@@ -158,10 +183,7 @@ export class ObjectValidator<
       );
     }
 
-    const Validator = ObjectValidator.object(
-      NewShape,
-      ctx?.validatorOptions,
-    );
+    const Validator = ObjectValidator.object(NewShape, ctx?.validatorOptions);
 
     if (this.RestValidator) {
       Validator.rest(
@@ -213,33 +235,35 @@ export class ObjectValidator<
 
       const Context = this.overrideContext(ctx);
 
-      const UnexpectedProperties = Object.keys(ctx.output).filter(
-        (key) =>
-          !Properties.includes(key as any) &&
-          (ctx.validatorOptions?.allowUnexpectedProps instanceof Array
-            ? !ctx.validatorOptions?.allowUnexpectedProps.includes(key)
-            : !ctx.validatorOptions?.allowUnexpectedProps),
-      );
+      let Exception: ValidationException | undefined;
 
-      if (
-        UnexpectedProperties.length &&
-        ctx.validatorOptions?.allowUnexpectedProps !== true &&
-        !this.RestValidator
+      for (
+        const Property of Array.from(
+          new Set([...Properties, ...Object.keys(ctx.output)]),
+        )
       ) {
-        ctx.location = `${ctx.location}.${UnexpectedProperties[0]}`;
-
-        throw await this._resolveErrorMessage(
-          ctx.validatorOptions?.messages?.unexpectedProperty,
-          "Unexpected property has been encountered!",
+        const ShapeValue = Shape[Property as keyof typeof Shape];
+        const Validator = BaseValidator.resolveValidator(
+          ShapeValue ?? this.RestValidator,
+          true,
         );
-      }
-
-      const Exception = new ValidationException();
-
-      for (const Property of Properties) {
-        const Validator = BaseValidator.resolveValidator(Shape[Property]);
 
         const Location = `${ctx.location}.${Property}`;
+
+        if (!Validator) {
+          if (
+            ctx.validatorOptions?.allowUnexpectedProps === true ||
+            (ctx.validatorOptions?.allowUnexpectedProps instanceof Array &&
+              ctx.validatorOptions?.allowUnexpectedProps.includes(Property))
+          ) continue;
+
+          ctx.location = Location;
+
+          throw await this._resolveErrorMessage(
+            ctx.validatorOptions?.messages?.unexpectedProperty,
+            "Unexpected property has been encountered!",
+          );
+        }
 
         try {
           ctx.output[Property] = await Validator.validate(
@@ -260,52 +284,21 @@ export class ObjectValidator<
                 !(Property in ctx.input)))
           ) delete ctx.output[Property];
         } catch (error) {
+          if (!Exception) Exception = new ValidationException();
+
           Exception.pushIssues(error);
         }
       }
 
-      if (this.RestValidator) {
-        const RestValidator = BaseValidator.resolveValidator(
-          this.RestValidator,
-        );
-
-        for (const Property of UnexpectedProperties) {
-          try {
-            const Location = `${ctx.location}.${Property}`;
-
-            ctx.output[Property] =
-              (await RestValidator.validate(ctx.output[Property], {
-                ...Context,
-                location: Location,
-                index: Property,
-                property: Property,
-                parent: ctx,
-              })) ?? ctx.output[Property];
-
-            if (
-              ctx.output[Property] === undefined &&
-              (ctx.validatorOptions?.deletePropertyIfUndefined === true ||
-                (ctx.validatorOptions?.deletePropertyIfUndefined !==
-                    false &&
-                  !(Property in ctx.input)))
-            ) delete ctx.output[Property];
-          } catch (error) {
-            Exception.pushIssues(error);
-          }
-        }
-      }
-
-      if (Exception.issues.length) throw Exception;
-    });
+      if (Exception?.issues.length) throw Exception;
+    }, true);
   }
 
   public rest<
     V extends BaseValidator<any, any, any>,
     I = inferInput<V>,
     O = inferOutput<V>,
-  >(
-    validator: V | (() => V),
-  ) {
+  >(validator: V | (() => V)) {
     this.RestValidator = validator;
     return this as unknown as ObjectValidator<
       Shape,
@@ -319,9 +312,7 @@ export class ObjectValidator<
     S = V extends BaseValidator<infer S, any, any> ? S : never,
     I = inferInput<V>,
     O = inferOutput<V>,
-  >(
-    validator: V | (() => V),
-  ) {
+  >(validator: V | (() => V)) {
     const Validator = this.clone();
 
     const ExtendingValidator = BaseValidator.resolveValidator(validator)

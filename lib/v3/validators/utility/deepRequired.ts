@@ -87,6 +87,6 @@ export class DeepRequiredValidator<
         ctx.output,
         this.overrideContext(ctx),
       );
-    });
+    }, true);
   }
 }

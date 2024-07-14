@@ -83,6 +83,6 @@ export class RequiredValidator<
         ctx.output,
         this.overrideContext(ctx),
       );
-    });
+    }, true);
   }
 }

@@ -74,7 +74,7 @@ export class OptionalValidator<
         ctx.output,
         this.overrideContext(ctx),
       );
-    });
+    }, true);
   }
 
   public default<

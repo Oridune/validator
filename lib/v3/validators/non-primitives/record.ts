@@ -13,12 +13,29 @@ import {
 } from "../base.ts";
 
 export interface IRecordValidatorOptions extends TBaseValidatorOptions {
+  /** Pass custom messages for the errors */
+  messages?: Partial<Record<"typeError", TErrorMessage>>;
+
+  /**
+   * Partialize the underlying validator (makes undefined values in the props acceptable)
+   *
+   * Use e.partial() instead, if working with typescript
+   */
   partial?: boolean;
+
+  /**
+   * Converts the underlying validator's props that are partialized/optional to required
+   *
+   * Use e.required() instead, if working with typescript
+   */
   required?: boolean;
 
+  /**
+   * Pass a key validator for validating the keys of the record specifically
+   */
   key?: BaseValidator<any, any, any>;
-  splitter?: string | RegExp;
-  messages?: Partial<Record<"typeError", TErrorMessage>>;
+
+  /** Delete any undefined props */
   deletePropertyIfUndefined?: boolean;
 }
 
@@ -35,6 +52,8 @@ export class RecordValidator<
   protected Validator?: Shape | (() => Shape);
 
   protected overrideContext(ctx: any) {
+    if (!ctx.validatorOptions) return ctx;
+
     return {
       ...ctx,
       ...(ctx.validatorOptions?.partial
@@ -108,7 +127,7 @@ export class RecordValidator<
       // De-referencing
       ctx.output = { ...ctx.output };
 
-      const Exception = new ValidationException();
+      let Exception: ValidationException | undefined;
 
       if (this.Validator) {
         const KeyValidator = ctx.validatorOptions?.key &&
@@ -139,12 +158,14 @@ export class RecordValidator<
                   !(Key in ctx.input)))
             ) delete ctx.output[Key];
           } catch (error) {
+            if (!Exception) Exception = new ValidationException();
+
             Exception.pushIssues(error);
           }
         }
       }
 
-      if (Exception.issues.length) throw Exception;
-    });
+      if (Exception?.issues.length) throw Exception;
+    }, true);
   }
 }

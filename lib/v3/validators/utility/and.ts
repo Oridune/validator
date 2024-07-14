@@ -34,6 +34,8 @@ export class AndValidator<
   )[] = [];
 
   protected overrideContext(ctx: any) {
+    if (!ctx.validatorOptions) return ctx;
+
     return {
       ...ctx,
       options: ctx?.validatorOptions,
@@ -100,7 +102,7 @@ export class AndValidator<
           Context,
         );
       }
-    });
+    }, true);
   }
 
   public and<V extends BaseValidator<any, any, any>>(

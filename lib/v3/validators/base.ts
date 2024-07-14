@@ -41,14 +41,12 @@ export type IValidationContext = {
   deepOptions?: TBaseValidatorOptions;
 } & Record<string, any>;
 
-export interface IValidatorContext<
-  Input = unknown,
-  Output = unknown,
-> extends Omit<IValidationContext, "options"> {
+export interface IValidatorContext<Input = unknown, Output = unknown>
+  extends Omit<IValidationContext, "options"> {
   validatorOptions?: TBaseValidatorOptions;
   readonly input: Input;
   output: Output;
-  exception: ValidationException;
+  exception?: ValidationException;
   throwsFatal: () => void;
   debugger?: ValidationDebugger;
 }
@@ -125,23 +123,31 @@ export interface IJSONSchema {
   schema: IValidatorJSONSchema;
 }
 
-export class BaseValidator<
-  Shape = any,
-  Input = any,
-  Output = any,
-> {
+export class BaseValidator<Shape = any, Input = any, Output = any> {
   static createFactory<T, A extends unknown[]>(
     cls: new (...args: A) => T,
   ): (...args: A) => T {
     return (...args: A) => new cls(...args);
   }
 
-  static resolveValidator<V extends BaseValidator<any, any, any>>(
+  static resolveValidator<V extends BaseValidator>(validator: any): V;
+  static resolveValidator<V extends BaseValidator>(
     validator: any,
-  ): V {
+    silent: false,
+  ): V;
+  static resolveValidator<V extends BaseValidator>(
+    validator: any,
+    silent: true,
+  ): V | null;
+  static resolveValidator<V extends BaseValidator>(
+    validator: any,
+    silent = false,
+  ): V | null {
     const Validator = typeof validator === "function" ? validator() : validator;
 
     if (!(Validator instanceof BaseValidator)) {
+      if (silent) return null;
+
       throw new Error(`Invalid validator provided!`);
     }
 
@@ -154,11 +160,8 @@ export class BaseValidator<
   //! If any new class properties are created, remember to add them to the .clone() method!
   protected Description?: string;
   protected Sample?: any;
-  protected CustomValidators: TCustomValidator<
-    unknown,
-    unknown,
-    unknown
-  >[] = [];
+  protected CustomValidators: TCustomValidator<unknown, unknown, unknown>[] =
+    [];
 
   protected _memory?: Record<string, any>;
 
@@ -168,7 +171,7 @@ export class BaseValidator<
 
     if (Cached !== undefined) return Cached;
 
-    return (this._memory ??= {})[Key] = callback();
+    return ((this._memory ??= {})[Key] = callback());
   }
 
   protected async _resolveErrorMessage(
@@ -200,38 +203,41 @@ export class BaseValidator<
 
   protected _custom<Return>(
     validator: TCustomValidator<any, any, Return>,
+    isDefault = false,
   ) {
     if (
-      this.Type === ValidatorType.UTILITY &&
-      !["and", "or", "if"].includes(this.ID)
-    ) {
-      this.CustomValidators.push(validator);
-    } else {
-      this.CustomValidators.push(
-        async (ctx: IValidatorContext<any, any>) => {
-          optional: if (ctx.validatorOptions?.optional ?? false) {
-            const OptionalOptions = ctx.validatorOptions?.optionalOptions;
+      !isDefault ||
+      (this.Type === ValidatorType.UTILITY &&
+        !["and", "or", "if"].includes(this.ID))
+    ) this.CustomValidators.push(validator);
+    else {
+      const CustomValidator = async (ctx: IValidatorContext<any, any>) => {
+        optional: if (ctx.validatorOptions?.optional ?? false) {
+          const OptionalOptions = ctx.validatorOptions?.optionalOptions;
 
-            if (
-              (OptionalOptions?.nullish &&
-                ([null, undefined] as any).includes(ctx.output)) ||
-              (OptionalOptions?.falsy && !ctx.output)
-            ) ctx.output = undefined;
-
-            if (ctx.output !== undefined) break optional;
-
-            ctx.output = typeof OptionalOptions?.default === "function"
-              ? await OptionalOptions?.default(ctx)
-              : OptionalOptions?.default;
-
-            if (OptionalOptions?.validate !== true) return ctx.output;
+          if (
+            (OptionalOptions?.nullish &&
+              ([null, undefined] as any).includes(ctx.output)) ||
+            (OptionalOptions?.falsy && !ctx.output)
+          ) {
+            ctx.output = undefined;
           }
 
-          if (ctx.validatorOptions?.cast) await this._cast(ctx);
+          if (ctx.output !== undefined) break optional;
 
-          return await validator(ctx);
-        },
-      );
+          ctx.output = typeof OptionalOptions?.default === "function"
+            ? await OptionalOptions?.default(ctx)
+            : OptionalOptions?.default;
+
+          if (OptionalOptions?.validate !== true) return ctx.output;
+        }
+
+        if (ctx.validatorOptions?.cast) await this._cast(ctx);
+
+        return await validator(ctx);
+      };
+
+      this.CustomValidators.push(CustomValidator);
     }
 
     return this as unknown as BaseValidator<
@@ -248,6 +254,8 @@ export class BaseValidator<
       try {
         ctx.output = (await Validator(ctx)) ?? ctx.output;
       } catch (error) {
+        ctx.exception ??= new ValidationException();
+
         const ResolvedError = error instanceof ValidationException ? error : {
           message: error.message ?? error,
           name: ctx.name,
@@ -261,7 +269,7 @@ export class BaseValidator<
       }
     }
 
-    if (ctx.exception.issues.length) throw ctx.exception;
+    if (ctx.exception?.issues?.length) throw ctx.exception;
 
     return ctx;
   }
@@ -309,14 +317,12 @@ export class BaseValidator<
    * @param validator A validation function.
    * @returns
    */
-  public custom<Return>(
-    validator: TCustomValidator<Input, Output, Return>,
-  ) {
+  public custom<Return>(validator: TCustomValidator<Input, Output, Return>) {
     if (typeof validator !== "function") {
       throw new Error(`Invalid validator function has been provided!`);
     }
 
-    return this._custom(validator);
+    return this._custom(validator, false);
   }
 
   /**
@@ -341,14 +347,14 @@ export class BaseValidator<
       };
     }
 
-    const VE = new ValidationException();
-
-    if (ValidatorOptions.throwsFatal) VE.throwsFatal();
-
     const DefaultName = "input";
+
     const Context: IValidatorContext<Input, Output> = {
-      exception: VE,
-      throwsFatal: () => VE.throwsFatal(),
+      throwsFatal() {
+        if (!this.exception) this.exception = new ValidationException();
+        this.exception.throwsFatal();
+      },
+
       name: ctx?.name ?? DefaultName,
       index: ctx?.index,
       property: ctx?.property,
@@ -361,9 +367,13 @@ export class BaseValidator<
       deepOptions: ctx?.deepOptions,
     };
 
+    if (ValidatorOptions.throwsFatal) {
+      Context.exception ??= new ValidationException();
+      Context.exception.throwsFatal();
+    }
+
     if (ValidationDebugger.enabled) {
-      Context.debugger = ctx?.debugger ??
-        new ValidationDebugger(ctx?.name);
+      Context.debugger = ctx?.debugger ?? new ValidationDebugger(ctx?.name);
 
       let Error: ValidationException | undefined;
 
@@ -379,11 +389,13 @@ export class BaseValidator<
         Error = error;
         throw Error;
       } finally {
-        Context.debugger?.exit({
-          label: this.constructor.name,
-          output: Context.output,
-          thrown: Error,
-        }).log();
+        Context.debugger
+          ?.exit({
+            label: this.constructor.name,
+            output: Context.output,
+            thrown: Error,
+          })
+          .log();
       }
     } else await this._validate(Context);
 

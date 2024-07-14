@@ -12,6 +12,7 @@ import {
 } from "../base.ts";
 
 export interface IStringValidatorOptions extends TBaseValidatorOptions {
+  /** Pass custom messages for the errors */
   messages?: Partial<
     Record<
       | "typeError"
@@ -25,12 +26,26 @@ export interface IStringValidatorOptions extends TBaseValidatorOptions {
       TErrorMessage
     >
   >;
+
+  /** Validate string as URL */
   isUrl?: boolean;
+
+  /** Transform string to URL object. (isUrl option is required) */
   returnURLInstance?: boolean;
+
+  /** Validate string minimum length */
   minLength?: number;
+
+  /** Validate string maximum length */
   maxLength?: number;
+
+  /** Pass a string enum */
   choices?: string[];
+
+  /** Pass a list of acceptable regular expressions */
   patterns?: RegExp[];
+
+  /** Validate if string isNaN */
   isNaN?: boolean;
 }
 
@@ -157,7 +172,7 @@ export class StringValidator<
           );
         }
       }
-    });
+    }, true);
   }
 
   public length(options: { min?: number; max?: number } | number) {
@@ -203,13 +218,9 @@ export class StringValidator<
     return this;
   }
 
-  public in<C extends string>(
-    choices: C[],
-  ): StringValidator<Shape, Input, C> {
+  public in<C extends string>(choices: C[]): StringValidator<Shape, Input, C> {
     if (!(choices instanceof Array)) {
-      throw new Error(
-        `Invalid choices array has been provided!`,
-      );
+      throw new Error(`Invalid choices array has been provided!`);
     }
 
     this["ValidatorOptions"].choices = choices;

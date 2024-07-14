@@ -13,6 +13,11 @@ import {
 import { StringValidator } from "../primitives/string.ts";
 
 export interface IOrValidatorOptions extends TBaseValidatorOptions {
+  /**
+   * By default all the string validators are moved at the end of the union validators for better validator matching.
+   *
+   * Pass `true` to disable validators sorting.
+   */
   disableValidatorSorting?: boolean;
 }
 
@@ -31,6 +36,8 @@ export class OrValidator<
   )[] = [];
 
   protected overrideContext(ctx: any) {
+    if (!ctx.validatorOptions) return ctx;
+
     return {
       ...ctx,
       options: ctx.validatorOptions,
@@ -43,10 +50,9 @@ export class OrValidator<
     return {
       type: "or",
       description: this.Description,
-      anyOf: this.Validators.map((validator) =>
-        BaseValidator.resolveValidator(validator).toJSON(
-          Context,
-        ).schema
+      anyOf: this.Validators.map(
+        (validator) =>
+          BaseValidator.resolveValidator(validator).toJSON(Context).schema,
       ),
     } satisfies IValidatorJSONSchema;
   }
@@ -86,7 +92,7 @@ export class OrValidator<
       let Exception: ValidationException | undefined;
 
       const Validators = await Promise.all(
-        this.Validators.map(BaseValidator.resolveValidator),
+        this.Validators.map((v) => BaseValidator.resolveValidator(v)),
       );
 
       if (ctx.validatorOptions?.disableValidatorSorting !== true) {
@@ -95,11 +101,7 @@ export class OrValidator<
           const isStringA = a instanceof StringValidator;
           const isStringB = b instanceof StringValidator;
 
-          return (isStringA && !isStringB)
-            ? 1
-            : (!isStringA && isStringB)
-            ? -1
-            : 0;
+          return isStringA && !isStringB ? 1 : !isStringA && isStringB ? -1 : 0;
         });
       }
 
@@ -107,27 +109,19 @@ export class OrValidator<
 
       for (const Validator of Validators) {
         try {
-          return ctx.output = await Validator
-            .validate(
-              ctx.output,
-              Context,
-            );
+          return (ctx.output = await Validator.validate(ctx.output, Context));
         } catch (error) {
           Exception = new ValidationException().pushIssues(error);
         }
       }
 
       throw Exception ?? new Error("Something went wrong!");
-    });
+    }, true);
   }
 
   public or<V extends BaseValidator<any, any, any>>(
     validator: V | (() => V),
-  ): OrValidator<
-    Shape | V,
-    Input | inferInput<V>,
-    Output | inferOutput<V>
-  > {
+  ): OrValidator<Shape | V, Input | inferInput<V>, Output | inferOutput<V>> {
     if (!(validator instanceof BaseValidator)) {
       throw new Error("Invalid validator instance has been provided!");
     }

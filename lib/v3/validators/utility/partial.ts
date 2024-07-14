@@ -83,6 +83,6 @@ export class PartialValidator<
         ctx.output,
         this.overrideContext(ctx),
       );
-    });
+    }, true);
   }
 }

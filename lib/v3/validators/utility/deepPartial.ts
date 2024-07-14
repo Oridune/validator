@@ -87,6 +87,6 @@ export class DeepPartialValidator<
         ctx.output,
         this.overrideContext(ctx),
       );
-    });
+    }, true);
   }
 }

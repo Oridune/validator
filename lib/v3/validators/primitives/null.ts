@@ -9,7 +9,9 @@ import {
   ValidatorType,
 } from "../base.ts";
 
-export interface INullValidatorOptions extends TBaseValidatorOptions {
+export interface INullValidatorOptions
+  extends Omit<TBaseValidatorOptions, "cast" | "castOptions"> {
+  /** Pass custom messages for the errors */
   messages?: Partial<Record<"typeError", TErrorMessage>>;
 }
 
@@ -49,6 +51,6 @@ export class NullValidator<
           "Value should be null!",
         );
       }
-    });
+    }, true);
   }
 }

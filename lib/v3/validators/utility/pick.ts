@@ -91,6 +91,6 @@ export class PickValidator<
         ctx.output,
         this.overrideContext(ctx),
       );
-    });
+    }, true);
   }
 }

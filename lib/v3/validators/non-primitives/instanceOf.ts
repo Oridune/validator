@@ -16,25 +16,26 @@ export interface IInstanceOfValidatorOptions<
   RestArgs extends Array<any>,
   Args = [Input, ...RestArgs][number],
 > extends TBaseValidatorOptions {
+  /** Pass custom messages for the errors */
   messages?: Partial<Record<"typeError", TErrorMessage>>;
 
   /**
-   * If passed `true` than the validator will act as an optional validator with the default value as the instance of the class passed.
+   * If passed `true`, the validator will act as an optional validator with the default value as the instantiation of the class passed.
    */
   allowUndefined?: AllowUndefined;
 
   /**
-   * If passed `true` than the validator will try to instantiate the class with the input value.
+   * If passed `true`, the validator will try to instantiate the class with the input value.
    */
   instantiate?: boolean;
 
   /**
-   * If `instantiate` is set to `true`, the validator try to instantiate the class with the input value in the first argument, You can pass the rest of the arguments here if any.
+   * If `instantiate` is set to `true`, the validator tries to instantiate the class with the input value in the first argument, You can pass the rest of the arguments here if any.
    */
   instantiationArgs?: Args[] | ((value: Input) => Args[] | Promise<Args[]>);
 
   /**
-   * If `instantiate` is set to `true`, the validator try to instantiate the class with the input value in the first argument, You can pass the rest of the arguments here if any.
+   * If `instantiate` is set to `true`, the validator tries to instantiate the class with the input value in the first argument, You can pass the rest of the arguments here if any.
    */
   instantiationRestArgs?:
     | RestArgs
@@ -77,7 +78,8 @@ export class InstanceOfValidator<
   protected _toSample(
     _ctx?: ISampleDataContext<IInstanceOfValidatorOptions<any, any, any>>,
   ) {
-    return this.Sample ?? ({} as Input);
+    return this.Sample ??
+      ((this.Constructor.name ?? `${this.Constructor}`) as Input);
   }
 
   protected _toStatic(
@@ -101,9 +103,7 @@ export class InstanceOfValidator<
           if (
             !ctx.validatorOptions?.instantiate ||
             (!ctx.validatorOptions?.allowUndefined && ctx.output === undefined)
-          ) {
-            throw "";
-          }
+          ) throw "Undefined not allowed!";
 
           const Args =
             typeof ctx.validatorOptions?.instantiationArgs === "function"
@@ -128,6 +128,6 @@ export class InstanceOfValidator<
           );
         }
       }
-    });
+    }, true);
   }
 }

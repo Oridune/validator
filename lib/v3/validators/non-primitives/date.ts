@@ -11,10 +11,19 @@ import {
 } from "../base.ts";
 
 export interface IDateValidatorOptions extends TBaseValidatorOptions {
+  /** Pass custom messages for the errors */
   messages?: Partial<
     Record<"typeError" | "smaller" | "greater", TErrorMessage>
   >;
+
+  /**
+   * Provide a start time for validation (Use .start or .between methods)
+   */
   startsAt?: Date | number;
+
+  /**
+   * Provide an ending time for validation (Use .end or .between methods)
+   */
   endsAt?: Date | number;
 }
 
@@ -90,7 +99,7 @@ export class DateValidator<
       }
 
       ctx.output = Output;
-    });
+    }, true);
   }
 
   public between(options: { start?: Date | number; end?: Date | number }) {

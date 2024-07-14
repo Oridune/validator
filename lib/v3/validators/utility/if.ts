@@ -11,6 +11,7 @@ import {
 } from "../base.ts";
 
 export interface IIfValidatorOptions extends TBaseValidatorOptions {
+  /** Pass custom messages for the errors */
   messages?: Partial<Record<"typeError", TErrorMessage>>;
 }
 
@@ -62,6 +63,6 @@ export class IfValidator<
           "Value didn't meet the expectation!",
         );
       }
-    });
+    }, true);
   }
 }

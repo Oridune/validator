@@ -1,15 +1,18 @@
+// deno-lint-ignore-file no-explicit-any
 import type { TErrorMessage } from "../../types.ts";
 import {
   BaseValidator,
   type IJSONSchemaContext,
   type ISampleDataContext,
   type IStaticContext,
+  type IValidatorContext,
   type IValidatorJSONSchema,
   type TBaseValidatorOptions,
   ValidatorType,
 } from "../base.ts";
 
 export interface IBigIntValidatorOptions extends TBaseValidatorOptions {
+  /** Pass custom messages for the errors */
   messages?: Partial<Record<"typeError", TErrorMessage>>;
 }
 
@@ -39,6 +42,16 @@ export class BigIntValidator<
     return BigIntValidator.bigint(ctx?.validatorOptions);
   }
 
+  protected _cast(ctx: IValidatorContext<any, any>) {
+    if (typeof ctx.output !== "bigint") {
+      try {
+        ctx.output = BigInt(parseInt(ctx.output));
+      } catch {
+        // Do nothing...
+      }
+    }
+  }
+
   constructor(options?: IBigIntValidatorOptions) {
     super(ValidatorType.PRIMITIVE, "bigint", options);
 
@@ -49,6 +62,6 @@ export class BigIntValidator<
           "Invalid bigint has been provided!",
         );
       }
-    });
+    }, true);
   }
 }

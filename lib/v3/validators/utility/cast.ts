@@ -11,6 +11,9 @@ import {
 
 export interface ICastValidatorOptions
   extends Omit<TBaseValidatorOptions, "optional"> {
+  /**
+   * Enable casting of all the deeply nested validators
+   */
   deepCast?: boolean;
 }
 
@@ -81,6 +84,6 @@ export class CastValidator<
         ctx.output,
         this.overrideContext(ctx),
       );
-    });
+    }, true);
   }
 }

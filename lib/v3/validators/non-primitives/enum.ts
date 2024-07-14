@@ -11,6 +11,7 @@ import {
 } from "../base.ts";
 
 export interface IEnumValidatorOptions extends TBaseValidatorOptions {
+  /** Pass custom messages for the errors */
   messages?: Partial<Record<"typeError" | "invalidChoice", TErrorMessage>>;
 }
 
@@ -90,6 +91,6 @@ export class EnumValidator<
           "Invalid choice!",
         );
       }
-    });
+    }, true);
   }
 }

@@ -12,10 +12,13 @@ import {
 } from "../base.ts";
 
 export interface IBooleanValidatorOptions extends TBaseValidatorOptions {
-  expected?: boolean;
+  /** Pass custom messages for the errors */
   messages?: Partial<
     Record<"typeError" | "notTrue" | "notFalse", TErrorMessage>
   >;
+
+  /** Validate expected value to be true or false */
+  expected?: boolean;
 }
 
 export class BooleanValidator<
@@ -91,6 +94,6 @@ export class BooleanValidator<
             "Value should be false!",
           );
       }
-    });
+    }, true);
   }
 }

@@ -8,9 +8,11 @@ export interface IValidationIssue {
   stack?: string;
 }
 
-export class ValidationException extends Error {
+export class ValidationException {
   public isFatal = false;
   public issues: IValidationIssue[] = [];
+
+  constructor(public message?: string) {}
 
   public throwsFatal() {
     this.isFatal = true;
@@ -34,17 +36,20 @@ export class ValidationException extends Error {
     return this;
   }
 
+  /**
+   * @depricated since version 3.0
+   */
   public clone() {
     const Exception = new ValidationException();
-    Exception.name = this.name;
     Exception.message = this.message;
-    Exception.cause = this.cause;
-    Exception.stack = this.stack;
     Exception.isFatal = this.isFatal;
-    Exception.issues = this.issues;
+    Exception.issues = [...this.issues];
     return Exception;
   }
 
+  /**
+   * @depricated since version 3.0
+   */
   public reset() {
     this.issues = [];
     return this;

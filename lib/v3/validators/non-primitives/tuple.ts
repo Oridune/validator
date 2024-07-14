@@ -17,15 +17,37 @@ import {
 } from "../base.ts";
 
 export interface ITupleValidatorOptions extends TBaseValidatorOptions {
-  partial?: boolean;
-  required?: boolean;
-
-  splitter?: string | RegExp;
+  /** Pass custom messages for the errors */
   messages?: Partial<
     Record<"typeError" | "smallerLength" | "greaterLength", TErrorMessage>
   >;
+
+  /** Validate array minimum length */
   minLength?: number;
+
+  /** Validate array maximum length */
   maxLength?: number;
+
+  /**
+   * Partialize the underlying validator (makes undefined values in the props acceptable)
+   *
+   * Use e.partial() instead, if working with typescript
+   */
+  partial?: boolean;
+
+  /**
+   * Converts the underlying validator's props that are partialized/optional to required
+   *
+   * Use e.required() instead, if working with typescript
+   */
+  required?: boolean;
+
+  /**
+   * (Casting Option) Requires `cast` to be `true`
+   *
+   * Set a splitter that will be used to split elements in the string and convert it into array during the cast.
+   */
+  splitter?: string | RegExp;
 }
 
 export class TupleValidator<
@@ -44,6 +66,8 @@ export class TupleValidator<
     | (() => BaseValidator<any, any, any>);
 
   protected overrideContext(ctx: any) {
+    if (!ctx.validatorOptions) return ctx;
+
     return {
       ...ctx,
       ...(ctx.validatorOptions?.partial
@@ -151,7 +175,6 @@ export class TupleValidator<
 
       const MinLength = ctx.validatorOptions?.minLength ??
         this.Validators.length;
-      const MaxLength = ctx.validatorOptions?.maxLength ?? MinLength;
 
       if (ctx.output.length < MinLength) {
         throw await this._resolveErrorMessage(
@@ -159,6 +182,8 @@ export class TupleValidator<
           "Array is smaller than minimum length!",
         );
       }
+
+      const MaxLength = ctx.validatorOptions?.maxLength ?? MinLength;
 
       if (!this.RestValidator || MaxLength > MinLength) {
         if (ctx.output.length > MaxLength) {
@@ -171,7 +196,7 @@ export class TupleValidator<
 
       ctx.output = [...ctx.output];
 
-      const Exception = new ValidationException();
+      let Exception: ValidationException | undefined;
 
       const Context = this.overrideContext(ctx);
 
@@ -192,12 +217,14 @@ export class TupleValidator<
             parent: ctx,
           });
         } catch (error) {
+          if (!Exception) Exception = new ValidationException();
+
           Exception.pushIssues(error);
         }
       }
 
-      if (Exception.issues.length) throw Exception;
-    });
+      if (Exception?.issues.length) throw Exception;
+    }, true);
   }
 
   public rest<

@@ -30,7 +30,7 @@ export class AnyValidator<
   }
 
   protected _toSample(_ctx?: ISampleDataContext<IAnyValidatorOptions>) {
-    return this.Sample ?? ({} as Input);
+    return this.Sample;
   }
 
   constructor(options?: IAnyValidatorOptions) {

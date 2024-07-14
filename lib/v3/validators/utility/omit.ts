@@ -91,6 +91,6 @@ export class OmitValidator<
         ctx.output,
         this.overrideContext(ctx),
       );
-    });
+    }, true);
   }
 }

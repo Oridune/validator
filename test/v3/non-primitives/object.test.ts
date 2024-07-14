@@ -17,7 +17,11 @@ Deno.test("Object Validator Tests", async (ctx) => {
     const Target = { foo: "bar" };
     const Result = await e.object({ foo: e.string() }).validate(
       Target,
-    ) satisfies { foo: string };
+    ).catch((error) => {
+      console.error(error);
+      throw error;
+    }) satisfies { foo: string };
+
     assertEquals(Result, Target);
   });
 
@@ -44,6 +48,9 @@ Deno.test("Object Validator Tests", async (ctx) => {
       await e.object().validate({
         foo: "bar",
         hello: "world",
+      }).catch((error) => {
+        console.error(error);
+        throw error;
       }) satisfies object;
 
       throw new Error(`Validation Invalid!`);

@@ -1,15 +1,18 @@
+// deno-lint-ignore-file no-explicit-any
 import type { TErrorMessage } from "../../types.ts";
 import {
   BaseValidator,
   type IJSONSchemaContext,
   type ISampleDataContext,
   type IStaticContext,
+  type IValidatorContext,
   type IValidatorJSONSchema,
   type TBaseValidatorOptions,
   ValidatorType,
 } from "../base.ts";
 
 export interface IUndefinedValidatorOptions extends TBaseValidatorOptions {
+  /** Pass custom messages for the errors */
   messages?: Partial<Record<"typeError", TErrorMessage>>;
 }
 
@@ -39,6 +42,12 @@ export class UndefinedValidator<
     return UndefinedValidator.undefined(ctx?.validatorOptions);
   }
 
+  protected _cast(ctx: IValidatorContext<any, any>) {
+    if (typeof ctx.output !== "undefined" && [null, ""].includes(ctx.output)) {
+      ctx.output = undefined;
+    }
+  }
+
   constructor(options?: IUndefinedValidatorOptions) {
     super(ValidatorType.PRIMITIVE, "undefined", options);
 
@@ -49,6 +58,6 @@ export class UndefinedValidator<
           "Value should be undefined!",
         );
       }
-    });
+    }, true);
   }
 }

@@ -12,6 +12,7 @@ import {
 } from "../base.ts";
 
 export interface INumberValidatorOptions extends TBaseValidatorOptions {
+  /** Pass custom messages for the errors */
   messages?: Partial<
     Record<
       | "typeError"
@@ -24,11 +25,23 @@ export interface INumberValidatorOptions extends TBaseValidatorOptions {
       TErrorMessage
     >
   >;
+
+  /** Validate number is int */
   isInt?: boolean;
+
+  /** Validate number is float */
   isFloat?: boolean;
+
+  /** Validate number minimum length */
   minLength?: number;
+
+  /** Validate number maximum length */
   maxLength?: number;
+
+  /** Validate number minimum length */
   minAmount?: number;
+
+  /** Validate number maximum length */
   maxAmount?: number;
 }
 
@@ -154,7 +167,7 @@ export class NumberValidator<
           );
         }
       }
-    });
+    }, true);
   }
 
   public length(options: { min?: number; max?: number } | number) {
