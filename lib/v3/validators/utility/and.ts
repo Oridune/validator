@@ -78,7 +78,7 @@ export class AndValidator<
         return Validator.toStatic(Context);
       }),
       ctx?.validatorOptions,
-    );
+    ) as any;
   }
 
   constructor(
