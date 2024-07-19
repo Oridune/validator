@@ -37,6 +37,7 @@ Deno.test("Date Validator Tests", async (ctx) => {
         startsAt: undefined,
         endsAt: undefined,
       },
+      validator: Schema,
     });
   });
 

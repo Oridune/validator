@@ -235,6 +235,26 @@ Deno.test("Object Validator Tests", async (ctx) => {
   });
 
   await ctx.step("Termination Check Case 1", async () => {
+    const Schema1 = e.object({
+      foo: e.string(),
+      bar: e.object({
+        baz: e.number(),
+      }),
+    });
+
+    const Schema2 = e.object({
+      isActive: e.boolean(),
+    });
+
+    const Schema3 = e.object().extends(e.deepPartial(Schema1)).extends(Schema2);
+
+    await Schema3.validate({
+      foo: "",
+      isActive: true,
+    });
+  });
+
+  await ctx.step("Termination Check Case 1", async () => {
     try {
       await e
         .object({

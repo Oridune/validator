@@ -136,6 +136,14 @@ export class TupleValidator<
       Validator.rest(RestValidator.toStatic(Context));
     }
 
+    if (ctx?.validatorOptions?.partial && !ctx?.validatorOptions.required) {
+      Validator.setOptions({ optional: true });
+    }
+
+    if (ctx?.validatorOptions?.required && !ctx?.validatorOptions.optional) {
+      Validator.setOptions({ optional: false });
+    }
+
     return Validator as any;
   }
 

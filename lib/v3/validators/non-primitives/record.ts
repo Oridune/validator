@@ -98,6 +98,14 @@ export class RecordValidator<
     const Validator = BaseValidator.resolveValidator(this.Validator);
     const Context = this.overrideContext(ctx);
 
+    if (ctx?.validatorOptions?.partial && !ctx?.validatorOptions.required) {
+      Validator.setOptions({ optional: true });
+    }
+
+    if (ctx?.validatorOptions?.required && !ctx?.validatorOptions.optional) {
+      Validator.setOptions({ optional: false });
+    }
+
     return RecordValidator.record(
       Validator.toStatic(Context) as Shape,
       ctx?.validatorOptions,

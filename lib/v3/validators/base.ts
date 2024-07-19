@@ -295,11 +295,19 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
   }
 
   /**
-   * The function `getOptions` returns the `ValidatorOptions` property.
+   * Get default validator options
    * @returns The `ValidatorOptions` property is being returned.
    */
   public getOptions() {
     return this.ValidatorOptions;
+  }
+
+  /**
+   * Change the validator's default options
+   * @returns The `ValidatorOptions` property is being returned.
+   */
+  public setOptions(options: Partial<TBaseValidatorOptions>) {
+    return Object.assign(this.ValidatorOptions, options);
   }
 
   /**

@@ -57,6 +57,7 @@ Deno.test("Enum Validator Tests", async (ctx) => {
         ],
         description: undefined,
       },
+      validator: Schema,
     });
   });
 
