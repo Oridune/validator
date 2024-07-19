@@ -76,7 +76,7 @@ export class OrValidator<
         BaseValidator.resolveValidator(validator).toStatic(Context)
       ),
       ctx?.validatorOptions,
-    );
+    ) as any;
   }
 
   constructor(validators: Shape[], options?: IOrValidatorOptions) {
