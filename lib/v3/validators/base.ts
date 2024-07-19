@@ -154,9 +154,6 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
     return Validator as V;
   }
 
-  protected Input?: Input;
-  protected Output?: Output;
-
   //! If any new class properties are created, remember to add them to the .clone() method!
   protected Description?: string;
   protected Sample?: any;
@@ -280,11 +277,19 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
     return this;
   }
 
+  public shape: Shape;
+  public input: Input;
+  public output: Output;
+
   constructor(
     public Type: ValidatorType,
     public ID: string,
     private ValidatorOptions: TBaseValidatorOptions = {},
   ) {
+    this.shape = null as Shape;
+    this.input = null as Input;
+    this.output = null as Output;
+
     this.Description = ValidatorOptions.description;
     this.Sample = ValidatorOptions.sample;
   }
@@ -423,6 +428,7 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
 
     return {
       schema: this._toJSON(Context),
+      validator: this,
     };
   }
 
@@ -456,6 +462,7 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
     return {
       data: this._toSample(Context),
       schema: Schema,
+      validator: this,
     };
   }
 

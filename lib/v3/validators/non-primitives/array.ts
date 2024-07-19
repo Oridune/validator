@@ -126,9 +126,7 @@ export class ArrayValidator<
       const Validator = BaseValidator.resolveValidator(this.Validator);
       const Context = this.overrideContext(ctx);
 
-      for (let i = 0; i < (ctx?.validatorOptions?.maxLength ?? 1); i++) {
-        Output.push(Validator.toSample(Context).data);
-      }
+      Output.push(Validator.toSample(Context).data);
     }
 
     return this.Sample ?? Output;

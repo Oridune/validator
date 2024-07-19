@@ -27,9 +27,13 @@ Deno.test("Object Validator Tests", async (ctx) => {
 
   await ctx.step("Truthy Validation Case 3", async () => {
     const Target = { foo: "" };
-    const Result = await e.object({
+
+    const Schema = e.object({
       foo: e.optional(e.string(), { optionalOptions: { falsy: true } }),
-    }).validate(Target) satisfies { foo?: string };
+    });
+
+    const Result = await Schema.validate(Target) satisfies { foo?: string };
+
     assertEquals(Result, { foo: undefined as any });
   });
 
