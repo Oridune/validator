@@ -66,14 +66,13 @@ export class ObjectValidator<
   static object = ObjectValidator.createFactory(ObjectValidator);
 
   //! If any new class properties are created, remember to add them to the .clone() method!
-  protected Shape: Shape;
   protected RestValidator?:
     | BaseValidator<any, any, any>
     | (() => BaseValidator<any, any, any>);
 
   protected resolvedShape(opts?: { omitKeys?: string[]; pickKeys?: string[] }) {
     if (opts?.omitKeys || opts?.pickKeys) {
-      let Shape = Object.entries(this.Shape);
+      let Shape = Object.entries(this.shape);
 
       if (opts?.omitKeys instanceof Array) {
         Shape = Shape.filter(([key]) => !opts.omitKeys!.includes(key));
@@ -86,7 +85,7 @@ export class ObjectValidator<
       return Object.fromEntries(Shape) as Shape;
     }
 
-    return this.Shape;
+    return this.shape;
   }
 
   protected resolvedShapeWithKeys(opts?: {
@@ -116,9 +115,8 @@ export class ObjectValidator<
   }
 
   protected _toJSON(ctx?: IJSONSchemaContext<IObjectValidatorOptions>) {
-    const [Shape, Properties] = this._memo(
-      "shape&Keys",
-      () => this.resolvedShapeWithKeys(ctx?.validatorOptions),
+    const [Shape, Properties] = this.resolvedShapeWithKeys(
+      ctx?.validatorOptions,
     );
 
     const Context = this.overrideContext(ctx);
@@ -135,7 +133,10 @@ export class ObjectValidator<
       properties: Properties.reduce<any>((obj, key) => {
         const Validator = BaseValidator.resolveValidator(Shape[key]);
 
-        if (Validator instanceof OptionalValidator) RequiredProps.delete(key);
+        if (
+          Validator instanceof OptionalValidator ||
+          Validator.getOptions().optional
+        ) RequiredProps.delete(key);
 
         obj[key] = Validator.toJSON(Context).schema;
 
@@ -147,9 +148,8 @@ export class ObjectValidator<
   }
 
   protected _toSample(ctx?: ISampleDataContext<IObjectValidatorOptions>) {
-    const [Shape, Properties] = this._memo(
-      "shape&Keys",
-      () => this.resolvedShapeWithKeys(ctx?.validatorOptions),
+    const [Shape, Properties] = this.resolvedShapeWithKeys(
+      ctx?.validatorOptions,
     );
 
     const Context = this.overrideContext(ctx);
@@ -169,9 +169,8 @@ export class ObjectValidator<
   protected _toStatic(
     ctx?: IStaticContext<IObjectValidatorOptions>,
   ): ObjectValidator<Shape, Input, Output> {
-    const [Shape, Properties] = this._memo(
-      "shape&Keys",
-      () => this.resolvedShapeWithKeys(ctx?.validatorOptions),
+    const [Shape, Properties] = this.resolvedShapeWithKeys(
+      ctx?.validatorOptions,
     );
 
     const Context = this.overrideContext(ctx);
@@ -220,7 +219,7 @@ export class ObjectValidator<
       throw new Error("Invalid object shape has been provided!");
     }
 
-    this.Shape = shape;
+    this.shape = shape;
 
     this._custom(async (ctx) => {
       if (typeof ctx.output !== "object" || ctx.output === null) {
@@ -330,7 +329,7 @@ export class ObjectValidator<
       throw new Error("Invalid object validator provided!");
     }
 
-    Validator["Shape"] = { ...this.Shape, ...ExtendingValidator["Shape"] };
+    Validator["shape"] = { ...this.shape, ...ExtendingValidator["shape"] };
 
     return Validator as unknown as ObjectValidator<
       Omit<Shape, keyof S> & S,
@@ -342,7 +341,7 @@ export class ObjectValidator<
   //! If any new class properties are created, remember to add them to the .clone() method!
   public clone() {
     const Validator = new ObjectValidator<Shape, Input, Output>(
-      { ...this.Shape },
+      { ...this.shape },
       this.getOptions(),
     );
 

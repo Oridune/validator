@@ -234,7 +234,7 @@ Deno.test("Object Validator Tests", async (ctx) => {
     assertObjectMatch(Result, Target2);
   });
 
-  await ctx.step("Termination Check Case 1", async () => {
+  await ctx.step("Extends Check Case 1", async () => {
     const Schema1 = e.object({
       foo: e.string(),
       bar: e.object({
@@ -252,6 +252,20 @@ Deno.test("Object Validator Tests", async (ctx) => {
       foo: "",
       isActive: true,
     });
+  });
+
+  await ctx.step("Extends Check Case 2", async () => {
+    const Schema1 = e.object({
+      foo: e.string(),
+      bar: e.object({
+        baz: e.number(),
+      }),
+    });
+
+    const Schema2 = e.object().extends(e.deepPartial(e.omit(Schema1, [])))
+      .extends(e.pick(Schema1, []));
+
+    await Schema2.validate({});
   });
 
   await ctx.step("Termination Check Case 1", async () => {
