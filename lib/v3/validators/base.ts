@@ -277,6 +277,14 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
     return this;
   }
 
+  protected _isPlainObject(value: any) {
+    if (typeof value !== "object" || value === null) return false;
+
+    const proto = Object.getPrototypeOf(value);
+
+    return proto === Object.prototype || proto === null;
+  }
+
   public shape: Shape;
   public input: Input;
   public output: Output;
@@ -389,6 +397,7 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
       Context.debugger = ctx?.debugger ?? new ValidationDebugger(ctx?.name);
 
       let Error: ValidationException | undefined;
+      let Timestamp: number | undefined;
 
       try {
         Context.debugger?.entry({
@@ -397,15 +406,20 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
           config: ValidatorOptions,
         });
 
+        Timestamp = Date.now();
+
         await this._validate(Context);
       } catch (error) {
         Error = error;
         throw Error;
       } finally {
+        const TimeNow = Date.now();
+
         Context.debugger
           ?.exit({
             label: this.constructor.name,
             output: Context.output,
+            timeTakenMs: TimeNow - (Timestamp ?? TimeNow),
             thrown: Error,
           })
           .log();

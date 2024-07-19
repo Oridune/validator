@@ -37,6 +37,29 @@ Deno.test("Object Validator Tests", async (ctx) => {
     assertEquals(Result, { foo: undefined as any });
   });
 
+  await ctx.step("Truthy Validation Case 4", async () => {
+    const url = new URL("https://google.com");
+    const Target = { username: "foo", followers: url };
+
+    const Schema = e.partial(
+      e.deepCast(
+        e.object({
+          username: e.string(),
+          followers: e.optional(
+            e.array(e.if<URL>((v) => v instanceof URL)),
+          ),
+        }),
+      ),
+    );
+
+    const Result = await Schema.validate(Target) satisfies {
+      username?: string;
+      followers?: URL[];
+    };
+
+    assertEquals(Result, { username: "foo", followers: [url] });
+  });
+
   await ctx.step("Falsy Validation", async () => {
     try {
       await e.object().validate("hi") satisfies object;

@@ -5,6 +5,7 @@ export type TDebuggerDetails = {
   label: string;
   tags?: string[];
   config?: object;
+  timeTakenMs?: number;
   output?: unknown;
   thrown?: unknown;
 };
@@ -86,6 +87,7 @@ export class ValidationDebugger {
           isEntry
             ? green("--> " + details.label)
             : blue("<-- " + details.label),
+          ...(details.timeTakenMs ? [dim(`(${details.timeTakenMs}ms)`)] : []),
           ...(details.tags ?? []),
           ...(typeof ErrorMsg === "string" ? [red("Error: " + ErrorMsg)] : []),
         );

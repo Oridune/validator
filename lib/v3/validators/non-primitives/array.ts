@@ -169,10 +169,7 @@ export class ArrayValidator<
 
     if (ctx.output instanceof Array) return;
 
-    if (
-      typeof ctx.output === "object" &&
-      ctx.output !== null
-    ) {
+    if (this._isPlainObject(ctx.output)) {
       try {
         const NanKeyErr = await this._resolveErrorMessage(
           ctx.validatorOptions?.messages?.nanKey,
