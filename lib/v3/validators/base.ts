@@ -49,6 +49,7 @@ export interface IValidatorContext<Input = unknown, Output = unknown>
   exception?: ValidationException;
   throwsFatal: () => void;
   debugger?: ValidationDebugger;
+  terminated?: boolean;
 }
 
 export type TCustomValidator<Input, Output, Return> = (
@@ -216,9 +217,7 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
             (OptionalOptions?.nullish &&
               ([null, undefined] as any).includes(ctx.output)) ||
             (OptionalOptions?.falsy && !ctx.output)
-          ) {
-            ctx.output = undefined;
-          }
+          ) ctx.output = undefined;
 
           if (ctx.output !== undefined) break optional;
 
@@ -226,7 +225,11 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
             ? await OptionalOptions?.default(ctx)
             : OptionalOptions?.default;
 
-          if (OptionalOptions?.validate !== true) return ctx.output;
+          if (OptionalOptions?.validate !== true) {
+            ctx.terminated = true;
+
+            return ctx.output;
+          }
         }
 
         if (ctx.validatorOptions?.cast) await this._cast(ctx);
@@ -248,6 +251,8 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
     ctx: IValidatorContext,
   ): Promise<IValidatorContext> {
     for (const Validator of this.CustomValidators) {
+      if (ctx.terminated) break;
+
       try {
         ctx.output = (await Validator(ctx)) ?? ctx.output;
       } catch (error) {

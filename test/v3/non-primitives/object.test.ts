@@ -39,12 +39,14 @@ Deno.test("Object Validator Tests", async (ctx) => {
 
   await ctx.step("Truthy Validation Case 4", async () => {
     const url = new URL("https://google.com");
-    const Target = { username: "foo", followers: url };
+    const Target = { followers: url };
 
     const Schema = e.partial(
       e.deepCast(
         e.object({
-          username: e.string(),
+          username: e.string().matches(/^foo$/).custom((ctx) =>
+            ctx.output.toLowerCase()
+          ),
           followers: e.optional(
             e.array(e.if<URL>((v) => v instanceof URL)),
           ),
@@ -57,7 +59,7 @@ Deno.test("Object Validator Tests", async (ctx) => {
       followers?: URL[];
     };
 
-    assertEquals(Result, { username: "foo", followers: [url] });
+    assertEquals(Result, { followers: [url] });
   });
 
   await ctx.step("Falsy Validation", async () => {
