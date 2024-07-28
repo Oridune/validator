@@ -68,7 +68,7 @@ export class InstanceOfValidator<
     ctx?: IJSONSchemaContext<IInstanceOfValidatorOptions<any, any, any>>,
   ) {
     return {
-      type: "object",
+      type: this.Constructor.name ?? `${this.Constructor}`,
       description: this.Description,
       optional: !!ctx?.validatorOptions?.optional,
       cast: !!ctx?.validatorOptions?.cast,
