@@ -171,7 +171,7 @@ export class ArrayValidator<
 
     if (this._isPlainObject(ctx.output)) {
       try {
-        const NanKeyErr = await this._resolveErrorMessage(
+        const NanKeyErr = await BaseValidator.resolveErrorMessage(
           ctx.validatorOptions?.messages?.nanKey,
           "A NaN key has been detected in the array!",
         );
@@ -203,7 +203,7 @@ export class ArrayValidator<
     }
 
     if (ctx.validatorOptions?.noCastSingularToArray) {
-      throw await this._resolveErrorMessage(
+      throw await BaseValidator.resolveErrorMessage(
         ctx.validatorOptions?.messages?.typeError,
         "Invalid array has been provided!",
       );
@@ -222,7 +222,7 @@ export class ArrayValidator<
 
     this._custom(async (ctx) => {
       if (!(ctx.output instanceof Array)) {
-        throw await this._resolveErrorMessage(
+        throw await BaseValidator.resolveErrorMessage(
           ctx.validatorOptions?.messages?.typeError,
           "Invalid array has been provided!",
         );
@@ -230,7 +230,7 @@ export class ArrayValidator<
 
       if (typeof ctx.validatorOptions?.minLength === "number") {
         if (ctx.output.length < ctx.validatorOptions.minLength) {
-          throw await this._resolveErrorMessage(
+          throw await BaseValidator.resolveErrorMessage(
             ctx.validatorOptions?.messages?.smallerLength,
             "Array is smaller than minimum length!",
           );
@@ -239,7 +239,7 @@ export class ArrayValidator<
 
       if (typeof ctx.validatorOptions?.maxLength === "number") {
         if (ctx.output.length > ctx.validatorOptions.maxLength) {
-          throw await this._resolveErrorMessage(
+          throw await BaseValidator.resolveErrorMessage(
             ctx.validatorOptions?.messages?.greaterLength,
             "Array is greater than maximum length!",
           );

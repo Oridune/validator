@@ -175,7 +175,7 @@ export class TupleValidator<
 
     this._custom(async (ctx) => {
       if (!(ctx.output instanceof Array)) {
-        throw await this._resolveErrorMessage(
+        throw await BaseValidator.resolveErrorMessage(
           ctx.validatorOptions?.messages?.typeError,
           "Invalid array has been provided!",
         );
@@ -185,7 +185,7 @@ export class TupleValidator<
         this.Validators.length;
 
       if (ctx.output.length < MinLength) {
-        throw await this._resolveErrorMessage(
+        throw await BaseValidator.resolveErrorMessage(
           ctx.validatorOptions?.messages?.smallerLength,
           "Array is smaller than minimum length!",
         );
@@ -195,7 +195,7 @@ export class TupleValidator<
 
       if (!this.RestValidator || MaxLength > MinLength) {
         if (ctx.output.length > MaxLength) {
-          throw await this._resolveErrorMessage(
+          throw await BaseValidator.resolveErrorMessage(
             ctx.validatorOptions?.messages?.greaterLength,
             "Array is larger than maximum length!",
           );

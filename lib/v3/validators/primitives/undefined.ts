@@ -53,7 +53,7 @@ export class UndefinedValidator<
 
     this._custom(async (ctx) => {
       if (ctx.output !== undefined) {
-        throw await this._resolveErrorMessage(
+        throw await BaseValidator.resolveErrorMessage(
           ctx.validatorOptions?.messages?.typeError,
           "Value should be undefined!",
         );

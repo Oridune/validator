@@ -223,7 +223,7 @@ export class ObjectValidator<
 
     this._custom(async (ctx) => {
       if (typeof ctx.output !== "object" || ctx.output === null) {
-        throw await this._resolveErrorMessage(
+        throw await BaseValidator.resolveErrorMessage(
           ctx.validatorOptions?.messages?.typeError,
           "Invalid object has been provided!",
         );
@@ -266,7 +266,7 @@ export class ObjectValidator<
 
           ctx.location = Location;
 
-          throw await this._resolveErrorMessage(
+          throw await BaseValidator.resolveErrorMessage(
             ctx.validatorOptions?.messages?.unexpectedProperty,
             "Unexpected property has been encountered!",
           );

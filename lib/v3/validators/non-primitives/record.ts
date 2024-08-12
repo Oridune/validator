@@ -126,7 +126,7 @@ export class RecordValidator<
 
     this._custom(async (ctx) => {
       if (typeof ctx.output !== "object" || ctx.output === null) {
-        throw await this._resolveErrorMessage(
+        throw await BaseValidator.resolveErrorMessage(
           ctx.validatorOptions?.messages?.typeError,
           "Invalid object has been provided!",
         );

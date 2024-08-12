@@ -122,7 +122,7 @@ export class InstanceOfValidator<
 
           ctx.output = new this.Constructor(...Args);
         } catch {
-          throw await this._resolveErrorMessage(
+          throw await BaseValidator.resolveErrorMessage(
             ctx.validatorOptions?.messages?.typeError,
             `Value is not an instanceOf ${this.Constructor.name}!`,
           );

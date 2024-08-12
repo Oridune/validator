@@ -1,4 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
+import type { TErrorMessage, TPrimitive } from "../../types.ts";
 import {
   BaseValidator,
   type IJSONSchemaContext,
@@ -8,7 +9,10 @@ import {
   ValidatorType,
 } from "../base.ts";
 
-export interface IAnyValidatorOptions extends TBaseValidatorOptions {}
+export interface IAnyValidatorOptions extends TBaseValidatorOptions {
+  /** Pass custom messages for the errors */
+  messages?: Partial<Record<"literalMatchFail", TErrorMessage>>;
+}
 
 export class AnyValidator<
   Shape extends any = any,
@@ -19,6 +23,19 @@ export class AnyValidator<
 
   static value = <T>(value: T, options?: IAnyValidatorOptions) =>
     AnyValidator.any(options).custom(() => value) as AnyValidator<any, T, T>;
+
+  static literal = <T extends TPrimitive>(
+    value: T,
+    options?: IAnyValidatorOptions,
+  ) =>
+    AnyValidator.any(options).custom(async (ctx) => {
+      if (ctx.output !== value) {
+        throw await BaseValidator.resolveErrorMessage(
+          ctx.validatorOptions?.messages?.literalMatchFail,
+          "Literal match failed!",
+        );
+      }
+    }) as AnyValidator<any, T, T>;
 
   protected _toJSON(ctx?: IJSONSchemaContext<IAnyValidatorOptions>) {
     return {

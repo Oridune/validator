@@ -106,7 +106,7 @@ export class NumberValidator<
 
     this._custom(async (ctx) => {
       if (typeof ctx.output !== "number" || isNaN(ctx.output)) {
-        throw await this._resolveErrorMessage(
+        throw await BaseValidator.resolveErrorMessage(
           ctx.validatorOptions?.messages?.typeError,
           "Invalid number has been provided!",
         );
@@ -116,7 +116,7 @@ export class NumberValidator<
 
       if (typeof ctx.validatorOptions?.minLength === "number") {
         if (InputStr.length < ctx.validatorOptions.minLength) {
-          throw await this._resolveErrorMessage(
+          throw await BaseValidator.resolveErrorMessage(
             ctx.validatorOptions?.messages?.smallerLength,
             "Number is smaller than minimum length!",
           );
@@ -125,7 +125,7 @@ export class NumberValidator<
 
       if (typeof ctx.validatorOptions?.maxLength === "number") {
         if (InputStr.length > ctx.validatorOptions.maxLength) {
-          throw await this._resolveErrorMessage(
+          throw await BaseValidator.resolveErrorMessage(
             ctx.validatorOptions?.messages?.greaterLength,
             "Number is greater than maximum length!",
           );
@@ -134,7 +134,7 @@ export class NumberValidator<
 
       if (typeof ctx.validatorOptions?.minAmount === "number") {
         if (ctx.output < ctx.validatorOptions.minAmount) {
-          throw await this._resolveErrorMessage(
+          throw await BaseValidator.resolveErrorMessage(
             ctx.validatorOptions?.messages?.smallerAmount,
             "Number is smaller than minimum amount!",
           );
@@ -143,7 +143,7 @@ export class NumberValidator<
 
       if (typeof ctx.validatorOptions?.maxAmount === "number") {
         if (ctx.output > ctx.validatorOptions.maxAmount) {
-          throw await this._resolveErrorMessage(
+          throw await BaseValidator.resolveErrorMessage(
             ctx.validatorOptions?.messages?.greaterAmount,
             "Number is greater than maximum amount!",
           );
@@ -152,7 +152,7 @@ export class NumberValidator<
 
       if (ctx.validatorOptions?.isInt) {
         if (isNaN(ctx.output) || ctx.output % 1 !== 0) {
-          throw await this._resolveErrorMessage(
+          throw await BaseValidator.resolveErrorMessage(
             ctx.validatorOptions?.messages?.notInt,
             "Number should be an integer!",
           );
@@ -161,7 +161,7 @@ export class NumberValidator<
 
       if (ctx.validatorOptions?.isFloat) {
         if (isNaN(ctx.output) || ctx.output % 1 === 0) {
-          throw await this._resolveErrorMessage(
+          throw await BaseValidator.resolveErrorMessage(
             ctx.validatorOptions?.messages?.notFloat,
             "Number should be a float!",
           );

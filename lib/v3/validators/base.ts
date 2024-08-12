@@ -155,6 +155,17 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
     return Validator as V;
   }
 
+  static async resolveErrorMessage(
+    message: TErrorMessage | undefined,
+    defaultMessage: string,
+  ) {
+    return typeof message === "function"
+      ? await message()
+      : typeof message === "string"
+      ? message
+      : defaultMessage;
+  }
+
   //! If any new class properties are created, remember to add them to the .clone() method!
   protected Description?: string;
   protected Sample?: any;
@@ -170,17 +181,6 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
     if (Cached !== undefined) return Cached;
 
     return ((this._memory ??= {})[Key] = callback());
-  }
-
-  protected async _resolveErrorMessage(
-    message: TErrorMessage | undefined,
-    defaultMessage: string,
-  ) {
-    return typeof message === "function"
-      ? await message()
-      : typeof message === "string"
-      ? message
-      : defaultMessage;
   }
 
   protected _toJSON(_ctx?: IJSONSchemaContext): IValidatorJSONSchema {

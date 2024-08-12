@@ -96,7 +96,7 @@ export class StringValidator<
 
     this._custom(async (ctx) => {
       if (typeof ctx.output !== "string") {
-        throw await this._resolveErrorMessage(
+        throw await BaseValidator.resolveErrorMessage(
           ctx.validatorOptions?.messages?.typeError,
           "Invalid string has been provided!",
         );
@@ -104,7 +104,7 @@ export class StringValidator<
 
       if (typeof ctx.validatorOptions?.minLength === "number") {
         if (ctx.output.length < ctx.validatorOptions.minLength) {
-          throw await this._resolveErrorMessage(
+          throw await BaseValidator.resolveErrorMessage(
             ctx.validatorOptions?.messages?.smallerLength,
             "String is smaller than minimum length!",
           );
@@ -113,7 +113,7 @@ export class StringValidator<
 
       if (typeof ctx.validatorOptions?.maxLength === "number") {
         if (ctx.output.length > ctx.validatorOptions.maxLength) {
-          throw await this._resolveErrorMessage(
+          throw await BaseValidator.resolveErrorMessage(
             ctx.validatorOptions?.messages?.greaterLength,
             "String is greater than maximum length!",
           );
@@ -122,7 +122,7 @@ export class StringValidator<
 
       if (ctx.validatorOptions?.choices instanceof Array) {
         if (!ctx.validatorOptions.choices.includes(ctx.output)) {
-          throw await this._resolveErrorMessage(
+          throw await BaseValidator.resolveErrorMessage(
             ctx.validatorOptions?.messages?.invalidChoice,
             "Invalid choice!",
           );
@@ -132,7 +132,7 @@ export class StringValidator<
       if (ctx.validatorOptions?.patterns?.length) {
         for (const Pattern of ctx.validatorOptions.patterns) {
           if (Pattern instanceof RegExp && !Pattern.test(ctx.output)) {
-            throw await this._resolveErrorMessage(
+            throw await BaseValidator.resolveErrorMessage(
               ctx.validatorOptions?.messages?.matchFailed,
               "String didn't match the expected pattern!",
             );
@@ -144,14 +144,14 @@ export class StringValidator<
         const IsNaN = isNaN(`${ctx.output ?? ""}` as unknown as number);
 
         if (!IsNaN && ctx.validatorOptions.isNaN) {
-          throw await this._resolveErrorMessage(
+          throw await BaseValidator.resolveErrorMessage(
             ctx.validatorOptions?.messages?.numberLike,
             "String should not be number like!",
           );
         }
 
         if (IsNaN && !ctx.validatorOptions.isNaN) {
-          throw await this._resolveErrorMessage(
+          throw await BaseValidator.resolveErrorMessage(
             ctx.validatorOptions?.messages?.notNumberLike,
             "String should be number like!",
           );
@@ -166,7 +166,7 @@ export class StringValidator<
             ? Url
             : Url.toString();
         } catch {
-          throw await this._resolveErrorMessage(
+          throw await BaseValidator.resolveErrorMessage(
             ctx.validatorOptions?.messages?.invalidURL,
             "String is not a valid URL!",
           );

@@ -46,7 +46,7 @@ export class NullValidator<
 
     this._custom(async (ctx) => {
       if (ctx.output !== null) {
-        throw await this._resolveErrorMessage(
+        throw await BaseValidator.resolveErrorMessage(
           ctx.validatorOptions?.messages?.typeError,
           "Value should be null!",
         );

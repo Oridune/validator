@@ -57,7 +57,7 @@ export class BigIntValidator<
 
     this._custom(async (ctx) => {
       if (typeof ctx.output !== "bigint") {
-        throw await this._resolveErrorMessage(
+        throw await BaseValidator.resolveErrorMessage(
           ctx.validatorOptions?.messages?.typeError,
           "Invalid bigint has been provided!",
         );

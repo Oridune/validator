@@ -60,6 +60,15 @@ export type inferEachOutput<
   [K in keyof T]: inferOutput<T[K]>;
 };
 
+export type TPrimitive =
+  | string
+  | number
+  | symbol
+  | bigint
+  | boolean
+  | null
+  | undefined;
+
 export type TModifierValidators =
   | PickValidator<any, any, any>
   | OmitValidator<any, any, any>

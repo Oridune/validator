@@ -30,7 +30,7 @@ Deno.test("Date Validator Tests", async (ctx) => {
     const Schema = e.date();
     assertEquals(Schema.toJSON(), {
       schema: {
-        type: "date",
+        type: "Date",
         description: undefined,
         cast: false,
         optional: false,

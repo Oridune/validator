@@ -164,6 +164,14 @@ export class Validators {
   static value = AnyValidator.value;
 
   /**
+   * Validate a literal value.
+   * @param value Any value as a literal is allowed.
+   * @param options
+   * @returns
+   */
+  static literal = AnyValidator.literal;
+
+  /**
    * Validate if the value matches the predicate
    * @param predicate `boolean` or a function that accepts the value and context in the first two arguments and returns a `boolean`
    * @param options

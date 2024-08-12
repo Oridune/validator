@@ -36,7 +36,7 @@ export class DateValidator<
 
   protected _toJSON(ctx?: IJSONSchemaContext<IDateValidatorOptions>) {
     return {
-      type: "date",
+      type: "Date",
       description: this.Description,
       optional: !!ctx?.validatorOptions?.optional,
       cast: !!ctx?.validatorOptions?.cast,
@@ -66,7 +66,7 @@ export class DateValidator<
         Output.toString() === "Invalid Date" ||
         isNaN(Output as any)
       ) {
-        throw await this._resolveErrorMessage(
+        throw await BaseValidator.resolveErrorMessage(
           ctx.validatorOptions?.messages?.typeError,
           "Value is not a valid date!",
         );
@@ -79,7 +79,7 @@ export class DateValidator<
         typeof ctx.validatorOptions?.startsAt === "number"
       ) {
         if (Input < Number(ctx.validatorOptions.startsAt)) {
-          throw await this._resolveErrorMessage(
+          throw await BaseValidator.resolveErrorMessage(
             ctx.validatorOptions?.messages?.smaller,
             "Date is smaller than minimum!",
           );
@@ -91,7 +91,7 @@ export class DateValidator<
         typeof ctx.validatorOptions?.endsAt === "number"
       ) {
         if (Input > Number(ctx.validatorOptions.endsAt)) {
-          throw await this._resolveErrorMessage(
+          throw await BaseValidator.resolveErrorMessage(
             ctx.validatorOptions?.messages?.greater,
             "Date is greater than maximum!",
           );

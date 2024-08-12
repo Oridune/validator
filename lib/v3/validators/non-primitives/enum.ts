@@ -86,7 +86,7 @@ export class EnumValidator<
             : this.Choices
         ).includes(ctx.output)
       ) {
-        throw await this._resolveErrorMessage(
+        throw await BaseValidator.resolveErrorMessage(
           ctx.validatorOptions?.messages?.invalidChoice,
           "Invalid choice!",
         );

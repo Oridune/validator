@@ -74,7 +74,7 @@ export class BooleanValidator<
 
     this._custom(async (ctx) => {
       if (typeof ctx.output !== "boolean") {
-        throw await this._resolveErrorMessage(
+        throw await BaseValidator.resolveErrorMessage(
           ctx.validatorOptions?.messages?.typeError,
           "Invalid boolean has been provided!",
         );
@@ -85,11 +85,11 @@ export class BooleanValidator<
         ctx.validatorOptions?.expected !== ctx.output
       ) {
         throw ctx.validatorOptions?.expected
-          ? await this._resolveErrorMessage(
+          ? await BaseValidator.resolveErrorMessage(
             ctx.validatorOptions?.messages?.notTrue,
             "Value should be true!",
           )
-          : await this._resolveErrorMessage(
+          : await BaseValidator.resolveErrorMessage(
             ctx.validatorOptions?.messages?.notFalse,
             "Value should be false!",
           );

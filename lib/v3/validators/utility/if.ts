@@ -58,7 +58,7 @@ export class IfValidator<
           ? await this.Predicate(ctx.input, ctx)
           : this.Predicate)
       ) {
-        throw await this._resolveErrorMessage(
+        throw await BaseValidator.resolveErrorMessage(
           ctx.validatorOptions?.messages?.typeError,
           "Value didn't meet the expectation!",
         );
