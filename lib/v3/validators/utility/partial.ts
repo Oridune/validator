@@ -20,6 +20,7 @@ import type { TupleValidator } from "../non-primitives/tuple.ts";
 
 export interface IPartialValidatorOptions
   extends Omit<TBaseValidatorOptions, "cast" | "optional"> {
+  noDefaults?: boolean;
 }
 
 type TAllowedValidators =
@@ -44,6 +45,7 @@ export class PartialValidator<
       options: {
         ...ctx.validatorOptions,
         partial: true,
+        partialNoDefaults: ctx.validatorOptions.noDefaults,
       },
       internal: true,
     };

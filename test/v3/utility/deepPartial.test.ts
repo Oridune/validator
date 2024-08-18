@@ -320,7 +320,7 @@ Deno.test("Deep-Partial Validator Tests", async (ctx) => {
     assertObjectMatch(Result, Data);
   });
 
-  await ctx.step("Truthy Validation Case 7", async () => {
+  await ctx.step("Truthy Validation Case 9", async () => {
     const Schema = e.deepPartial(e.record(e.number()));
 
     const Data: any = { foo: undefined };
@@ -330,6 +330,34 @@ Deno.test("Deep-Partial Validator Tests", async (ctx) => {
     }) satisfies Record<string, number | undefined>;
 
     assertObjectMatch(Result, Data);
+  });
+
+  await ctx.step("Truthy Validation Case 10", async () => {
+    const Schema = e.deepPartial(
+      e.object({
+        username: e.string(),
+        password: e.string(),
+        profile: e.object({
+          fullName: e.optional(e.string()).default("Anonymous"),
+          dob: e.date(),
+        }),
+      }),
+      { noDefaults: true },
+    );
+
+    const Data = { profile: {} };
+    const Result = await Schema.validate(Data) satisfies {
+      username?: string;
+      password?: string;
+      profile?: {
+        fullName?: string;
+        dob?: Date;
+      };
+    };
+
+    if (Result.profile?.fullName) throw new Error("No fullName");
+
+    assertObjectMatch(Data, Result);
   });
 
   await ctx.step("Falsy Validation Case 1", async () => {

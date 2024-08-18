@@ -39,6 +39,7 @@ export type IValidationContext = {
   context?: unknown;
   options?: TBaseValidatorOptions;
   deepOptions?: TBaseValidatorOptions;
+  replaceOptions?: TBaseValidatorOptions;
   internal?: boolean;
 } & Record<string, any>;
 
@@ -368,11 +369,12 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
   ): Promise<Output> {
     let ValidatorOptions = this.ValidatorOptions;
 
-    if (ctx?.options || ctx?.deepOptions) {
+    if (ctx?.options || ctx?.deepOptions || ctx?.replaceOptions) {
       ValidatorOptions = {
         ...ctx?.deepOptions,
         ...ctx?.options,
         ...this.ValidatorOptions,
+        ...ctx?.replaceOptions,
       };
     }
 

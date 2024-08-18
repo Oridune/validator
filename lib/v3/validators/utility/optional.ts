@@ -16,7 +16,9 @@ export type IDefaultValueType<D> = D extends (
   : D extends (ctx: IValidatorContext) => infer T ? T
   : D;
 
-export interface IOptionalValidatorOptions extends TBaseValidatorOptions {}
+export interface IOptionalValidatorOptions extends TBaseValidatorOptions {
+  noDefaults?: boolean;
+}
 
 export class OptionalValidator<
   Shape extends BaseValidator<any, any, any>,
@@ -28,6 +30,10 @@ export class OptionalValidator<
   protected Validator: Shape | (() => Shape);
 
   protected overrideContext(ctx: any) {
+    if (ctx.validatorOptions.noDefaults) {
+      delete ctx.validatorOptions?.optionalOptions.default;
+    }
+
     return {
       ...ctx,
       options: {

@@ -71,7 +71,17 @@ export class TupleValidator<
     return {
       ...ctx,
       ...(ctx.validatorOptions?.partial
-        ? { options: { optional: true } }
+        ? {
+          options: {
+            optional: true,
+            noDefaults: ctx.validatorOptions.partialNoDefaults ?? false,
+          },
+          replaceOptions: ctx.validatorOptions.optionalOptions
+            ? {
+              optionalOptions: ctx.validatorOptions.optionalOptions,
+            }
+            : undefined,
+        }
         : ctx.validatorOptions?.required
         ? { options: { optional: false } }
         : {}),
