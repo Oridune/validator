@@ -267,6 +267,7 @@ export class ArrayValidator<
                 index: Key,
                 property: Index,
                 parent: ctx,
+                internal: true,
               });
             } catch (error) {
               if (!Exception) Exception = new ValidationException();

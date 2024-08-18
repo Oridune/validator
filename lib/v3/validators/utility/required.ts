@@ -45,6 +45,7 @@ export class RequiredValidator<
         ...ctx.validatorOptions,
         required: true,
       },
+      internal: true,
     };
   }
 

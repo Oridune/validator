@@ -52,6 +52,7 @@ export class PickValidator<
         ...ctx.validatorOptions,
         pickKeys: this.Keys,
       },
+      internal: true,
     };
   }
 

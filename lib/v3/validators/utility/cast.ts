@@ -46,6 +46,7 @@ export class CastValidator<
         ...ctx.validatorOptions,
         cast: ctx.validatorOptions?.cast ?? true,
       },
+      internal: true,
     };
   }
 

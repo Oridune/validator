@@ -11,8 +11,19 @@ export interface IValidationIssue {
 export class ValidationException {
   public isFatal = false;
   public issues: IValidationIssue[] = [];
+  public stack?: string;
 
   constructor(public message?: string) {}
+
+  public captureStackTrace() {
+    const capture: { stack?: string } = {};
+
+    Error.captureStackTrace(capture);
+
+    this.stack = capture.stack;
+
+    return this;
+  }
 
   public throwsFatal() {
     this.isFatal = true;

@@ -49,6 +49,7 @@ export class DeepRequiredValidator<
         ...ctx.validatorOptions,
         required: true,
       },
+      internal: true,
     };
   }
 

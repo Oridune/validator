@@ -147,7 +147,11 @@ export class RecordValidator<
           try {
             let Key = Index;
 
-            if (KeyValidator) Key = await KeyValidator.validate(Key);
+            if (KeyValidator) {
+              Key = await KeyValidator.validate(Key, {
+                internal: true,
+              });
+            }
 
             const Location = `${ctx.location}.${Key}`;
 
@@ -157,6 +161,7 @@ export class RecordValidator<
               index: Key,
               property: Key,
               parent: ctx,
+              internal: true,
             });
 
             if (

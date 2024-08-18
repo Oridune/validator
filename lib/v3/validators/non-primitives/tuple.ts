@@ -223,6 +223,7 @@ export class TupleValidator<
             index: Index,
             property: Key,
             parent: ctx,
+            internal: true,
           });
         } catch (error) {
           if (!Exception) Exception = new ValidationException();

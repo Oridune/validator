@@ -39,6 +39,7 @@ export type IValidationContext = {
   context?: unknown;
   options?: TBaseValidatorOptions;
   deepOptions?: TBaseValidatorOptions;
+  internal?: boolean;
 } & Record<string, any>;
 
 export interface IValidatorContext<Input = unknown, Output = unknown>
@@ -159,11 +160,13 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
     message: TErrorMessage | undefined,
     defaultMessage: string,
   ) {
-    return typeof message === "function"
-      ? await message()
-      : typeof message === "string"
-      ? message
-      : defaultMessage;
+    return new Error(
+      typeof message === "function"
+        ? await message()
+        : typeof message === "string"
+        ? message
+        : defaultMessage,
+    );
   }
 
   //! If any new class properties are created, remember to add them to the .clone() method!
@@ -271,7 +274,7 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
       }
     }
 
-    if (ctx.exception?.issues?.length) throw ctx.exception;
+    if (ctx.exception?.issues?.length) throw ctx.exception.captureStackTrace();
 
     return ctx;
   }

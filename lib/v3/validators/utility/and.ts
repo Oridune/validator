@@ -39,6 +39,7 @@ export class AndValidator<
     return {
       ...ctx,
       options: ctx?.validatorOptions,
+      internal: true,
     };
   }
 

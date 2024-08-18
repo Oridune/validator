@@ -41,6 +41,7 @@ export class OrValidator<
     return {
       ...ctx,
       options: ctx.validatorOptions,
+      internal: true,
     };
   }
 

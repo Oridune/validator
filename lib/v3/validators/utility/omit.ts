@@ -52,6 +52,7 @@ export class OmitValidator<
         ...ctx.validatorOptions,
         omitKeys: this.Keys,
       },
+      internal: true,
     };
   }
 

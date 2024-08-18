@@ -36,6 +36,7 @@ export class OptionalValidator<
         optional: ctx.validatorOptions?.optional ?? true,
         optionalOptions: ctx.validatorOptions?.optionalOptions,
       },
+      internal: true,
     };
   }
 

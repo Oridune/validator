@@ -281,6 +281,7 @@ export class ObjectValidator<
               index: Property,
               property: Property,
               parent: ctx,
+              internal: true,
             },
           );
 
