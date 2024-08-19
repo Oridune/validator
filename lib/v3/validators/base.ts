@@ -228,7 +228,11 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
 
           if (ctx.output !== undefined) break optional;
 
-          if (ctx.validatorOptions?.noDefaults) return undefined;
+          if (ctx.validatorOptions?.noDefaults) {
+            ctx.terminated = true;
+
+            return undefined;
+          }
 
           ctx.output = typeof OptionalOptions?.default === "function"
             ? await OptionalOptions?.default(ctx)

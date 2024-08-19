@@ -169,6 +169,33 @@ Deno.test("Partial Validator Tests", async (ctx) => {
     assertObjectMatch(Result, Data);
   });
 
+  await ctx.step("Truthy Validation Case 11", async () => {
+    const Schema = e.partial(
+      e.object({
+        date: e.optional(
+          e.instanceOf(Date, { instantiate: true })
+            .custom((ctx) => {
+              // This function should not be reachable.
+              if (typeof ctx.output !== "string") {
+                throw new Error("Invalid date");
+              }
+            }),
+        ),
+        password: e.optional(e.string()).default(() => "secret"),
+      }),
+      { noDefaults: true },
+    );
+
+    const Data = {};
+    const Result = await Schema.validate(Data) satisfies {
+      password?: string;
+    };
+
+    if (Result.password) throw new Error("No password");
+
+    assertObjectMatch(Result, Data);
+  });
+
   await ctx.step("Falsy Validation Case 1", async () => {
     try {
       const Schema = e.partial(
