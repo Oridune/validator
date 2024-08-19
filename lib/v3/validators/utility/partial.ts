@@ -40,15 +40,12 @@ export class PartialValidator<
   protected Validator: Shape | (() => Shape);
 
   protected overrideContext(ctx: any) {
-    const NoDefaults = ctx.validatorOptions.noDefaults;
-    delete ctx.validatorOptions.noDefaults;
-
     return {
       ...ctx,
       options: {
         ...ctx.validatorOptions,
         partial: true,
-        partialNoDefaults: NoDefaults,
+        partialNoDefaults: ctx.validatorOptions.noDefaults,
       },
       internal: true,
     };
