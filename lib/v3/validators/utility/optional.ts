@@ -30,10 +30,6 @@ export class OptionalValidator<
   protected Validator: Shape | (() => Shape);
 
   protected overrideContext(ctx: any) {
-    if (
-      ctx.validatorOptions.noDefaults && ctx.validatorOptions?.optionalOptions
-    ) delete ctx.validatorOptions.optionalOptions.default;
-
     return {
       ...ctx,
       options: {
