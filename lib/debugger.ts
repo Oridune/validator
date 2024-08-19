@@ -29,6 +29,9 @@ export class ValidationDebugger {
     return JSON.stringify(
       obj,
       (_, value) => {
+        if (typeof value === "function") {
+          return `[Function ${value.name || "(anonymous)"}]`;
+        }
         if (typeof value === "bigint") return `${value}n`;
         if (typeof value === "object" && value !== null) {
           if (seen.has(value)) return "[Circular]";

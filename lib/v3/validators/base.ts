@@ -93,6 +93,7 @@ export interface IValidatorJSONSchema {
 export interface IJSONSchemaOptions {
   options?: TBaseValidatorOptions;
   deepOptions?: TBaseValidatorOptions;
+  replaceOptions?: TBaseValidatorOptions;
 }
 
 export interface IJSONSchemaContext<Opts = TBaseValidatorOptions>
@@ -105,6 +106,7 @@ export interface ISampleDataOptions {
   schemaOptions?: IJSONSchemaOptions;
   options?: TBaseValidatorOptions;
   deepOptions?: TBaseValidatorOptions;
+  replaceOptions?: TBaseValidatorOptions;
 }
 
 export interface ISampleDataContext<Opts = TBaseValidatorOptions>
@@ -115,6 +117,7 @@ export interface ISampleDataContext<Opts = TBaseValidatorOptions>
 export interface IStaticOptions {
   options?: TBaseValidatorOptions;
   deepOptions?: TBaseValidatorOptions;
+  replaceOptions?: TBaseValidatorOptions;
 }
 
 export interface IStaticContext<Opts = TBaseValidatorOptions>
@@ -449,12 +452,13 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
       ...options?.deepOptions,
       ...options?.options,
       ...this.ValidatorOptions,
+      ...options?.replaceOptions,
     };
 
-    delete options?.options;
+    const { options: _, ...restOptions } = options ?? {};
 
     const Context: IJSONSchemaContext = {
-      ...options,
+      ...restOptions,
       validatorOptions: ValidatorOptions,
     };
 
@@ -482,12 +486,13 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
       ...options?.deepOptions,
       ...options?.options,
       ...this.ValidatorOptions,
+      ...options?.replaceOptions,
     };
 
-    delete options?.options;
+    const { options: _, ...restOptions } = options ?? {};
 
     const Context: IJSONSchemaContext = {
-      ...options,
+      ...restOptions,
       validatorOptions: ValidatorOptions,
     };
 
@@ -508,12 +513,13 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
       ...options?.deepOptions,
       ...options?.options,
       ...this.ValidatorOptions,
+      ...options?.replaceOptions,
     };
 
-    delete options?.options;
+    const { options: _, ...restOptions } = options ?? {};
 
     const Context: IStaticContext = {
-      ...options,
+      ...restOptions,
       validatorOptions: ValidatorOptions,
     };
 

@@ -184,20 +184,13 @@ export class ObjectValidator<
     );
 
     const Context = this.overrideContext(ctx);
+
     const NewShape: Record<string, BaseValidator> = {};
 
     for (const Key of Properties) {
       NewShape[Key] = BaseValidator.resolveValidator(Shape[Key]).toStatic(
         Context,
       );
-
-      if (ctx?.validatorOptions?.partial && !ctx?.validatorOptions.required) {
-        NewShape[Key].setOptions({ optional: true });
-      }
-
-      if (ctx?.validatorOptions?.required && !ctx?.validatorOptions.optional) {
-        NewShape[Key].setOptions({ optional: false });
-      }
     }
 
     const Validator = ObjectValidator.object(NewShape, ctx?.validatorOptions);

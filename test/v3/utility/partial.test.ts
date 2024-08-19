@@ -111,10 +111,30 @@ Deno.test("Partial Validator Tests", async (ctx) => {
     const Schema = e.partial(
       e.object({
         username: e.string(),
-        password: e.optional(e.string()).default("secret"),
+        password: e.optional(e.string()).default(() => "secret"),
       }),
       { noDefaults: true },
     );
+
+    const Data = { username: "john" };
+    const Result = await Schema.validate(Data) satisfies {
+      username?: string;
+      password?: string;
+    };
+
+    if (Result.password) throw new Error("No password");
+
+    assertObjectMatch(Result, Data);
+  });
+
+  await ctx.step("Truthy Validation Case 9", async () => {
+    const Schema = e.object().extends(e.partial(
+      e.object({
+        username: e.string(),
+        password: e.optional(e.string()).default(() => "secret"),
+      }),
+      { noDefaults: true },
+    ));
 
     const Data = { username: "john" };
     const Result = await Schema.validate(Data) satisfies {
