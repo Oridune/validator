@@ -292,7 +292,7 @@ export class ObjectValidator<
             ctx.output[Property] === undefined &&
             (ctx.validatorOptions?.deletePropertyIfUndefined === true ||
               (ctx.validatorOptions?.deletePropertyIfUndefined !== false &&
-                !(Property in ctx.input)))
+                !(Property in (ctx.input ?? {}))))
           ) delete ctx.output[Property];
         } catch (error) {
           if (!Exception) Exception = new ValidationException();

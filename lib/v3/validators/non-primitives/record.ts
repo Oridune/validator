@@ -170,7 +170,7 @@ export class RecordValidator<
               ctx.output[Key] === undefined &&
               (ctx.validatorOptions?.deletePropertyIfUndefined === true ||
                 (ctx.validatorOptions?.deletePropertyIfUndefined !== false &&
-                  !(Key in ctx.input)))
+                  !(Key in (ctx.input ?? {}))))
             ) delete ctx.output[Key];
           } catch (error) {
             if (!Exception) Exception = new ValidationException();
