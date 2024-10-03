@@ -11,6 +11,18 @@ const ActivitySchema = () =>
     enabled: e.optional(e.boolean),
   });
 
+const Small = e.pick(ActivitySchema(), ["user"]);
+
+console.log("Small", await Small.validate({ user: "user" }));
+
+console.log(
+  await ActivitySchema().validate({
+    description: "abc",
+    user: "user",
+    enabled: true,
+  }),
+);
+
 // User Schema
 const UserSchema = () =>
   e.object({

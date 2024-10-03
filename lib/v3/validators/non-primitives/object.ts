@@ -235,12 +235,8 @@ export class ObjectValidator<
       // De-referencing
       ctx.output = { ...ctx.output };
 
-      const [Shape, Properties] = this._memo(
-        "shape&Keys",
-        () =>
-          this.resolvedShapeWithKeys(
-            ctx?.validatorOptions as IObjectValidatorOptions,
-          ),
+      const [Shape, Properties] = this.resolvedShapeWithKeys(
+        ctx?.validatorOptions as IObjectValidatorOptions,
       );
 
       const Context = this.overrideContext(ctx);
