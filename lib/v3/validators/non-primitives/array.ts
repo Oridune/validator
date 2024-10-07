@@ -79,6 +79,16 @@ export interface IArrayValidatorOptions extends TBaseValidatorOptions {
    * If you want to disable this behavior, pass `true` here.
    */
   noCastSingularToArray?: boolean;
+
+  /**
+   * (Casting Option) Requires `cast` to be `true`
+   *
+   * During casting, the value will be validated while keeping its original shape.
+   *
+   * For example if you pass an object instead of an array by default the validator tries to convert it to an array before validation.
+   * If this option is set to `true` the validator will try to validate without converting the object to array.
+   */
+  preserveShape?: boolean;
 }
 
 export class ArrayValidator<
@@ -178,25 +188,30 @@ export class ArrayValidator<
           "A NaN key has been detected in the array!",
         );
 
-        ctx.output = Object.keys(ctx.output).reduce((array, key) => {
-          const Key = parseInt(key);
+        if (ctx.validatorOptions?.preserveShape) {
+          ctx.validatorOptions.objectKeys = Object.keys(ctx.output);
+          ctx.output = Object.values(ctx.output);
+        } else {
+          ctx.output = Object.keys(ctx.output).reduce((array, key) => {
+            const Key = parseInt(key);
 
-          if (isNaN(Key)) {
-            if (ctx.validatorOptions?.pushNanKeys) {
-              array.push(ctx.output[key]);
+            if (isNaN(Key)) {
+              if (ctx.validatorOptions?.pushNanKeys) {
+                array.push(ctx.output[key]);
 
-              return array;
+                return array;
+              }
+
+              if (ctx.validatorOptions?.ignoreNanKeys) return array;
+
+              throw NanKeyErr;
             }
 
-            if (ctx.validatorOptions?.ignoreNanKeys) return array;
+            array[Key] = ctx.output[key];
 
-            throw NanKeyErr;
-          }
-
-          array[Key] = ctx.output[key];
-
-          return array;
-        }, [] as any[]);
+            return array;
+          }, [] as any[]);
+        }
 
         return;
       } catch {
@@ -249,7 +264,18 @@ export class ArrayValidator<
       }
 
       if (ctx.output.length) {
-        ctx.output = [...ctx.output];
+        if (
+          ctx.validatorOptions?.preserveShape &&
+          ctx.validatorOptions.objectKeys instanceof Array
+        ) {
+          ctx.output = ctx.validatorOptions.objectKeys.reduce(
+            (obj, key, index) => {
+              obj[key] = ctx.output[index];
+              return obj;
+            },
+            {},
+          );
+        } else ctx.output = [...ctx.output];
 
         let Exception: ValidationException | undefined;
 
