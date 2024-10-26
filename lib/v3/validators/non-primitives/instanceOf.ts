@@ -64,7 +64,7 @@ export class InstanceOfValidator<
     >,
   ) => new InstanceOfValidator<T, Proto | Input, Proto>(constructor, options);
 
-  protected _toJSON(
+  protected override _toJSON(
     ctx?: IJSONSchemaContext<IInstanceOfValidatorOptions<any, any, any>>,
   ) {
     return {
@@ -75,14 +75,14 @@ export class InstanceOfValidator<
     } satisfies IValidatorJSONSchema;
   }
 
-  protected _toSample(
+  protected override _toSample(
     _ctx?: ISampleDataContext<IInstanceOfValidatorOptions<any, any, any>>,
   ) {
     return this.Sample ??
       ((this.Constructor.name ?? `${this.Constructor}`) as Input);
   }
 
-  protected _toStatic(
+  protected override _toStatic(
     ctx?: IStaticContext<IInstanceOfValidatorOptions<any, any, any>>,
   ): InstanceOfValidator<Shape, Input, Output> {
     return InstanceOfValidator.instanceOf(

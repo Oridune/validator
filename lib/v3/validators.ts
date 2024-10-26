@@ -27,6 +27,7 @@ import {
   TupleValidator,
   UndefinedValidator,
 } from "./validators/mod.ts";
+import { DeepOptionsValidator } from "./validators/utility/deepOptions.ts";
 
 export class Validators {
   /**
@@ -204,6 +205,14 @@ export class Validators {
   static or = OrValidator.or;
 
   /**
+   * Pass deep options to the validators
+   * @param validators Any kind of validator or deep validators.
+   * @param options
+   * @returns
+   */
+  static deepOptions = DeepOptionsValidator.deepOptions;
+
+  /**
    * Passed validator(s) will try to cast the data type of the value before validating.
    * @param validators Any kind of validator.
    * @param options
@@ -310,7 +319,7 @@ export class Validators {
       const Results = await callback();
       return Results;
     } catch (error) {
-      throw Validators.error(error);
+      throw Validators.error(error as Error);
     }
   };
 
@@ -323,7 +332,7 @@ export class Validators {
       const Results = callback();
       return Results;
     } catch (error) {
-      throw Validators.error(error);
+      throw Validators.error(error as Error);
     }
   };
 

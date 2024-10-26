@@ -37,7 +37,7 @@ export class AnyValidator<
       }
     }) as AnyValidator<any, T, T>;
 
-  protected _toJSON(ctx?: IJSONSchemaContext<IAnyValidatorOptions>) {
+  protected override _toJSON(ctx?: IJSONSchemaContext<IAnyValidatorOptions>) {
     return {
       type: "any",
       description: this.Description,
@@ -46,7 +46,9 @@ export class AnyValidator<
     } satisfies IValidatorJSONSchema;
   }
 
-  protected _toSample(_ctx?: ISampleDataContext<IAnyValidatorOptions>) {
+  protected override _toSample(
+    _ctx?: ISampleDataContext<IAnyValidatorOptions>,
+  ) {
     return this.Sample;
   }
 

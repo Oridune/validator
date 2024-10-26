@@ -26,7 +26,7 @@ export class EnumValidator<
     | Input[]
     | ((ctx: IValidatorContext) => Input[] | Promise<Input[]>);
 
-  protected _toJSON(ctx?: IJSONSchemaContext<IEnumValidatorOptions>) {
+  protected override _toJSON(ctx?: IJSONSchemaContext<IEnumValidatorOptions>) {
     if (!(this.Choices instanceof Array)) {
       return {
         type: "enum",
@@ -51,7 +51,9 @@ export class EnumValidator<
     } satisfies IValidatorJSONSchema;
   }
 
-  protected _toSample(_ctx?: ISampleDataContext<IEnumValidatorOptions>) {
+  protected override _toSample(
+    _ctx?: ISampleDataContext<IEnumValidatorOptions>,
+  ) {
     return (
       this.Sample ??
         ((!(this.Choices instanceof Array)
@@ -60,7 +62,7 @@ export class EnumValidator<
     );
   }
 
-  protected _toStatic(
+  protected override _toStatic(
     ctx?: IStaticContext<IEnumValidatorOptions>,
   ): EnumValidator<Shape, Input, Output> {
     return EnumValidator.enum(this.Choices, ctx?.validatorOptions);

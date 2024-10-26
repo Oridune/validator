@@ -34,7 +34,7 @@ export class DateValidator<
 > extends BaseValidator<Shape, Input, Output> {
   static date = DateValidator.createFactory(DateValidator);
 
-  protected _toJSON(ctx?: IJSONSchemaContext<IDateValidatorOptions>) {
+  protected override _toJSON(ctx?: IJSONSchemaContext<IDateValidatorOptions>) {
     return {
       type: "Date",
       description: this.Description,
@@ -45,11 +45,13 @@ export class DateValidator<
     } satisfies IValidatorJSONSchema;
   }
 
-  protected _toSample(_ctx?: ISampleDataContext<IDateValidatorOptions>) {
+  protected override _toSample(
+    _ctx?: ISampleDataContext<IDateValidatorOptions>,
+  ) {
     return this.Sample ?? (new Date() as Input);
   }
 
-  protected _toStatic(
+  protected override _toStatic(
     ctx?: IStaticContext<IDateValidatorOptions>,
   ): DateValidator<Shape, Input, Output> {
     return DateValidator.date(ctx?.validatorOptions);

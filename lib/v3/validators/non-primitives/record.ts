@@ -74,7 +74,9 @@ export class RecordValidator<
     };
   }
 
-  protected _toJSON(ctx?: IJSONSchemaContext<IRecordValidatorOptions>) {
+  protected override _toJSON(
+    ctx?: IJSONSchemaContext<IRecordValidatorOptions>,
+  ) {
     const Validator = this.Validator &&
       BaseValidator.resolveValidator(this.Validator);
     const Context = this.overrideContext(ctx);
@@ -88,11 +90,13 @@ export class RecordValidator<
     } satisfies IValidatorJSONSchema;
   }
 
-  protected _toSample(_ctx?: ISampleDataContext<IRecordValidatorOptions>) {
+  protected override _toSample(
+    _ctx?: ISampleDataContext<IRecordValidatorOptions>,
+  ) {
     return this.Sample ?? ({} as Input);
   }
 
-  protected _cast(ctx: IValidatorContext<any, any>) {
+  protected override _cast(ctx: IValidatorContext<any, any>) {
     if (typeof ctx.output === "string") {
       try {
         ctx.output = JSON.parse(ctx.output);
@@ -102,7 +106,7 @@ export class RecordValidator<
     }
   }
 
-  protected _toStatic(
+  protected override _toStatic(
     ctx?: IStaticContext<IRecordValidatorOptions>,
   ): RecordValidator<Shape, Input, Output> {
     const Validator = BaseValidator.resolveValidator(this.Validator);
@@ -175,7 +179,7 @@ export class RecordValidator<
           } catch (error) {
             if (!Exception) Exception = new ValidationException();
 
-            Exception.pushIssues(error);
+            Exception.pushIssues(error as Error);
           }
         }
       }

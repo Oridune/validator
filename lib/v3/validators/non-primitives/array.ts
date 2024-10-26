@@ -123,7 +123,7 @@ export class ArrayValidator<
     };
   }
 
-  protected _toJSON(ctx?: IJSONSchemaContext<IArrayValidatorOptions>) {
+  protected override _toJSON(ctx?: IJSONSchemaContext<IArrayValidatorOptions>) {
     const Validator = this.Validator &&
       BaseValidator.resolveValidator(this.Validator);
     const Context = this.overrideContext(ctx);
@@ -139,7 +139,9 @@ export class ArrayValidator<
     } satisfies IValidatorJSONSchema;
   }
 
-  protected _toSample(ctx?: ISampleDataContext<IArrayValidatorOptions>) {
+  protected override _toSample(
+    ctx?: ISampleDataContext<IArrayValidatorOptions>,
+  ) {
     const Output = ([] as any[]) as Input;
 
     if (this.Validator) {
@@ -152,7 +154,7 @@ export class ArrayValidator<
     return this.Sample ?? Output;
   }
 
-  protected _toStatic(
+  protected override _toStatic(
     ctx?: IStaticContext<IArrayValidatorOptions>,
   ): ArrayValidator<Shape, Input, Output> {
     const Validator = BaseValidator.resolveValidator(this.Validator);
@@ -164,7 +166,9 @@ export class ArrayValidator<
     );
   }
 
-  protected async _cast(ctx: IValidatorContext<any, any>): Promise<void> {
+  protected override async _cast(
+    ctx: IValidatorContext<any, any>,
+  ): Promise<void> {
     if (typeof ctx.output === "string") {
       try {
         ctx.output = JSON.parse(ctx.output);
@@ -300,7 +304,7 @@ export class ArrayValidator<
             } catch (error) {
               if (!Exception) Exception = new ValidationException();
 
-              Exception.pushIssues(error);
+              Exception.pushIssues(error as Error);
             }
           }
         }

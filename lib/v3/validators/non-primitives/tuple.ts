@@ -88,7 +88,7 @@ export class TupleValidator<
     };
   }
 
-  protected _toJSON(ctx?: IJSONSchemaContext<ITupleValidatorOptions>) {
+  protected override _toJSON(ctx?: IJSONSchemaContext<ITupleValidatorOptions>) {
     const RestValidator = this.RestValidator &&
       BaseValidator.resolveValidator(this.RestValidator);
     const Context = this.overrideContext(ctx);
@@ -109,7 +109,9 @@ export class TupleValidator<
     } satisfies IValidatorJSONSchema;
   }
 
-  protected _toSample(ctx?: ISampleDataContext<ITupleValidatorOptions>) {
+  protected override _toSample(
+    ctx?: ISampleDataContext<ITupleValidatorOptions>,
+  ) {
     const Output = ([] as any[]) as Input;
     const Context = this.overrideContext(ctx);
 
@@ -126,7 +128,7 @@ export class TupleValidator<
     return this.Sample ?? Output.filter(Boolean);
   }
 
-  protected _toStatic(
+  protected override _toStatic(
     ctx?: IStaticContext<ITupleValidatorOptions>,
   ): TupleValidator<Shape, Input, Output> {
     const Context = this.overrideContext(ctx);
@@ -149,7 +151,7 @@ export class TupleValidator<
     return Validator as any;
   }
 
-  protected _cast(ctx: IValidatorContext<any, any>) {
+  protected override _cast(ctx: IValidatorContext<any, any>) {
     if (typeof ctx.output === "string") {
       try {
         ctx.output = JSON.parse(ctx.output);
@@ -230,7 +232,7 @@ export class TupleValidator<
         } catch (error) {
           if (!Exception) Exception = new ValidationException();
 
-          Exception.pushIssues(error);
+          Exception.pushIssues(error as Error);
         }
       }
 

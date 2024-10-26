@@ -56,19 +56,23 @@ export class DeepPartialValidator<
     };
   }
 
-  protected _toJSON(ctx?: IJSONSchemaContext<IDeepPartialValidatorOptions>) {
+  protected override _toJSON(
+    ctx?: IJSONSchemaContext<IDeepPartialValidatorOptions>,
+  ) {
     return BaseValidator.resolveValidator(this.Validator).toJSON(
       this.overrideContext(ctx),
     ).schema;
   }
 
-  protected _toSample(ctx?: ISampleDataContext<IDeepPartialValidatorOptions>) {
+  protected override _toSample(
+    ctx?: ISampleDataContext<IDeepPartialValidatorOptions>,
+  ) {
     return BaseValidator.resolveValidator(this.Validator).toSample(
       this.overrideContext(ctx),
     ).data;
   }
 
-  protected _toStatic(
+  protected override _toStatic(
     ctx?: IStaticContext<IDeepPartialValidatorOptions>,
   ): BaseValidator<Shape, Input, Output> {
     return BaseValidator.resolveValidator(this.Validator).toStatic(

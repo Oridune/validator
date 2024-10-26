@@ -40,7 +40,9 @@ export class BooleanValidator<
       expected: false,
     }) as BooleanValidator<BooleanConstructor, false, false>;
 
-  protected _toJSON(ctx?: IJSONSchemaContext<IBooleanValidatorOptions>) {
+  protected override _toJSON(
+    ctx?: IJSONSchemaContext<IBooleanValidatorOptions>,
+  ) {
     return {
       type: "boolean",
       description: this.Description,
@@ -50,20 +52,22 @@ export class BooleanValidator<
     } satisfies IValidatorJSONSchema;
   }
 
-  protected _toSample(ctx?: ISampleDataContext<IBooleanValidatorOptions>) {
+  protected override _toSample(
+    ctx?: ISampleDataContext<IBooleanValidatorOptions>,
+  ) {
     return (
       this.Sample ?? ctx?.validatorOptions?.expected ??
         ([true, false][Math.floor(Math.random() * (1 - 0 + 1) + 0)] as Input)
     );
   }
 
-  protected _toStatic(
+  protected override _toStatic(
     ctx?: IStaticContext<IBooleanValidatorOptions>,
   ): BooleanValidator<Shape, Input, Output> {
     return BooleanValidator.boolean(ctx?.validatorOptions);
   }
 
-  protected _cast(ctx: IValidatorContext<any, any>) {
+  protected override _cast(ctx: IValidatorContext<any, any>) {
     if (typeof ctx.output !== "boolean") {
       ctx.output = ["true", "1"].includes(`${ctx.output}`.toLowerCase());
     }

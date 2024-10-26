@@ -22,7 +22,7 @@ export class NullValidator<
 > extends BaseValidator<Shape, Input, Output> {
   static null = NullValidator.createFactory(NullValidator);
 
-  protected _toJSON(ctx?: IJSONSchemaContext<INullValidatorOptions>) {
+  protected override _toJSON(ctx?: IJSONSchemaContext<INullValidatorOptions>) {
     return {
       type: "null",
       description: this.Description,
@@ -31,11 +31,13 @@ export class NullValidator<
     } satisfies IValidatorJSONSchema;
   }
 
-  protected _toSample(_ctx?: ISampleDataContext<INullValidatorOptions>) {
+  protected override _toSample(
+    _ctx?: ISampleDataContext<INullValidatorOptions>,
+  ) {
     return this.Sample ?? (null as Input);
   }
 
-  protected _toStatic(
+  protected override _toStatic(
     ctx?: IStaticContext<INullValidatorOptions>,
   ): NullValidator<Shape, Input, Output> {
     return NullValidator.null(ctx?.validatorOptions);

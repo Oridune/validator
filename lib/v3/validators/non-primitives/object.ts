@@ -124,7 +124,9 @@ export class ObjectValidator<
     };
   }
 
-  protected _toJSON(ctx?: IJSONSchemaContext<IObjectValidatorOptions>) {
+  protected override _toJSON(
+    ctx?: IJSONSchemaContext<IObjectValidatorOptions>,
+  ) {
     const [Shape, Properties] = this.resolvedShapeWithKeys(
       ctx?.validatorOptions,
     );
@@ -157,7 +159,9 @@ export class ObjectValidator<
     } satisfies IValidatorJSONSchema;
   }
 
-  protected _toSample(ctx?: ISampleDataContext<IObjectValidatorOptions>) {
+  protected override _toSample(
+    ctx?: ISampleDataContext<IObjectValidatorOptions>,
+  ) {
     const [Shape, Properties] = this.resolvedShapeWithKeys(
       ctx?.validatorOptions,
     );
@@ -176,7 +180,7 @@ export class ObjectValidator<
     );
   }
 
-  protected _toStatic(
+  protected override _toStatic(
     ctx?: IStaticContext<IObjectValidatorOptions>,
   ): ObjectValidator<Shape, Input, Output> {
     const [Shape, Properties] = this.resolvedShapeWithKeys(
@@ -204,7 +208,7 @@ export class ObjectValidator<
     return Validator as any;
   }
 
-  protected _cast(ctx: IValidatorContext<any, any>) {
+  protected override _cast(ctx: IValidatorContext<any, any>) {
     if (typeof ctx.output === "string") {
       try {
         ctx.output = JSON.parse(ctx.output);
@@ -293,7 +297,7 @@ export class ObjectValidator<
         } catch (error) {
           if (!Exception) Exception = new ValidationException();
 
-          Exception.pushIssues(error);
+          Exception.pushIssues(error as Error);
         }
       }
 

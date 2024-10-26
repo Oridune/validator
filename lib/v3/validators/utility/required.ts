@@ -49,19 +49,23 @@ export class RequiredValidator<
     };
   }
 
-  protected _toJSON(ctx?: IJSONSchemaContext<IRequiredValidatorOptions>) {
+  protected override _toJSON(
+    ctx?: IJSONSchemaContext<IRequiredValidatorOptions>,
+  ) {
     return BaseValidator.resolveValidator(this.Validator).toJSON(
       this.overrideContext(ctx),
     ).schema;
   }
 
-  protected _toSample(ctx?: ISampleDataContext<IRequiredValidatorOptions>) {
+  protected override _toSample(
+    ctx?: ISampleDataContext<IRequiredValidatorOptions>,
+  ) {
     return BaseValidator.resolveValidator(this.Validator).toSample(
       this.overrideContext(ctx),
     ).data;
   }
 
-  protected _toStatic(
+  protected override _toStatic(
     ctx?: IStaticContext<IRequiredValidatorOptions>,
   ): BaseValidator<Shape, Input, Output> {
     return BaseValidator.resolveValidator(this.Validator).toStatic(

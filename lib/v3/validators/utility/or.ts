@@ -45,7 +45,7 @@ export class OrValidator<
     };
   }
 
-  protected _toJSON(ctx?: IJSONSchemaContext<IOrValidatorOptions>) {
+  protected override _toJSON(ctx?: IJSONSchemaContext<IOrValidatorOptions>) {
     const Context = this.overrideContext(ctx);
 
     return {
@@ -58,7 +58,7 @@ export class OrValidator<
     } satisfies IValidatorJSONSchema;
   }
 
-  protected _toSample(ctx?: ISampleDataContext<IOrValidatorOptions>) {
+  protected override _toSample(ctx?: ISampleDataContext<IOrValidatorOptions>) {
     return (
       this.Sample ??
         BaseValidator.resolveValidator(
@@ -67,7 +67,7 @@ export class OrValidator<
     );
   }
 
-  protected _toStatic(
+  protected override _toStatic(
     ctx?: IStaticContext<IOrValidatorOptions>,
   ): OrValidator<Shape, Input, Output> {
     const Context = this.overrideContext(ctx);
@@ -112,7 +112,7 @@ export class OrValidator<
         try {
           return (ctx.output = await Validator.validate(ctx.output, Context));
         } catch (error) {
-          Exception = new ValidationException().pushIssues(error);
+          Exception = new ValidationException().pushIssues(error as Error);
         }
       }
 

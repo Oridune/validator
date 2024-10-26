@@ -52,7 +52,9 @@ export class NumberValidator<
 > extends BaseValidator<Shape, Input, Output> {
   static number = NumberValidator.createFactory(NumberValidator);
 
-  protected _toJSON(ctx?: IJSONSchemaContext<INumberValidatorOptions>) {
+  protected override _toJSON(
+    ctx?: IJSONSchemaContext<INumberValidatorOptions>,
+  ) {
     return {
       type: "number",
       description: this.Description,
@@ -67,7 +69,9 @@ export class NumberValidator<
     } satisfies IValidatorJSONSchema;
   }
 
-  protected _toSample(ctx?: ISampleDataContext<INumberValidatorOptions>) {
+  protected override _toSample(
+    ctx?: ISampleDataContext<INumberValidatorOptions>,
+  ) {
     return (
       this.Sample ??
         (() => {
@@ -89,13 +93,13 @@ export class NumberValidator<
     );
   }
 
-  protected _toStatic(
+  protected override _toStatic(
     ctx?: IStaticContext<INumberValidatorOptions>,
   ): NumberValidator<Shape, Input, Output> {
     return NumberValidator.number(ctx?.validatorOptions);
   }
 
-  protected _cast(ctx: IValidatorContext<any, any>) {
+  protected override _cast(ctx: IValidatorContext<any, any>) {
     if (typeof ctx.output !== "number") {
       ctx.output = parseFloat(ctx.output);
     }

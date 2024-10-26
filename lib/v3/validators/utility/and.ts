@@ -43,7 +43,7 @@ export class AndValidator<
     };
   }
 
-  protected _toJSON(ctx?: IJSONSchemaContext<IAndValidatorOptions>) {
+  protected override _toJSON(ctx?: IJSONSchemaContext<IAndValidatorOptions>) {
     const Context = this.overrideContext(ctx);
 
     return {
@@ -57,7 +57,7 @@ export class AndValidator<
     } satisfies IValidatorJSONSchema;
   }
 
-  protected _toSample(ctx?: ISampleDataContext<IAndValidatorOptions>) {
+  protected override _toSample(ctx?: ISampleDataContext<IAndValidatorOptions>) {
     const Context = this.overrideContext(ctx);
 
     return (
@@ -68,7 +68,7 @@ export class AndValidator<
     );
   }
 
-  protected _toStatic(
+  protected override _toStatic(
     ctx?: IStaticContext<IAndValidatorOptions>,
   ): AndValidator<Shape, Input, Output> {
     const Context = this.overrideContext(ctx);

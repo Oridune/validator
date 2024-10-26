@@ -23,7 +23,9 @@ export class UndefinedValidator<
 > extends BaseValidator<Shape, Input, Output> {
   static undefined = UndefinedValidator.createFactory(UndefinedValidator);
 
-  protected _toJSON(ctx?: IJSONSchemaContext<IUndefinedValidatorOptions>) {
+  protected override _toJSON(
+    ctx?: IJSONSchemaContext<IUndefinedValidatorOptions>,
+  ) {
     return {
       type: "undefined",
       description: this.Description,
@@ -32,17 +34,19 @@ export class UndefinedValidator<
     } satisfies IValidatorJSONSchema;
   }
 
-  protected _toSample(_ctx?: ISampleDataContext<IUndefinedValidatorOptions>) {
+  protected override _toSample(
+    _ctx?: ISampleDataContext<IUndefinedValidatorOptions>,
+  ) {
     return this.Sample ?? (undefined as Input);
   }
 
-  protected _toStatic(
+  protected override _toStatic(
     ctx?: IStaticContext<IUndefinedValidatorOptions>,
   ): UndefinedValidator<Shape, Input, Output> {
     return UndefinedValidator.undefined(ctx?.validatorOptions);
   }
 
-  protected _cast(ctx: IValidatorContext<any, any>) {
+  protected override _cast(ctx: IValidatorContext<any, any>) {
     if (typeof ctx.output !== "undefined" && [null, ""].includes(ctx.output)) {
       ctx.output = undefined;
     }

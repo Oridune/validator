@@ -56,19 +56,19 @@ export class OmitValidator<
     };
   }
 
-  protected _toJSON(ctx?: IJSONSchemaContext<IOmitValidatorOptions>) {
+  protected override _toJSON(ctx?: IJSONSchemaContext<IOmitValidatorOptions>) {
     return BaseValidator.resolveValidator(this.Validator).toJSON(
       this.overrideContext(ctx),
     ).schema;
   }
 
-  protected _toSample(ctx?: ISampleDataContext<IOmitValidatorOptions>) {
+  protected override _toSample(ctx?: ISampleDataContext<IOmitValidatorOptions>) {
     return BaseValidator.resolveValidator(this.Validator).toSample(
       this.overrideContext(ctx),
     ).data;
   }
 
-  protected _toStatic(
+  protected override _toStatic(
     ctx?: IStaticContext<IOmitValidatorOptions>,
   ): BaseValidator<Shape, Input, Output> {
     return BaseValidator.resolveValidator(this.Validator).toStatic(

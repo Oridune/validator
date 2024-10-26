@@ -51,19 +51,23 @@ export class PartialValidator<
     };
   }
 
-  protected _toJSON(ctx?: IJSONSchemaContext<IPartialValidatorOptions>) {
+  protected override _toJSON(
+    ctx?: IJSONSchemaContext<IPartialValidatorOptions>,
+  ) {
     return BaseValidator.resolveValidator(this.Validator).toJSON(
       this.overrideContext(ctx),
     ).schema;
   }
 
-  protected _toSample(ctx?: ISampleDataContext<IPartialValidatorOptions>) {
+  protected override _toSample(
+    ctx?: ISampleDataContext<IPartialValidatorOptions>,
+  ) {
     return BaseValidator.resolveValidator(this.Validator).toSample(
       this.overrideContext(ctx),
     ).data;
   }
 
-  protected _toStatic(
+  protected override _toStatic(
     ctx?: IStaticContext<IPartialValidatorOptions>,
   ): BaseValidator<Shape, Input, Output> {
     return BaseValidator.resolveValidator(this.Validator).toStatic(

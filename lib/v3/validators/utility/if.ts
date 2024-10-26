@@ -27,7 +27,7 @@ export class IfValidator<
     options?: IIfValidatorOptions,
   ) => new IfValidator<unknown, T, T>(predicate, options);
 
-  protected _toJSON(ctx?: IJSONSchemaContext<IIfValidatorOptions>) {
+  protected override _toJSON(ctx?: IJSONSchemaContext<IIfValidatorOptions>) {
     return {
       type: typeof (this.Sample ?? {}),
       description: this.Description,
@@ -36,11 +36,11 @@ export class IfValidator<
     } satisfies IValidatorJSONSchema;
   }
 
-  protected _toSample(_ctx?: ISampleDataContext<IIfValidatorOptions>) {
+  protected override _toSample(_ctx?: ISampleDataContext<IIfValidatorOptions>) {
     return this.Sample ?? ({} as Input);
   }
 
-  protected _toStatic(
+  protected override _toStatic(
     ctx?: IStaticContext<IIfValidatorOptions>,
   ): IfValidator<Shape, Input, Output> {
     return IfValidator.if(this.Predicate as any, ctx?.validatorOptions) as any;

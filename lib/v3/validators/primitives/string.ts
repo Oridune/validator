@@ -60,7 +60,9 @@ export class StringValidator<
     options?: IStringValidatorOptions & { returnURLInstance?: URLInstance },
   ) => StringValidator.string(options).isURL(options?.returnURLInstance);
 
-  protected _toJSON(ctx?: IJSONSchemaContext<IStringValidatorOptions>) {
+  protected override _toJSON(
+    ctx?: IJSONSchemaContext<IStringValidatorOptions>,
+  ) {
     return {
       type: "string",
       description: this.Description,
@@ -77,17 +79,19 @@ export class StringValidator<
     } satisfies IValidatorJSONSchema;
   }
 
-  protected _toSample(_ctx?: ISampleDataContext<IStringValidatorOptions>) {
+  protected override _toSample(
+    _ctx?: ISampleDataContext<IStringValidatorOptions>,
+  ) {
     return this.Sample ?? ("" as Input);
   }
 
-  protected _toStatic(
+  protected override _toStatic(
     ctx?: IStaticContext<IStringValidatorOptions>,
   ): StringValidator<Shape, Input, Output> {
     return StringValidator.string(ctx?.validatorOptions);
   }
 
-  protected _cast(ctx: IValidatorContext<any, any>) {
+  protected override _cast(ctx: IValidatorContext<any, any>) {
     if (typeof ctx.output !== "string") ctx.output = `${ctx.output ?? ""}`;
   }
 

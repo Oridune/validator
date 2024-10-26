@@ -23,7 +23,9 @@ export class BigIntValidator<
 > extends BaseValidator<Shape, Input, Output> {
   static bigint = BigIntValidator.createFactory(BigIntValidator);
 
-  protected _toJSON(ctx?: IJSONSchemaContext<IBigIntValidatorOptions>) {
+  protected override _toJSON(
+    ctx?: IJSONSchemaContext<IBigIntValidatorOptions>,
+  ) {
     return {
       type: "bigint",
       description: this.Description,
@@ -32,17 +34,19 @@ export class BigIntValidator<
     } satisfies IValidatorJSONSchema;
   }
 
-  protected _toSample(_ctx?: ISampleDataContext<IBigIntValidatorOptions>) {
+  protected override _toSample(
+    _ctx?: ISampleDataContext<IBigIntValidatorOptions>,
+  ) {
     return this.Sample ?? (1n as Input);
   }
 
-  protected _toStatic(
+  protected override _toStatic(
     ctx?: IStaticContext<IBigIntValidatorOptions>,
   ): BigIntValidator<Shape, Input, Output> {
     return BigIntValidator.bigint(ctx?.validatorOptions);
   }
 
-  protected _cast(ctx: IValidatorContext<any, any>) {
+  protected override _cast(ctx: IValidatorContext<any, any>) {
     if (typeof ctx.output !== "bigint") {
       try {
         ctx.output = BigInt(parseInt(ctx.output));

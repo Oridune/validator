@@ -42,19 +42,23 @@ export class OptionalValidator<
     };
   }
 
-  protected _toJSON(ctx?: IJSONSchemaContext<IOptionalValidatorOptions>) {
+  protected override _toJSON(
+    ctx?: IJSONSchemaContext<IOptionalValidatorOptions>,
+  ) {
     return BaseValidator.resolveValidator(this.Validator).toJSON(
       this.overrideContext(ctx),
     ).schema;
   }
 
-  protected _toSample(ctx?: ISampleDataContext<IOptionalValidatorOptions>) {
+  protected override _toSample(
+    ctx?: ISampleDataContext<IOptionalValidatorOptions>,
+  ) {
     return BaseValidator.resolveValidator(this.Validator).toSample(
       this.overrideContext(ctx),
     ).data;
   }
 
-  protected _toStatic(
+  protected override _toStatic(
     ctx?: IStaticContext<IOptionalValidatorOptions>,
   ): BaseValidator<Shape, Input, Output> {
     return BaseValidator.resolveValidator(this.Validator).toStatic(

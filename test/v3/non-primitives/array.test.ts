@@ -258,6 +258,25 @@ Deno.test("Array Validator Tests", async (ctx) => {
     assertObjectMatch(Result, Target);
   });
 
+  await ctx.step("Truthy Validation Case 18", async () => {
+    const Target = { foo: { "foo": "a", "bar": "b", "baz": "c" } };
+    const Schema = e.deepOptions(
+      e.object({
+        foo: e.array(
+          e.string(),
+        ),
+      }),
+      {
+        cast: true,
+        preserveShape: true,
+      },
+    );
+
+    const Result = await Schema.validate(Target);
+
+    assertObjectMatch(Result, Target);
+  });
+
   await ctx.step("Falsy Validation Case 1", async () => {
     try {
       await e.array().validate("hi") satisfies any[];

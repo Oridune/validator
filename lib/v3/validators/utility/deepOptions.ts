@@ -9,55 +9,36 @@ import {
   ValidatorType,
 } from "../base.ts";
 
-export interface ICastValidatorOptions
-  extends Omit<TBaseValidatorOptions, "optional"> {
-  /**
-   * Enable casting of all the deeply nested validators
-   */
-  deepCast?: boolean;
+export interface IDeepOptions extends Omit<TBaseValidatorOptions, "optional"> {
 }
 
-export class CastValidator<
+export class DeepOptionsValidator<
   Shape extends BaseValidator<any, any, any>,
   Input = inferInput<Shape>,
   Output = inferOutput<Shape>,
 > extends BaseValidator<Shape, Input, Output> {
-  static cast = BaseValidator.createFactory(CastValidator);
-
-  static deepCast = <
-    Shape extends BaseValidator<any, any, any>,
-  >(validator: Shape, options?: Omit<ICastValidatorOptions, "deepCast">) =>
-    CastValidator.cast(validator, { ...options, deepCast: true });
+  static deepOptions = BaseValidator.createFactory(DeepOptionsValidator);
 
   protected Validator: Shape | (() => Shape);
 
   protected overrideContext(ctx: any) {
     return {
       ...ctx,
-      ...(ctx.validatorOptions?.deepCast
-        ? {
-          deepOptions: {
-            ...ctx.deepOptions,
-            cast: ctx.validatorOptions?.cast ?? true,
-          },
-        }
-        : {}),
-      options: {
-        ...ctx.validatorOptions,
-        cast: ctx.validatorOptions?.cast ?? true,
-      },
+      deepOptions: ctx.validatorOptions,
       internal: true,
     };
   }
 
-  protected override _toJSON(ctx?: IJSONSchemaContext<ICastValidatorOptions>) {
+  protected override _toJSON(
+    ctx?: IJSONSchemaContext<IDeepOptions>,
+  ) {
     return BaseValidator.resolveValidator(this.Validator).toJSON(
       this.overrideContext(ctx),
     ).schema;
   }
 
   protected override _toSample(
-    ctx?: ISampleDataContext<ICastValidatorOptions>,
+    ctx?: ISampleDataContext<IDeepOptions>,
   ) {
     return BaseValidator.resolveValidator(this.Validator).toSample(
       this.overrideContext(ctx),
@@ -65,7 +46,7 @@ export class CastValidator<
   }
 
   protected override _toStatic(
-    ctx?: IStaticContext<ICastValidatorOptions>,
+    ctx?: IStaticContext<IDeepOptions>,
   ): BaseValidator<Shape, Input, Output> {
     return BaseValidator.resolveValidator(this.Validator).toStatic(
       this.overrideContext(ctx),
@@ -74,9 +55,9 @@ export class CastValidator<
 
   constructor(
     validator: Shape | (() => Shape),
-    options?: ICastValidatorOptions,
+    options?: IDeepOptions,
   ) {
-    super(ValidatorType.UTILITY, "cast", options);
+    super(ValidatorType.UTILITY, "deepOptions", options);
 
     this.Validator = validator;
 

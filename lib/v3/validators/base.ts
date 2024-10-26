@@ -268,7 +268,9 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
 
       try {
         ctx.output = (await Validator(ctx)) ?? ctx.output;
-      } catch (error) {
+      } catch (err) {
+        const error: any = err;
+
         ctx.exception ??= new ValidationException();
 
         const ResolvedError = error instanceof ValidationException ? error : {
@@ -429,8 +431,9 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
 
         await this._validate(Context);
       } catch (error) {
-        Error = error;
-        throw Error;
+        if (error instanceof ValidationException) Error = error;
+
+        throw error;
       } finally {
         const TimeNow = Date.now();
 
