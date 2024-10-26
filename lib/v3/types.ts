@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import type { CastValidator } from "./validators/utility/cast.ts";
+import type { DeepOptionsValidator } from "./validators/utility/deepOptions.ts";
 import type { DeepPartialValidator } from "./validators/utility/deepPartial.ts";
 import type { DeepRequiredValidator } from "./validators/utility/deepRequired.ts";
 import type { OmitValidator } from "./validators/utility/omit.ts";
@@ -76,5 +77,6 @@ export type TModifierValidators =
   | OptionalValidator<any, any, any>
   | PartialValidator<any, any, any>
   | RequiredValidator<any, any, any>
+  | DeepOptionsValidator<any, any, any>
   | DeepPartialValidator<any, any, any>
   | DeepRequiredValidator<any, any, any>;
