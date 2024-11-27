@@ -7,10 +7,10 @@ const ZSchema = () => z.tuple([z.string(), z.number(), z.boolean()]);
 
 const Target1 = ["foo", 1, true];
 
-Deno.bench("Object Oridune Validator Bench", async () => {
+Deno.bench("Tuple Oridune Validator Bench", async () => {
     await ESchema().validate(Target1);
 });
 
-Deno.bench("Object Zod Bench", async () => {
+Deno.bench("Tuple Zod Bench", async () => {
     await ZSchema().parseAsync(Target1);
 });

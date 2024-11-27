@@ -2,6 +2,7 @@
 import type { TErrorMessage } from "../types.ts";
 import { ValidationException } from "../../exceptions.ts";
 import { ValidationDebugger } from "../../debugger.ts";
+import { createValue } from "./value.ts";
 
 export enum ValidatorType {
   PRIMITIVE = "primitive",
@@ -505,8 +506,20 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
       validatorOptions: ValidatorOptions,
     };
 
+    const Result = this._toSample(Context);
+    const Data = createValue(Result);
+
+    const Comment = [
+      Context.validatorOptions?.optional ? "(Optional)" : undefined,
+      Context.validatorOptions?.description,
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    if (Comment) Data.metadata.comment = Comment;
+
     return {
-      data: this._toSample(Context),
+      data: Data,
       schema: Schema,
       validator: this,
     };

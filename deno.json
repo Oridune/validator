@@ -1,10 +1,7 @@
 {
   "name": "@oridune/validator",
-  "version": "0.3.20",
+  "version": "0.4.0",
   "exports": "./mod.ts",
-  "tasks": {
-    "build:npm": "deno run -A ./scripts/build_npm.ts"
-  },
   "imports": {
     "@std/fmt": "jsr:@std/fmt@^0.225.3"
   }

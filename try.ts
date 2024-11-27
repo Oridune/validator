@@ -1,4 +1,5 @@
 import e, { ValidationDebugger } from "./v3.ts";
+import { JSON as JSON2 } from "./lib/jsonSerializer.ts";
 
 ValidationDebugger.enabled = true;
 ValidationDebugger.logFilters = { label: "OptionalValidator" };
@@ -13,15 +14,15 @@ const ActivitySchema = () =>
 
 const Small = e.pick(ActivitySchema(), ["user"]);
 
-console.log("Small", await Small.validate({ user: "user" }));
+// console.log("Small", await Small.validate({ user: "user" }));
 
-console.log(
-  await ActivitySchema().validate({
-    description: "abc",
-    user: "user",
-    enabled: true,
-  }),
-);
+// console.log(
+//   await ActivitySchema().validate({
+//     description: "abc",
+//     user: "user",
+//     enabled: true,
+//   }),
+// );
 
 // User Schema
 const UserSchema = () =>
@@ -103,8 +104,17 @@ const UsersData = [
   },
 ];
 
-console.log(
-  await e.array(e.deepCast(UserSchema())).validate(UsersData).catch(
-    console.error,
-  ),
-);
+// console.log(UserSchema().toSample().data);
+
+const data = {
+  foo: "bar",
+  bar: { baz: "foo" },
+  // hello: [{ hola: "mundo" }, ""],
+};
+
+console.log("JSON1:");
+console.log(JSON.stringify(data, null, " "));
+
+console.log();
+console.log("JSON2:");
+console.log(JSON2.stringify(data, null, " "));
