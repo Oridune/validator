@@ -1,8 +1,16 @@
+export type WrapValueType<T> = T extends Array<infer U> ? Value<U>[]
+  : T extends object ? { [K in keyof T]: Value<T[K]> }
+  : T;
+
 export class Value<T> {
+  public value: WrapValueType<T>;
+
   constructor(
-    public value: T,
+    value: T,
     public metadata: Record<string, unknown> = {},
   ) {
+    this.value = value as WrapValueType<T>;
+
     if (value instanceof Value) {
       this.value = value.value;
       this.metadata = Object.assign(metadata, value.metadata);
@@ -75,7 +83,7 @@ export class Value<T> {
     // Recursive serialization function
     const serialize = (rawData: unknown, indent = ""): unknown => {
       let comment = "";
-      let data;
+      let data: unknown;
 
       if (rawData instanceof Value) {
         if (

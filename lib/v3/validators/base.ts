@@ -533,8 +533,7 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
     if (Comment) SampleWithMeta.metadata.comment = Comment;
 
     return {
-      data: Sample,
-      metadata: SampleWithMeta,
+      data: SampleWithMeta,
       schema: Schema,
       validator: this,
     };
