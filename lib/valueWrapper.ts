@@ -5,6 +5,20 @@ export type WrapValueType<T> = T extends Array<infer U> ? Value<U>[]
 export class Value<T> {
   public value: WrapValueType<T>;
 
+  protected isPlainObject(obj: unknown): obj is Record<string, unknown> {
+    if (typeof obj !== "object" || obj === null) {
+      return false;
+    }
+
+    const proto = Object.getPrototypeOf(obj);
+
+    if (proto === null) {
+      return true;
+    }
+
+    return proto.constructor === Object;
+  }
+
   constructor(
     value: T,
     public metadata: Record<string, unknown> = {},
@@ -30,7 +44,7 @@ export class Value<T> {
       }) as T;
     }
 
-    if (typeof _v === "object" && _v !== null) {
+    if (this.isPlainObject(_v)) {
       return Object.fromEntries(
         Object.entries(_v).map((entry): [string, unknown] => {
           if (entry[1] instanceof Value) {
@@ -45,7 +59,7 @@ export class Value<T> {
     return _v;
   }
 
-  public serialize(
+  public stringify(
     replacer: null | ((key: string, value: unknown) => unknown) | string[] =
       null,
     space: string | number = 0,
