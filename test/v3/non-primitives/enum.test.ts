@@ -64,8 +64,10 @@ Deno.test("Enum Validator Tests", async (ctx) => {
   await ctx.step("Truthy Validation Case 4", () => {
     const Schema = e.enum(Object.values(Status));
 
+    const Sample = Schema.toSample().data.plain();
+
     assertEquals(
-      Schema.toSample().data.value,
+      Sample,
       [
         "pending",
         "processing",

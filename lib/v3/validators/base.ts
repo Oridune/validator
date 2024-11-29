@@ -195,7 +195,7 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
     throw new Error(`_toJSON implementation is required!`);
   }
 
-  protected _toSample(_ctx?: ISampleDataContext): Input {
+  protected _toSample(_ctx?: ISampleDataContext): Input | Value<Input> {
     throw new Error(`_toSample implementation is required!`);
   }
 
@@ -520,7 +520,7 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
       __internal: true,
     };
 
-    const Sample = this._toSample(Context);
+    const Sample = this._toSample(Context) as Input;
     const SampleWithMeta = new Value(Sample);
 
     const Comment = [

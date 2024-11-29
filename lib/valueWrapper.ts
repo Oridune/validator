@@ -1,69 +1,21 @@
+// deno-lint-ignore-file no-explicit-any
 export type WrapValueType<T> = T extends Array<infer U> ? Value<U>[]
   : T extends object ? { [K in keyof T]: Value<T[K]> }
   : T;
 
+type StringifyReplacer =
+  | null
+  | ((key: string, value: unknown) => unknown)
+  | string[];
+
+type StringifyOpts = { noComments?: boolean };
+
 export class Value<T> {
-  public value: WrapValueType<T>;
-
-  protected isPlainObject(obj: unknown): obj is Record<string, unknown> {
-    if (typeof obj !== "object" || obj === null) {
-      return false;
-    }
-
-    const proto = Object.getPrototypeOf(obj);
-
-    if (proto === null) {
-      return true;
-    }
-
-    return proto.constructor === Object;
-  }
-
-  constructor(
-    value: T,
-    public metadata: Record<string, unknown> = {},
-  ) {
-    this.value = value as WrapValueType<T>;
-
-    if (value instanceof Value) {
-      this.value = value.value;
-      this.metadata = Object.assign(metadata, value.metadata);
-    }
-  }
-
-  public plain() {
-    const _v = this.value;
-
-    if (_v instanceof Array) {
-      return _v.map((item): unknown => {
-        if (item instanceof Value) {
-          return item.plain();
-        }
-
-        return item;
-      }) as T;
-    }
-
-    if (this.isPlainObject(_v)) {
-      return Object.fromEntries(
-        Object.entries(_v).map((entry): [string, unknown] => {
-          if (entry[1] instanceof Value) {
-            return [entry[0], entry[1].plain()];
-          }
-
-          return entry;
-        }),
-      ) as T;
-    }
-
-    return _v;
-  }
-
-  public stringify(
-    replacer: null | ((key: string, value: unknown) => unknown) | string[] =
-      null,
+  static stringify(
+    obj: unknown,
+    replacer: StringifyReplacer = null,
     space: string | number = 0,
-    opts?: { noComments?: boolean },
+    opts?: StringifyOpts,
   ) {
     const visited = new WeakSet();
 
@@ -175,6 +127,74 @@ export class Value<T> {
       throw new Error(`Unsupported data type: ${typeof data}`);
     };
 
-    return serialize(applyReplacer("", this));
+    return serialize(applyReplacer("", obj));
+  }
+
+  public value: WrapValueType<T>;
+
+  protected isPlainObject(obj: unknown): obj is Record<string, unknown> {
+    if (typeof obj !== "object" || obj === null) {
+      return false;
+    }
+
+    const proto = Object.getPrototypeOf(obj);
+
+    if (proto === null) {
+      return true;
+    }
+
+    return proto.constructor === Object;
+  }
+
+  constructor(
+    value: T,
+    public metadata: Record<string, unknown> = {},
+  ) {
+    this.value = value as WrapValueType<T>;
+
+    if (value instanceof Value) {
+      this.value = value.value;
+      this.metadata = Object.assign(metadata, value.metadata);
+    }
+  }
+
+  public plain(): T {
+    const _v = this.value as any;
+
+    if (_v instanceof Array) {
+      return _v.map((item): unknown => {
+        if (item instanceof Value) {
+          return item.plain();
+        }
+
+        return item;
+      }) as T;
+    }
+
+    if (this.isPlainObject(_v)) {
+      return Object.fromEntries(
+        Object.entries(_v).map((entry): [string, unknown] => {
+          if (entry[1] instanceof Value) {
+            return [entry[0], entry[1].plain()];
+          }
+
+          return entry;
+        }),
+      ) as T;
+    }
+
+    return _v;
+  }
+
+  public stringify(
+    replacer: StringifyReplacer = null,
+    space: string | number = 0,
+    opts?: StringifyOpts,
+  ) {
+    return Value.stringify(this, replacer, space, opts);
+  }
+
+  public toJSON() {
+    return this.plain();
   }
 }
