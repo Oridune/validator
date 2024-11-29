@@ -86,15 +86,11 @@ export const createValue = <T>(value: T, metadata?: Record<string, any>) => {
       return undefined;
     },
     set: (target, prop, value, receiver) => {
-      if (prop in target) {
-        return Reflect.set(target, prop, value, receiver);
-      }
-
       if (typeof target.value === "object" && target.value !== null) {
         return Reflect.set(target.value, prop, value, receiver);
       }
 
-      return false;
+      return Reflect.set(target, prop, value, receiver);
     },
     ownKeys: (target) => {
       if (typeof target.value === "object" && target.value !== null) {
@@ -107,10 +103,16 @@ export const createValue = <T>(value: T, metadata?: Record<string, any>) => {
     },
     getOwnPropertyDescriptor: (target, prop) => {
       if (prop in target) {
-        return Object.getOwnPropertyDescriptor(target, prop);
+        return Reflect.getOwnPropertyDescriptor(target, prop);
       }
 
-      return Object.getOwnPropertyDescriptor(target.value, prop);
+      if (
+        typeof target.value === "object" &&
+        target.value !== null &&
+        Reflect.has(target.value, prop)
+      ) return Reflect.getOwnPropertyDescriptor(target.value, prop);
+
+      return undefined;
     },
   });
 };

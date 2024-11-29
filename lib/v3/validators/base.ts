@@ -516,9 +516,7 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
       .filter(Boolean)
       .join(" ");
 
-    // deno-lint-ignore ban-ts-comment
-    // @ts-ignore
-    if (Comment) Data[Symbol.for("comment")] = Comment;
+    if (Comment) Data.metadata.__comment = Comment;
 
     return {
       data: Data,
