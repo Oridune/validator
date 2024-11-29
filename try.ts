@@ -1,5 +1,4 @@
 import e, { ValidationDebugger } from "./v3.ts";
-import { JSON as JSON2 } from "./lib/jsonSerializer.ts";
 
 ValidationDebugger.enabled = true;
 ValidationDebugger.logFilters = { label: "OptionalValidator" };
@@ -54,6 +53,7 @@ const UserSchema = () =>
         )
         .min(1),
     ),
+    tags: e.array(e.string()),
   });
 
 // const User1Id = "123";
@@ -112,16 +112,6 @@ const UserSchema = () =>
 //   hello: [{ hola: "mundo" }, ""],
 // };
 
-const data = UserSchema().toSample().data;
+const data = UserSchema().toSample().metadata;
 
-const json1 = JSON.stringify(data, null, 2);
-const json2 = JSON2.stringify(data, null, 2, { noComments: true });
-
-console.log("JSON1:");
-console.log(json1);
-
-console.log();
-console.log("JSON2:");
-console.log(json2);
-
-console.log("Equal:", json1 === json2);
+console.log(data);

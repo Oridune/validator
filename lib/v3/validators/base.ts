@@ -2,7 +2,7 @@
 import type { TErrorMessage } from "../types.ts";
 import { ValidationException } from "../../exceptions.ts";
 import { ValidationDebugger } from "../../debugger.ts";
-import { createValue } from "./value.ts";
+import { Value } from "../../valueWrapper.ts";
 
 export enum ValidatorType {
   PRIMITIVE = "primitive",
@@ -458,6 +458,9 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
    * @returns
    */
   public toJSON(options?: IJSONSchemaOptions) {
+    const _Internal = typeof options === "object" && "__internal" in options &&
+      options.__internal === true;
+
     const ValidatorOptions = {
       ...options?.deepOptions,
       ...options?.options,
@@ -470,6 +473,10 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
     const Context: IJSONSchemaContext = {
       ...restOptions,
       validatorOptions: ValidatorOptions,
+
+      // deno-lint-ignore ban-ts-comment
+      // @ts-ignore
+      __internal: true,
     };
 
     return {
@@ -484,7 +491,10 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
    * @returns
    */
   public toSample(options?: ISampleDataOptions) {
-    const Schema = options?.schema !== false
+    const Internal = typeof options === "object" && "__internal" in options &&
+      options.__internal === true;
+
+    const Schema = options?.schema !== false && !Internal
       ? this.toJSON({
         options: options?.options,
         deepOptions: options?.deepOptions,
@@ -504,10 +514,14 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
     const Context: IJSONSchemaContext = {
       ...restOptions,
       validatorOptions: ValidatorOptions,
+
+      // deno-lint-ignore ban-ts-comment
+      // @ts-ignore
+      __internal: true,
     };
 
-    const Result = this._toSample(Context);
-    const Data = createValue(Result);
+    const Sample = this._toSample(Context);
+    const SampleWithMeta = new Value(Sample);
 
     const Comment = [
       Context.validatorOptions?.optional ? "(Optional)" : undefined,
@@ -516,10 +530,11 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
       .filter(Boolean)
       .join(" ");
 
-    if (Comment) Data.metadata.__comment = Comment;
+    if (Comment) SampleWithMeta.metadata.comment = Comment;
 
     return {
-      data: Data,
+      data: Sample,
+      metadata: SampleWithMeta,
       schema: Schema,
       validator: this,
     };
@@ -531,6 +546,9 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
    * @returns
    */
   public toStatic(options?: IStaticOptions) {
+    const _Internal = typeof options === "object" && "__internal" in options &&
+      options.__internal === true;
+
     const ValidatorOptions = {
       ...options?.deepOptions,
       ...options?.options,
@@ -543,6 +561,10 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
     const Context: IStaticContext = {
       ...restOptions,
       validatorOptions: ValidatorOptions,
+
+      // deno-lint-ignore ban-ts-comment
+      // @ts-ignore
+      __internal: true,
     };
 
     return this._toStatic(Context);

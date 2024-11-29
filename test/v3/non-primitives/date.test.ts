@@ -43,7 +43,7 @@ Deno.test("Date Validator Tests", async (ctx) => {
 
   await ctx.step("Truthy Validation Case 5", () => {
     const Schema = e.date();
-    assertInstanceOf(Schema.toSample().data, Date);
+    assertInstanceOf(Schema.toSample().data.value, Date);
   });
 
   await ctx.step("Falsy Validation", async () => {

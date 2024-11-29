@@ -231,9 +231,12 @@ Deno.test("Array Validator Tests", async (ctx) => {
       ),
     );
 
-    assertObjectMatch(Schema.toSample(), {
-      data: [""],
-    });
+    const Sample = Schema.toSample();
+
+    if (
+      !(Sample.data.value instanceof Array && 0 in Sample.data &&
+        Sample.data[0].valueOf() === "")
+    ) throw new Error("Unexpected sample results!");
   });
 
   await ctx.step("Truthy Validation Case 16", async () => {

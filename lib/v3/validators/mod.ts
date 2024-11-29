@@ -27,4 +27,3 @@ export * from "./utility/omit.ts";
 export * from "./utility/pick.ts";
 
 export * from "./base.ts";
-export * from "./value.ts";

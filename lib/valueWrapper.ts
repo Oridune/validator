@@ -1,8 +1,43 @@
-import { Value } from "../mod.ts";
+export class Value<T> {
+  constructor(
+    public value: T,
+    public metadata: Record<string, unknown> = {},
+  ) {
+    if (value instanceof Value) {
+      this.value = value.value;
+      this.metadata = Object.assign(metadata, value.metadata);
+    }
+  }
 
-export class JSON {
-  static stringify(
-    data: unknown,
+  public plain() {
+    const _v = this.value;
+
+    if (_v instanceof Array) {
+      return _v.map((item): unknown => {
+        if (item instanceof Value) {
+          return item.plain();
+        }
+
+        return item;
+      }) as T;
+    }
+
+    if (typeof _v === "object" && _v !== null) {
+      return Object.fromEntries(
+        Object.entries(_v).map((entry): [string, unknown] => {
+          if (entry[1] instanceof Value) {
+            return [entry[0], entry[1].plain()];
+          }
+
+          return entry;
+        }),
+      ) as T;
+    }
+
+    return _v;
+  }
+
+  public serialize(
     replacer: null | ((key: string, value: unknown) => unknown) | string[] =
       null,
     space: string | number = 0,
@@ -38,18 +73,19 @@ export class JSON {
     };
 
     // Recursive serialization function
-    const serialize = (data: unknown, indent = ""): unknown => {
+    const serialize = (rawData: unknown, indent = ""): unknown => {
       let comment = "";
+      let data;
 
-      if (data instanceof Value) {
+      if (rawData instanceof Value) {
         if (
           !opts?.noComments &&
-          typeof data.metadata.__comment === "string"
+          typeof rawData.metadata.comment === "string"
         ) {
-          comment = ` /* ${data.metadata.__comment} */`;
+          comment = ` /* ${rawData.metadata.comment} */`;
         }
 
-        data = data.value;
+        data = rawData.value;
       }
 
       const innerIndex = indent +
@@ -117,6 +153,6 @@ export class JSON {
       throw new Error(`Unsupported data type: ${typeof data}`);
     };
 
-    return serialize(applyReplacer("", data));
+    return serialize(applyReplacer("", this));
   }
 }

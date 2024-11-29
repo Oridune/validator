@@ -65,7 +65,7 @@ Deno.test("Enum Validator Tests", async (ctx) => {
     const Schema = e.enum(Object.values(Status));
 
     assertEquals(
-      Schema.toSample().data,
+      Schema.toSample().data.value,
       [
         "pending",
         "processing",
