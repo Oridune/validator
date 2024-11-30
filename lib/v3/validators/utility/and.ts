@@ -48,7 +48,9 @@ export class AndValidator<
 
     return {
       type: "and",
-      description: this.Description,
+      description: BaseValidator.prepareDescription(
+        ctx?.validatorOptions ?? {},
+      ),
       allOf: this.Validators.map((validator) =>
         BaseValidator.resolveValidator(validator).toJSON(
           Context,

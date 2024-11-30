@@ -45,7 +45,9 @@ export class BooleanValidator<
   ) {
     return {
       type: "boolean",
-      description: this.Description,
+      description: BaseValidator.prepareDescription(
+        ctx?.validatorOptions ?? {},
+      ),
       optional: !!ctx?.validatorOptions?.optional,
       cast: !!ctx?.validatorOptions?.cast,
       expected: ctx?.validatorOptions?.expected,

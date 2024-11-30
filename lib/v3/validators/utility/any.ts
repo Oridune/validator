@@ -40,7 +40,9 @@ export class AnyValidator<
   protected override _toJSON(ctx?: IJSONSchemaContext<IAnyValidatorOptions>) {
     return {
       type: "any",
-      description: this.Description,
+      description: BaseValidator.prepareDescription(
+        ctx?.validatorOptions ?? {},
+      ),
       optional: !!ctx?.validatorOptions?.optional,
       cast: !!ctx?.validatorOptions?.cast,
     } satisfies IValidatorJSONSchema;

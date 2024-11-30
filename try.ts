@@ -112,6 +112,6 @@ const UserSchema = () =>
 //   hello: [{ hola: "mundo" }, ""],
 // };
 
-const data = UserSchema().toSample().data.stringify(null, 2);
+const data = UserSchema().toSample().schema;
 
 console.log(data);

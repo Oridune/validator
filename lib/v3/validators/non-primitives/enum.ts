@@ -30,7 +30,9 @@ export class EnumValidator<
     if (!(this.Choices instanceof Array)) {
       return {
         type: "enum",
-        description: this.Description,
+        description: BaseValidator.prepareDescription(
+          ctx?.validatorOptions ?? {},
+        ),
         optional: !!ctx?.validatorOptions?.optional,
         cast: !!ctx?.validatorOptions?.cast,
       } satisfies IValidatorJSONSchema;

@@ -57,7 +57,9 @@ export class NumberValidator<
   ) {
     return {
       type: "number",
-      description: this.Description,
+      description: BaseValidator.prepareDescription(
+        ctx?.validatorOptions ?? {},
+      ),
       optional: !!ctx?.validatorOptions?.optional,
       cast: !!ctx?.validatorOptions?.cast,
       isInt: ctx?.validatorOptions?.isInt,

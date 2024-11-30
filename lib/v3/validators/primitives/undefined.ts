@@ -28,7 +28,9 @@ export class UndefinedValidator<
   ) {
     return {
       type: "undefined",
-      description: this.Description,
+      description: BaseValidator.prepareDescription(
+        ctx?.validatorOptions ?? {},
+      ),
       optional: !!ctx?.validatorOptions?.optional,
       cast: !!ctx?.validatorOptions?.cast,
     } satisfies IValidatorJSONSchema;

@@ -139,7 +139,9 @@ export class ObjectValidator<
 
     return {
       type: "object",
-      description: this.Description,
+      description: BaseValidator.prepareDescription(
+        ctx?.validatorOptions ?? {},
+      ),
       optional: !!ctx?.validatorOptions?.optional,
       cast: !!ctx?.validatorOptions?.cast,
       properties: Properties.reduce<any>((obj, key) => {

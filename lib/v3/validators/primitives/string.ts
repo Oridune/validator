@@ -65,7 +65,9 @@ export class StringValidator<
   ) {
     return {
       type: "string",
-      description: this.Description,
+      description: BaseValidator.prepareDescription(
+        ctx?.validatorOptions ?? {},
+      ),
       optional: !!ctx?.validatorOptions?.optional,
       cast: !!ctx?.validatorOptions?.cast,
       isUrl: ctx?.validatorOptions?.isUrl,

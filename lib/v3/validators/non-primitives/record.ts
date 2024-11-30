@@ -83,7 +83,9 @@ export class RecordValidator<
 
     return {
       type: "object",
-      description: this.Description,
+      description: BaseValidator.prepareDescription(
+        ctx?.validatorOptions ?? {},
+      ),
       optional: !!ctx?.validatorOptions?.optional,
       cast: !!ctx?.validatorOptions?.cast,
       additionalProperties: Validator?.toJSON(Context).schema,

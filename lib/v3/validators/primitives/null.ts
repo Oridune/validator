@@ -25,7 +25,9 @@ export class NullValidator<
   protected override _toJSON(ctx?: IJSONSchemaContext<INullValidatorOptions>) {
     return {
       type: "null",
-      description: this.Description,
+      description: BaseValidator.prepareDescription(
+        ctx?.validatorOptions ?? {},
+      ),
       optional: !!ctx?.validatorOptions?.optional,
       cast: !!ctx?.validatorOptions?.cast,
     } satisfies IValidatorJSONSchema;

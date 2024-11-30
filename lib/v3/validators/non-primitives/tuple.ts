@@ -95,7 +95,9 @@ export class TupleValidator<
 
     return {
       type: "array",
-      description: this.Description,
+      description: BaseValidator.prepareDescription(
+        ctx?.validatorOptions ?? {},
+      ),
       optional: !!ctx?.validatorOptions?.optional,
       cast: !!ctx?.validatorOptions?.cast,
       minLength: ctx?.validatorOptions?.minLength,

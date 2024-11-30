@@ -30,7 +30,9 @@ export class IfValidator<
   protected override _toJSON(ctx?: IJSONSchemaContext<IIfValidatorOptions>) {
     return {
       type: typeof (this.Sample ?? {}),
-      description: this.Description,
+      description: BaseValidator.prepareDescription(
+        ctx?.validatorOptions ?? {},
+      ),
       optional: !!ctx?.validatorOptions?.optional,
       cast: !!ctx?.validatorOptions?.cast,
     } satisfies IValidatorJSONSchema;

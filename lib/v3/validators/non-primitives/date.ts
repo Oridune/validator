@@ -37,7 +37,9 @@ export class DateValidator<
   protected override _toJSON(ctx?: IJSONSchemaContext<IDateValidatorOptions>) {
     return {
       type: "Date",
-      description: this.Description,
+      description: BaseValidator.prepareDescription(
+        ctx?.validatorOptions ?? {},
+      ),
       optional: !!ctx?.validatorOptions?.optional,
       cast: !!ctx?.validatorOptions?.cast,
       startsAt: ctx?.validatorOptions?.startsAt,

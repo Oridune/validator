@@ -50,7 +50,9 @@ export class OrValidator<
 
     return {
       type: "or",
-      description: this.Description,
+      description: BaseValidator.prepareDescription(
+        ctx?.validatorOptions ?? {},
+      ),
       anyOf: this.Validators.map(
         (validator) =>
           BaseValidator.resolveValidator(validator).toJSON(Context).schema,
