@@ -179,7 +179,10 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
       opts?.optional
         ? `(optional${opts?.isUrl ? " URL" : ""}${
           opts?.optionalOptions?.default
-            ? " default:" + opts?.optionalOptions?.default
+            ? " default:" +
+              (typeof opts?.optionalOptions?.default === "function"
+                ? "[computed]"
+                : opts?.optionalOptions?.default)
             : ""
         })`
         : undefined,
