@@ -47,7 +47,7 @@ export class Value<T> {
     };
 
     // Recursive serialization function
-    const serialize = (rawData: unknown, indent = ""): unknown => {
+    const serialize = (rawData: unknown, indent = ""): string | undefined => {
       let comment = "";
       let data: unknown;
 

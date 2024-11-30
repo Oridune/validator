@@ -174,6 +174,30 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
     );
   }
 
+  static prepareDescription(opts: TBaseValidatorOptions) {
+    return [
+      opts?.optional
+        ? `(optional${opts?.isUrl ? " URL" : ""}${
+          opts?.optionalOptions?.default
+            ? " default:" + opts?.optionalOptions?.default
+            : ""
+        })`
+        : undefined,
+      opts?.minLength ? `min:${opts?.minLength}` : undefined,
+      opts?.maxLength ? `max:${opts?.maxLength}` : undefined,
+      opts?.minAmount ? `minAmount:${opts?.minAmount}` : undefined,
+      opts?.maxAmount ? `maxAmount:${opts?.maxAmount}` : undefined,
+      opts?.choices ? opts?.choices.join("|") : undefined,
+      opts?.patterns ? opts?.patterns.join(" ") : undefined,
+      opts?.isNaN ? "NaN" : undefined,
+      opts?.isInt ? "int" : undefined,
+      opts?.isFloat ? "float" : undefined,
+      opts?.description,
+    ]
+      .filter(Boolean)
+      .join(" ");
+  }
+
   //! If any new class properties are created, remember to add them to the .clone() method!
   protected Description?: string;
   protected Sample?: any;
@@ -523,12 +547,9 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
     const Sample = this._toSample(Context) as Input;
     const SampleWithMeta = new Value(Sample);
 
-    const Comment = [
-      Context.validatorOptions?.optional ? "(Optional)" : undefined,
-      Context.validatorOptions?.description,
-    ]
-      .filter(Boolean)
-      .join(" ");
+    const Comment = BaseValidator.prepareDescription(
+      Context.validatorOptions ?? {},
+    );
 
     if (Comment) SampleWithMeta.metadata.comment = Comment;
 

@@ -27,8 +27,8 @@ const Small = e.pick(ActivitySchema(), ["user"]);
 const UserSchema = () =>
   e.object({
     _id: e.optional(e.string()).default("1234567890"),
-    username: e.string(),
-    password: e.optional(e.string()).default("topSecret"),
+    username: e.string().isURL().min(5).max(50),
+    password: e.optional(e.string({ patterns: [/^.*$/] })).default("topSecret"),
     profile: e.object({
       name: e.string(),
       dob: e.optional(e.date()).default(() => new Date()),
@@ -112,6 +112,6 @@ const UserSchema = () =>
 //   hello: [{ hola: "mundo" }, ""],
 // };
 
-const data = UserSchema().toSample().data;
+const data = UserSchema().toSample().data.stringify(null, 2);
 
-console.log(data.stringify(null, 2));
+console.log(data);
