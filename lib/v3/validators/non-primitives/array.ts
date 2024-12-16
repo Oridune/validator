@@ -118,8 +118,8 @@ export class ArrayValidator<
             : undefined,
         }
         : ctx.validatorOptions?.required
-        ? { options: { optional: false } }
-        : {}),
+          ? { options: { optional: false } }
+          : {}),
     };
   }
 
@@ -293,7 +293,8 @@ export class ArrayValidator<
             try {
               const Location = `${ctx.location}.${Index}`;
 
-              const Key = parseInt(Index);
+              const _Key = parseInt(Index);
+              const Key = isNaN(_Key) ? Index : _Key;
 
               ctx.output[Key] = await Validator.validate(Input, {
                 ...Context,

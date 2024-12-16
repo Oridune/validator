@@ -10,7 +10,7 @@ export enum ValidatorType {
   UTILITY = "utility",
 }
 
-export interface ICastOptions {}
+export interface ICastOptions { }
 
 export interface IOptionalOptions {
   default?: any;
@@ -169,36 +169,35 @@ export class BaseValidator<Shape = any, Input = any, Output = any> {
       typeof message === "function"
         ? await message()
         : typeof message === "string"
-        ? message
-        : defaultMessage,
+          ? message
+          : defaultMessage,
     );
   }
 
   static prepareDescription(opts: TBaseValidatorOptions) {
     return [
       opts?.optional
-        ? `(optional${opts?.isUrl ? " URL" : ""}${
-          opts?.optionalOptions?.default
-            ? " default:" +
-              (typeof opts?.optionalOptions?.default === "function"
-                ? "[computed]"
-                : opts?.optionalOptions?.default)
-            : ""
+        ? `(optional${opts?.isUrl ? " URL" : ""}${opts?.optionalOptions?.default
+          ? " default:" +
+          (typeof opts?.optionalOptions?.default === "function"
+            ? "[computed]"
+            : opts?.optionalOptions?.default)
+          : ""
         })`
         : undefined,
-      opts?.minLength ? `min:${opts?.minLength}` : undefined,
-      opts?.maxLength ? `max:${opts?.maxLength}` : undefined,
-      opts?.minAmount ? `minAmount:${opts?.minAmount}` : undefined,
-      opts?.maxAmount ? `maxAmount:${opts?.maxAmount}` : undefined,
-      opts?.choices ? opts?.choices.join("|") : undefined,
-      opts?.patterns ? opts?.patterns.join(" ") : undefined,
+      typeof opts?.minLength === "number" ? `min:${opts.minLength}` : undefined,
+      typeof opts?.maxLength === "number" ? `max:${opts.maxLength}` : undefined,
+      typeof opts?.minAmount === "number" ? `minAmount:${opts.minAmount}` : undefined,
+      typeof opts?.maxAmount === "number" ? `maxAmount:${opts.maxAmount}` : undefined,
+      opts?.choices ? opts.choices.join("|") : undefined,
+      opts?.patterns ? opts.patterns.join(" ") : undefined,
       opts?.isNaN ? "NaN" : undefined,
       opts?.isInt ? "int" : undefined,
       opts?.isFloat ? "float" : undefined,
       opts?.description,
     ]
       .filter(Boolean)
-      .join(" ");
+      .join(" ") || undefined;
   }
 
   //! If any new class properties are created, remember to add them to the .clone() method!
