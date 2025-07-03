@@ -286,7 +286,7 @@ export class Validators {
   /**
    * Add an error to the validator.
    * @param message Message of the error.
-   * @param location Path to a specific field where the error occured.
+   * @param location Path to a specific field where the error occurred.
    * @param input Input value that is causing the error.
    */
   static error = (

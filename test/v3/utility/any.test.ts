@@ -27,6 +27,24 @@ Deno.test("Any Validator Tests", async (ctx) => {
     assertEquals(Result, Target);
   });
 
+  await ctx.step("Value Schema Validation", () => {
+    const Input1 = "foo";
+
+    const Validator1 = e.value(Input1);
+
+    const { schema: s1 } = Validator1.toJSON();
+
+    assertEquals(s1.type, Input1);
+
+    const Input2 = 123;
+
+    const Validator2 = e.value(Input2);
+
+    const { schema: s2 } = Validator2.toJSON();
+
+    assertEquals(s2.type, Input2.toString());
+  });
+
   await ctx.step("Truthy Literal Validation", async () => {
     const Input = "foo";
     const Output = "foo";

@@ -52,7 +52,9 @@ const UserSchema = () =>
           }),
         )
         .min(1),
-    ),
+    ).default({
+      message: "",
+    }),
     tags: e.array(e.string()),
   });
 
@@ -112,6 +114,6 @@ const UserSchema = () =>
 //   hello: [{ hola: "mundo" }, ""],
 // };
 
-const data = UserSchema().toSample().schema;
+const data = UserSchema().toSample().data;
 
-console.log(data);
+console.log(JSON.stringify(data, undefined, 2));

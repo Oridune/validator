@@ -12,6 +12,11 @@ import {
 export interface IAnyValidatorOptions extends TBaseValidatorOptions {
   /** Pass custom messages for the errors */
   messages?: Partial<Record<"literalMatchFail", TErrorMessage>>;
+
+  /**
+   * Custom type for JSON schema
+   */
+  type?: string;
 }
 
 export class AnyValidator<
@@ -21,25 +26,35 @@ export class AnyValidator<
 > extends BaseValidator<Shape, Input, Output> {
   static any = AnyValidator.createFactory(AnyValidator);
 
-  static value = <T>(value: T, options?: IAnyValidatorOptions) =>
-    AnyValidator.any(options).custom(() => value) as AnyValidator<any, T, T>;
+  static value = <T>(value: T, options?: IAnyValidatorOptions) => {
+    const valueType = value instanceof Array ? "array" : String(value);
+
+    return AnyValidator.any({ type: valueType, ...options }).custom(() =>
+      value
+    ) as AnyValidator<any, T, T>;
+  };
 
   static literal = <T extends TPrimitive>(
     value: T,
     options?: IAnyValidatorOptions,
-  ) =>
-    AnyValidator.any(options).custom(async (ctx) => {
-      if (ctx.output !== value) {
-        throw await BaseValidator.resolveErrorMessage(
-          ctx.validatorOptions?.messages?.literalMatchFail,
-          "Literal match failed!",
-        );
-      }
-    }) as AnyValidator<any, T, T>;
+  ) => {
+    const valueType = value instanceof Array ? "array" : String(value);
+
+    return AnyValidator.any({ type: valueType, ...options }).custom(
+      async (ctx) => {
+        if (ctx.output !== value) {
+          throw await BaseValidator.resolveErrorMessage(
+            ctx.validatorOptions?.messages?.literalMatchFail,
+            "Literal match failed!",
+          );
+        }
+      },
+    ) as AnyValidator<any, T, T>;
+  };
 
   protected override _toJSON(ctx?: IJSONSchemaContext<IAnyValidatorOptions>) {
     return {
-      type: "any",
+      type: ctx?.validatorOptions?.type ?? "any",
       description: BaseValidator.prepareDescription(
         ctx?.validatorOptions ?? {},
       ),
