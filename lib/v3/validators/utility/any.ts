@@ -54,7 +54,8 @@ export class AnyValidator<
 
   protected override _toJSON(ctx?: IJSONSchemaContext<IAnyValidatorOptions>) {
     return {
-      type: ctx?.validatorOptions?.type ?? "any",
+      type: "any",
+      tsType: ctx?.validatorOptions?.type,
       description: BaseValidator.prepareDescription(
         ctx?.validatorOptions ?? {},
       ),

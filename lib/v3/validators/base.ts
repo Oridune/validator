@@ -66,6 +66,7 @@ export type TCustomValidatorReturn<Return, Default> = Return extends void
 
 export interface IValidatorJSONSchema {
   type: string | string[];
+  tsType?: string;
   description?: string;
   optional?: boolean;
   cast?: boolean;
