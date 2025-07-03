@@ -24,23 +24,45 @@ export class AnyValidator<
   Input extends any = any,
   Output = Input,
 > extends BaseValidator<Shape, Input, Output> {
+  static inferTsType(value: unknown) {
+    if (Array.isArray(value)) return "array";
+    if (value === null) return "null";
+
+    const type = typeof value;
+
+    switch (type) {
+      case "string":
+      case "symbol":
+        return `"${String(value)}" | (string & {})`;
+
+      case "number":
+        return `${String(value)} | (number & {})`;
+
+      case "boolean":
+        return `${String(value)} | (boolean & {})`;
+
+      default:
+        return type;
+    }
+  }
+
   static any = AnyValidator.createFactory(AnyValidator);
 
   static value = <T>(value: T, options?: IAnyValidatorOptions) => {
-    const valueType = value instanceof Array ? "array" : String(value);
-
-    return AnyValidator.any({ type: valueType, ...options }).custom(() =>
-      value
-    ) as AnyValidator<any, T, T>;
+    return AnyValidator.any({
+      type: AnyValidator.inferTsType(value),
+      ...options,
+    }).custom(() => value) as AnyValidator<any, T, T>;
   };
 
   static literal = <T extends TPrimitive>(
     value: T,
     options?: IAnyValidatorOptions,
   ) => {
-    const valueType = value instanceof Array ? "array" : String(value);
-
-    return AnyValidator.any({ type: valueType, ...options }).custom(
+    return AnyValidator.any({
+      type: AnyValidator.inferTsType(value),
+      ...options,
+    }).custom(
       async (ctx) => {
         if (ctx.output !== value) {
           throw await BaseValidator.resolveErrorMessage(
