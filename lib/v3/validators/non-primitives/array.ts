@@ -118,8 +118,8 @@ export class ArrayValidator<
             : undefined,
         }
         : ctx.validatorOptions?.required
-          ? { options: { optional: false } }
-          : {}),
+        ? { options: { optional: false } }
+        : {}),
     };
   }
 
@@ -174,12 +174,16 @@ export class ArrayValidator<
     if (typeof ctx.output === "string") {
       try {
         ctx.output = JSON.parse(ctx.output);
+
+        if (!(ctx.output instanceof Array)) throw new Error("Not an array!");
+
         return;
       } catch {
         if (ctx.validatorOptions?.splitter) {
-          ctx.output = ctx.output.toString().split(
+          ctx.output = `${ctx.output}`.trim().split(
             ctx.validatorOptions?.splitter,
           );
+
           return;
         }
       }

@@ -35,7 +35,7 @@ Deno.test("Any Validator Tests", async (ctx) => {
     const { schema: s1 } = Validator1.toJSON();
 
     assertEquals(s1.type, "any");
-    assertEquals(s1.tsType, Input1);
+    assertEquals(s1.tsType, `"foo" | (string & {})`);
 
     const Input2 = 123;
 
@@ -43,7 +43,7 @@ Deno.test("Any Validator Tests", async (ctx) => {
 
     const { schema: s2 } = Validator2.toJSON();
 
-    assertEquals(s2.tsType, Input2.toString());
+    assertEquals(s2.tsType, `123 | (number & {})`);
   });
 
   await ctx.step("Truthy Literal Validation", async () => {

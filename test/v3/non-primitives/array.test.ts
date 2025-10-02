@@ -94,6 +94,21 @@ Deno.test("Array Validator Tests", async (ctx) => {
   });
 
   await ctx.step("Truthy Validation Case 8", async () => {
+    const Target = "123456";
+
+    const Result = await e
+      .array(e.or([e.string()]), { cast: true, splitter: /\s*,\s*/ })
+      .validate(Target)
+      .catch((error) => {
+        console.error(error);
+        throw error;
+      }) satisfies string[];
+
+    assertEquals(Result.length, 1);
+    assertObjectMatch(Result, ["123456"] as any);
+  });
+
+  await ctx.step("Truthy Validation Case 9", async () => {
     const Target = { 0: "foo", "2": "bar", 5: "baz", foo: "bar" };
     const Expected: string[] = [];
 
@@ -115,7 +130,7 @@ Deno.test("Array Validator Tests", async (ctx) => {
     assertEquals(Result.length, 6);
   });
 
-  await ctx.step("Truthy Validation Case 9", async () => {
+  await ctx.step("Truthy Validation Case 10", async () => {
     const Target = { 0: "foo", "2": "bar", 5: "baz", foo: "bar" };
 
     const Result = await e
@@ -131,7 +146,7 @@ Deno.test("Array Validator Tests", async (ctx) => {
     assertEquals(Result.length, 1);
   });
 
-  await ctx.step("Truthy Validation Case 10", async () => {
+  await ctx.step("Truthy Validation Case 11", async () => {
     const Target = { 0: "foo", "2": "bar", 5: "baz", foo: "bar" };
 
     const Result = await e
@@ -147,7 +162,7 @@ Deno.test("Array Validator Tests", async (ctx) => {
     assertEquals(Result.length, 1);
   });
 
-  await ctx.step("Truthy Validation Case 11", async () => {
+  await ctx.step("Truthy Validation Case 12", async () => {
     const Target = { 0: "foo", "1": "bar", 2: "baz", foo: "bar" };
 
     const Result = await e
@@ -165,7 +180,7 @@ Deno.test("Array Validator Tests", async (ctx) => {
     assertObjectMatch(Result, ["foo", "bar", "baz", "bar"] as any);
   });
 
-  await ctx.step("Truthy Validation Case 12", async () => {
+  await ctx.step("Truthy Validation Case 13", async () => {
     const Target = { 0: "foo", "1": "bar", 2: "baz", foo: "bar" };
 
     const Result = await e
@@ -179,7 +194,7 @@ Deno.test("Array Validator Tests", async (ctx) => {
     assertObjectMatch(Result, ["foo", "bar", "baz", "bar"] as any);
   });
 
-  await ctx.step("Truthy Validation Case 13", () => {
+  await ctx.step("Truthy Validation Case 14", () => {
     const Schema = e.optional(
       e.cast(
         e.array(e.string(), {
@@ -201,7 +216,7 @@ Deno.test("Array Validator Tests", async (ctx) => {
     });
   });
 
-  await ctx.step("Truthy Validation Case 14", () => {
+  await ctx.step("Truthy Validation Case 15", () => {
     const Schema = e.optional(
       e.deepCast(
         e.array(e.string(), {
@@ -224,7 +239,7 @@ Deno.test("Array Validator Tests", async (ctx) => {
     });
   });
 
-  await ctx.step("Truthy Validation Case 15", () => {
+  await ctx.step("Truthy Validation Case 16", () => {
     const Schema = e.optional(
       e.deepCast(
         e.array(e.string()),
@@ -236,7 +251,7 @@ Deno.test("Array Validator Tests", async (ctx) => {
     assertObjectMatch(Sample!, [""] as any);
   });
 
-  await ctx.step("Truthy Validation Case 16", async () => {
+  await ctx.step("Truthy Validation Case 17", async () => {
     const Target = "[1]";
     const Schema = e.optional(
       e.deepCast(
@@ -249,7 +264,7 @@ Deno.test("Array Validator Tests", async (ctx) => {
     assertObjectMatch(Result!, ["1"] as any);
   });
 
-  await ctx.step("Truthy Validation Case 17", async () => {
+  await ctx.step("Truthy Validation Case 18", async () => {
     const Target = { "foo": "a", "bar": "b", "baz": "c" };
     const Schema = e.array(e.string(), { cast: true, preserveShape: true });
 
@@ -258,7 +273,7 @@ Deno.test("Array Validator Tests", async (ctx) => {
     assertObjectMatch(Result, Target);
   });
 
-  await ctx.step("Truthy Validation Case 18", async () => {
+  await ctx.step("Truthy Validation Case 19", async () => {
     const Target = { foo: { "foo": "a", "bar": "b", "baz": "c" } };
     const Schema = e.deepOptions(
       e.object({
