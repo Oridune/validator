@@ -50,6 +50,8 @@ export class EnumValidator<
       choices: this.Choices instanceof Array
         ? Array.from(new Set(this.Choices.map((item) => `${item}`)))
         : undefined,
+      optional: !!ctx?.validatorOptions?.optional,
+      cast: !!ctx?.validatorOptions?.cast,
     } satisfies IValidatorJSONSchema;
   }
 

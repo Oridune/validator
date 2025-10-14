@@ -1,17 +1,17 @@
 import e, { ValidationDebugger } from "./v3.ts";
 
-ValidationDebugger.enabled = true;
-ValidationDebugger.logFilters = { label: "OptionalValidator" };
+// ValidationDebugger.enabled = true;
+// ValidationDebugger.logFilters = { label: "OptionalValidator" };
 
-const ActivitySchema = () =>
-  e.object({
-    _id: e.optional(e.string()).default("1234567890"),
-    description: e.string(),
-    user: e.string(),
-    enabled: e.optional(e.boolean),
-  });
+// const ActivitySchema = () =>
+//   e.object({
+//     _id: e.optional(e.string()).default("1234567890"),
+//     description: e.string(),
+//     user: e.string(),
+//     enabled: e.optional(e.boolean),
+//   });
 
-const Small = e.pick(ActivitySchema(), ["user"]);
+// const Small = e.pick(ActivitySchema(), ["user"]);
 
 // console.log("Small", await Small.validate({ user: "user" }));
 
@@ -23,40 +23,40 @@ const Small = e.pick(ActivitySchema(), ["user"]);
 //   }),
 // );
 
-// User Schema
-const UserSchema = () =>
-  e.object({
-    _id: e.optional(e.string()).default("1234567890"),
-    username: e.string().isURL().min(5).max(50),
-    password: e.optional(e.string({ patterns: [/^.*$/] })).default("topSecret"),
-    profile: e.object({
-      name: e.string(),
-      dob: e.optional(e.date()).default(() => new Date()),
-    }),
-    age: e.optional(e.number()).default(18),
-    followers: e.optional(e.array(e.if(e.string().test))),
-    posts: e.optional(e.array(e.if(e.string().test))),
-    latestPost: e.optional(e.if(e.string().test)),
-    activity: e.optional(e.array(ActivitySchema())),
-    latestActivity: e.optional(ActivitySchema()),
-    createdAt: e.optional(e.date()).default(() => new Date()),
-    updatedAt: e.optional(e.date()).default(() => new Date()),
-    timeline: e.optional(
-      e
-        .array(
-          e.object({
-            _id: e.optional(e.string()).default("1234567890"),
-            message: e.string(),
-            priority: e.value(100),
-            createdAt: e.optional(e.date()).default(() => new Date()),
-          }),
-        )
-        .min(1),
-    ).default({
-      message: "",
-    }),
-    tags: e.array(e.string()),
-  });
+// // User Schema
+// const UserSchema = () =>
+//   e.object({
+//     _id: e.optional(e.string()).default("1234567890"),
+//     username: e.string().isURL().min(5).max(50),
+//     password: e.optional(e.string({ patterns: [/^.*$/] })).default("topSecret"),
+//     profile: e.object({
+//       name: e.string(),
+//       dob: e.optional(e.date()).default(() => new Date()),
+//     }),
+//     age: e.optional(e.number()).default(18),
+//     followers: e.optional(e.array(e.if(e.string().test))),
+//     posts: e.optional(e.array(e.if(e.string().test))),
+//     latestPost: e.optional(e.if(e.string().test)),
+//     activity: e.optional(e.array(ActivitySchema())),
+//     latestActivity: e.optional(ActivitySchema()),
+//     createdAt: e.optional(e.date()).default(() => new Date()),
+//     updatedAt: e.optional(e.date()).default(() => new Date()),
+//     timeline: e.optional(
+//       e
+//         .array(
+//           e.object({
+//             _id: e.optional(e.string()).default("1234567890"),
+//             message: e.string(),
+//             priority: e.value(100),
+//             createdAt: e.optional(e.date()).default(() => new Date()),
+//           }),
+//         )
+//         .min(1),
+//     ).default({
+//       message: "",
+//     }),
+//     tags: e.array(e.string()),
+//   });
 
 // const User1Id = "123";
 // const User2Id = "456";
@@ -114,6 +114,13 @@ const UserSchema = () =>
 //   hello: [{ hola: "mundo" }, ""],
 // };
 
-const data = UserSchema().toSample().data;
+// const data = UserSchema().toSample().data;
 
-console.log(JSON.stringify(data, undefined, 2));
+// console.log(JSON.stringify(data, undefined, 2));
+
+enum Foo {
+  foo = "foo",
+  bar = "bar",
+}
+
+console.log(e.optional(e.in(Object.values(Foo))).toSample());
