@@ -48,4 +48,18 @@ Deno.test("Or Validator Tests", async (ctx) => {
 
     assertEquals(Result, Target);
   });
+
+  await ctx.step("Truthy Validation Case 4", async () => {
+    const Target = "123456789qwertyuiop123456y";
+    const Result = await e.deepCast(
+      e.or([
+        e.string(),
+        e.boolean(),
+        e.number(),
+      ]),
+    )
+      .validate(Target) satisfies string | number | boolean;
+
+    assertEquals(Result, Target as any);
+  });
 });

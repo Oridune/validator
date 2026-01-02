@@ -3,7 +3,8 @@
   "specifiers": {
     "jsr:@std/fmt@~0.225.3": "0.225.6",
     "npm:@types/node@*": "22.5.4",
-    "npm:zod@*": "3.25.67"
+    "npm:zod@*": "4.3.4",
+    "npm:zod@latest": "4.3.4"
   },
   "jsr": {
     "@std/fmt@0.225.6": {
@@ -20,8 +21,8 @@
     "undici-types@6.19.8": {
       "integrity": "sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw=="
     },
-    "zod@3.25.67": {
-      "integrity": "sha512-idA2YXwpCdqUSKRCACDE6ItZD9TZzy3OZMtpfLoh6oPR47lipysRrJfjzMqFxQ3uJuUPyUeWe1r9vLH33xO/Qw=="
+    "zod@4.3.4": {
+      "integrity": "sha512-Zw/uYiiyF6pUT1qmKbZziChgNPRu+ZRneAsMUDU6IwmXdWt5JwcUfy2bvLOCUtz5UniaN/Zx5aFttZYbYc7O/A=="
     }
   },
   "remote": {

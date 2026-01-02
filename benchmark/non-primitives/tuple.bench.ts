@@ -1,5 +1,5 @@
 import e from "../../lib/v3/validators.ts";
-import z from "https://deno.land/x/zod@v3.23.8/mod.ts";
+import * as z from "npm:zod@latest";
 
 const ESchema = () => e.tuple([e.string(), e.number(), e.boolean()]);
 

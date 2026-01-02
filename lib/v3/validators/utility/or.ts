@@ -110,6 +110,33 @@ export class OrValidator<
 
       const Context = this.overrideContext(ctx);
 
+      if (Context.validatorOptions?.deepCast) {
+        for (const Validator of Validators) {
+          try {
+            return (ctx.output = await Validator.validate(ctx.output, {
+              ...Context,
+              validatorOptions: {
+                ...Context.validatorOptions,
+                cast: false,
+                deepCast: false,
+              },
+              deepOptions: {
+                ...Context.deepOptions,
+                cast: false,
+                deepCast: false,
+              },
+              options: {
+                ...Context.options,
+                cast: false,
+                deepCast: false,
+              },
+            }));
+          } catch {
+            // Continue to the next validator
+          }
+        }
+      }
+
       for (const Validator of Validators) {
         try {
           return (ctx.output = await Validator.validate(ctx.output, Context));
